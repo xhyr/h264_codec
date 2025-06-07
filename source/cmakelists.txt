@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(h264_codec)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_definitions("-DUNICODE" "-D_UNICODE")
+
+add_subdirectory(encoder)
+add_subdirectory(decoder)
+add_subdirectory(common)
+
+add_executable(${PROJECT_NAME} main.cpp)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/encoder)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/encoder)
+target_link_libraries(${PROJECT_NAME} encoder.lib)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/decoder)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/decoder)
+target_link_libraries(${PROJECT_NAME} decoder.lib)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/common)
+target_link_libraries(${PROJECT_NAME} common.lib)
+
+add_dependencies(${PROJECT_NAME} encoder decoder common)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../resource")
+
