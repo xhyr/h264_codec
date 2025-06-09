@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "image_util.h"
-#include "yuv_frame.h"
 #include "log.h"
+#include "encoder_config.h"
+#include "encoder_config_reader.h"
 
 using namespace codec;
 
@@ -10,8 +10,7 @@ int main(int argc, char* argv[])
 {
 	LOGINFO("codec begin.");
 
-	auto yuv_frame = ImageUtil::Read2YUVFrame("test.png");
-	yuv_frame->Serial("test.yuv");
+	auto encoder_config = EncoderConfigReader::Read("config.txt");
 
 	LOGINFO("codec end.");
 

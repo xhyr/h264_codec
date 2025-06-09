@@ -1,0 +1,2 @@
+input_file_path = foreman_part_qcif.yuv
+output_file_path = test.264

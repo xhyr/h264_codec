@@ -1,6 +1,7 @@
 #include "file_util.h"
 
 #include <filesystem>
+#include <fstream>
 
 #include "log.h"
 
@@ -24,6 +25,19 @@ bool FileUtil::DuplicateFile(const std::string& source_file_path, const std::str
 		LOGERROR("copy file error : %s.", e.what());
 		return false;
 	}
+
+	return true;
+}
+
+bool FileUtil::ReadFile2Lines(const std::string& file_path, std::vector<std::string>& lines)
+{
+	std::ifstream in_file(file_path);
+	if (!in_file.is_open())
+		return false;
+
+	std::string line;
+	while (std::getline(in_file, line))
+		lines.push_back(line);
 
 	return true;
 }

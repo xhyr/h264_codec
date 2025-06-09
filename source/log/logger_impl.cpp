@@ -65,10 +65,7 @@ int64_t LoggerImpl::GetElapsedSeconds() const
 
 void LoggerImpl::Init()
 {
-	std::string time_description = GetTimeDescription();
-	std::string log_file_name = time_description + ".txt";
-	log_file_name = "log.txt";
-	m_stream.open(log_file_name);
+	m_stream.open("log.log");
 
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
@@ -80,8 +77,8 @@ void LoggerImpl::BackUp()
 	m_stream.flush();
 	m_stream.close();
 
-	std::string back_up_file_name = GetTimeDescription() + "_log.txt";
-	FileUtil::DuplicateFile("log.txt", back_up_file_name);
+	std::string back_up_file_name = GetTimeDescription() + "_log.log";
+	FileUtil::DuplicateFile("log.log", back_up_file_name);
 }
 
 std::string LoggerImpl::GetTimeDescription()
