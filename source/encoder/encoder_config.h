@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include "global_defines.h"
@@ -11,7 +12,8 @@ struct EncoderConfig
 	std::string input_file_path;
 	std::string output_file_path;
 
-
+	uint32_t width;
+	uint32_t height;
 };
 
 __codec_end

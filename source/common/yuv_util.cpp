@@ -60,7 +60,7 @@ std::tuple<std::shared_ptr<uint8_t[]>, std::shared_ptr<uint8_t[]>, std::shared_p
 	return std::make_tuple(y_data, u_data, v_data);
 }
 
-bool YUVUtil::Serial(uint32_t width, uint32_t height, std::shared_ptr<uint8_t[]> y_data, std::shared_ptr<uint8_t[]> u_data, std::shared_ptr<uint8_t[]> v_data, const std::string& file_path)
+bool YUVUtil::Serial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]> y_data, std::shared_ptr<uint8_t[]> u_data, std::shared_ptr<uint8_t[]> v_data)
 {
 	auto file_handle = fopen(file_path.c_str(), "wb");
 	if (!file_handle)
@@ -73,6 +73,25 @@ bool YUVUtil::Serial(uint32_t width, uint32_t height, std::shared_ptr<uint8_t[]>
 	fclose(file_handle);
 
 	return true;
+}
+
+bool YUVUtil::Unserial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]>& y_data, std::shared_ptr<uint8_t[]>& u_data, std::shared_ptr<uint8_t[]>& v_data)
+{
+	auto file_handle = fopen(file_path.c_str(), "rb");
+	if (!file_handle)
+		return false;
+
+	y_data.reset(new uint8_t[width * height]);
+	u_data.reset(new uint8_t[width * height / 4]);
+	v_data.reset(new uint8_t[width * height / 4]);
+
+	fread(y_data.get(), 1, width * height, file_handle);
+	fread(u_data.get(), 1, width * height / 4, file_handle);
+	fread(v_data.get(), 1, width * height / 4, file_handle);
+
+	fclose(file_handle);
+
+    return true;
 }
 
 __codec_end

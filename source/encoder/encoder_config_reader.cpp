@@ -37,6 +37,16 @@ std::shared_ptr<EncoderConfig> EncoderConfigReader::ParseConfigMap(const std::un
 			break;
 		config->output_file_path = iter->second;
 
+		iter = config_map.find("width");
+		if (iter == config_map.end())
+			break;
+		config->width = std::stoi(iter->second);
+
+		iter = config_map.find("height");
+		if (iter == config_map.end())
+			break;
+		config->height = std::stoi(iter->second);
+
 		return config;
 	} while (0);
 
