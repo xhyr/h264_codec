@@ -44,10 +44,11 @@ uint32_t CodingUtil::GetBinaryLength(uint32_t value)
 	return length;
 }
 
-void CodingUtil::SODB2EBSP(std::shared_ptr<BytesData> bytes_data)
+std::shared_ptr<BytesData> CodingUtil::SODB2EBSP(std::shared_ptr<BytesData> bytes_data)
 {
 	SODB2RBSP(bytes_data);
 	RBSP2EBSP(bytes_data);
+	return bytes_data;
 }
 
 void CodingUtil::SODB2RBSP(std::shared_ptr<BytesData> bytes_data)

@@ -21,7 +21,9 @@ struct CodingUtil
 
 	static uint32_t GetBinaryLength(uint32_t value);
 
-	static void SODB2EBSP(std::shared_ptr<BytesData> bytes_data);
+	static std::shared_ptr<BytesData> SODB2EBSP(std::shared_ptr<BytesData> bytes_data);
+
+private:
 
 	static void SODB2RBSP(std::shared_ptr<BytesData> bytes_data);
 
