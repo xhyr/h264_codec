@@ -6,3 +6,5 @@ output_file_path = test.264
 width = 176
 
 height = 144
+
+frames_to_encode = 1

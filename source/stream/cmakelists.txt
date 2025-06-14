@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(log)
+project(stream)
 
 macro(source_group_by_dir source_files)
     if(MSVC)
@@ -30,4 +30,8 @@ add_definitions("-DUNICODE" "-D_UNICODE")
 add_library(${PROJECT_NAME} STATIC ${all_files})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/coding)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/common)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/log)
+
+add_dependencies(${PROJECT_NAME} coding common log)

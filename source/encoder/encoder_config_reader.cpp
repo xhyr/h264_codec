@@ -47,6 +47,11 @@ std::shared_ptr<EncoderConfig> EncoderConfigReader::ParseConfigMap(const std::un
 			break;
 		config->height = std::stoi(iter->second);
 
+		iter = config_map.find("frames_to_encode");
+		if (iter == config_map.end())
+			break;
+		config->frames_to_encode = std::stoi(iter->second);
+
 		return config;
 	} while (0);
 

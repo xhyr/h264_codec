@@ -14,6 +14,8 @@ struct EncoderConfig
 
 	uint32_t width;
 	uint32_t height;
+
+	uint32_t frames_to_encode;
 };
 
 __codec_end
