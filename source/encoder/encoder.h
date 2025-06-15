@@ -16,6 +16,8 @@ public:
 
 	void PrepareContext();
 
+
+
 private:
 	std::shared_ptr<EncoderConfig> m_config;
 	std::shared_ptr<EncoderContext> m_context;

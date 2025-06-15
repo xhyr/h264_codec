@@ -12,7 +12,7 @@ class OStream;
 class Nalu
 {
 public:
-	explicit Nalu(NaluType nalu_type);
+	Nalu(NaluType nalu_type, NaluPriority nalu_priority);
 	~Nalu();
 
 	void SetData(std::shared_ptr<BytesData> bytes_data);
@@ -21,6 +21,7 @@ public:
 
 private:
 	NaluType m_type;
+	NaluPriority m_priority;
 	std::shared_ptr<BytesData> m_data;
 };
 

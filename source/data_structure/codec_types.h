@@ -11,7 +11,7 @@ enum class NaluType
 	PPS = 8
 };
 
-enum class NalPriority
+enum class NaluPriority
 {
 	DISPOSABLE = 0,
 	LOW = 1,

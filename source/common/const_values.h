@@ -10,6 +10,9 @@ struct ConstValues
 {
 	static const uint32_t s_zero_bytes_short_start_code;
 
+	static const uint32_t s_zero_bytes_start_code;
+
+
 
 
 };

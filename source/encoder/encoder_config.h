@@ -16,6 +16,10 @@ struct EncoderConfig
 	uint32_t height;
 
 	uint32_t frames_to_encode;
+
+	uint32_t profile_idc;
+	uint32_t level_idc;
+	uint32_t ref_frame_number;
 };
 
 __codec_end

@@ -52,6 +52,21 @@ std::shared_ptr<EncoderConfig> EncoderConfigReader::ParseConfigMap(const std::un
 			break;
 		config->frames_to_encode = std::stoi(iter->second);
 
+		iter = config_map.find("profile_idc");
+		if (iter == config_map.end())
+			break;
+		config->profile_idc = std::stoi(iter->second);
+
+		iter = config_map.find("level_idc");
+		if (iter == config_map.end())
+			break;
+		config->level_idc = std::stoi(iter->second);
+
+		iter = config_map.find("ref_frame_number");
+		if (iter == config_map.end())
+			break;
+		config->ref_frame_number = std::stoi(iter->second);
+
 		return config;
 	} while (0);
 

@@ -30,7 +30,9 @@ add_definitions("-DUNICODE" "-D_UNICODE")
 add_library(${PROJECT_NAME} STATIC ${all_files})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/data_structure)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/stream)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/common)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/log)
 
-add_dependencies(${PROJECT_NAME} common log)
+add_dependencies(${PROJECT_NAME} data_structure stream common log)

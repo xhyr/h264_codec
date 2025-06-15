@@ -8,3 +8,9 @@ width = 176
 height = 144
 
 frames_to_encode = 1
+
+profile_idc = 66
+
+level_idc = 30
+
+ref_frame_number = 10
