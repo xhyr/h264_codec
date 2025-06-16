@@ -1,4 +1,4 @@
-#include "parameter_set_mgr.h"
+#include "parameter_set_container.h"
 
 #include "sps.h"
 #include "sps_data.h"
@@ -8,20 +8,20 @@
 
 __codec_begin
 
-ParameterSetMgr::ParameterSetMgr()
+ParameterSetContainer::ParameterSetContainer()
 {
 }
 
-ParameterSetMgr::~ParameterSetMgr()
+ParameterSetContainer::~ParameterSetContainer()
 {
 }
 
-void ParameterSetMgr::InitConfig(std::shared_ptr<EncoderConfig> config)
+void ParameterSetContainer::InitConfig(std::shared_ptr<EncoderConfig> config)
 {
 	m_config = config;
 }
 
-void ParameterSetMgr::ConstructSPS()
+void ParameterSetContainer::ConstructSPS()
 {
 	m_sps = std::make_shared<SPS>();
 	auto sps_data = m_sps->GetData();
@@ -32,7 +32,7 @@ void ParameterSetMgr::ConstructSPS()
 	sps_data->pic_height_in_map_units_minus1 = m_config->height / 16 - 1;
 }
 
-void ParameterSetMgr::SerialSPS(std::shared_ptr<OStream> ostream)
+void ParameterSetContainer::SerialSPS(std::shared_ptr<OStream> ostream)
 {
 	Nalu nalu(NaluType::SPS, NaluPriority::HIGHEST);
 	nalu.SetData(m_sps->Encapsulate());

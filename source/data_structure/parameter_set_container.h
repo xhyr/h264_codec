@@ -10,11 +10,11 @@ struct EncoderConfig;
 class OStream;
 class SPS;
 
-class ParameterSetMgr
+class ParameterSetContainer
 {
 public:
-	ParameterSetMgr();
-	~ParameterSetMgr();
+	ParameterSetContainer();
+	~ParameterSetContainer();
 
 	void InitConfig(std::shared_ptr<EncoderConfig> config);
 
