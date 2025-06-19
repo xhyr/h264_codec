@@ -9,6 +9,7 @@ __codec_begin
 struct EncoderConfig;
 class OStream;
 class SPS;
+class PPS;
 
 class ParameterSetContainer
 {
@@ -20,12 +21,20 @@ public:
 
 	void ConstructSPS();
 
+	void ConstructPPS();
+
+	void Serial(std::shared_ptr<OStream> ostream);
+
+private:
 	void SerialSPS(std::shared_ptr<OStream> ostream);
+
+	void SerialPPS(std::shared_ptr<OStream> ostream);
 
 private:
 	std::shared_ptr<EncoderConfig> m_config;
 
 	std::shared_ptr<SPS> m_sps;
+	std::shared_ptr<PPS> m_pps;
 };
 
 __codec_end

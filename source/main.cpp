@@ -21,9 +21,10 @@ int main(int argc, char* argv[])
 	ParameterSetContainer parameter_set_container;
 	parameter_set_container.InitConfig(encoder_config);
 	parameter_set_container.ConstructSPS();
+	parameter_set_container.ConstructPPS();
 
 	auto out_stream = StreamUtil::CreateFileOStream("test.264");
-	parameter_set_container.SerialSPS(out_stream);
+	parameter_set_container.Serial(out_stream);
 
 	LOGINFO("codec end.");
 

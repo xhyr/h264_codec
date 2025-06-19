@@ -16,7 +16,7 @@ std::shared_ptr<BytesData> PPSData::Convert2BytesData() const
 	CodingUtil::UE_V(num_ref_idx_l0_default_active_minus1, bytes_data);
 	CodingUtil::UE_V(num_ref_idx_l1_default_active_minus1, bytes_data);
 	CodingUtil::U_1(weighted_pred_flag, bytes_data);
-	CodingUtil::U_1(weighted_bipred_idc, bytes_data);
+	CodingUtil::U_V(2, weighted_bipred_idc, bytes_data);
 	CodingUtil::SE_V(pic_init_qp_minus_26, bytes_data);
 	CodingUtil::SE_V(pic_init_qs_minus_26, bytes_data);
 	CodingUtil::SE_V(chroma_qp_index_offset, bytes_data);
