@@ -8,7 +8,7 @@ add_definitions("-DUNICODE" "-D_UNICODE")
 
 add_subdirectory(encoder)
 add_subdirectory(decoder)
-add_subdirectory(data_structure)
+add_subdirectory(object)
 add_subdirectory(stream)
 add_subdirectory(coding)
 add_subdirectory(common)
@@ -24,9 +24,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/decoder)
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/decoder)
 target_link_libraries(${PROJECT_NAME} decoder.lib)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/data_structure)
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/data_structure)
-target_link_libraries(${PROJECT_NAME} data_structure.lib)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/object)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/object)
+target_link_libraries(${PROJECT_NAME} object.lib)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/stream)
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/stream)
@@ -44,7 +44,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/log)
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/log)
 target_link_libraries(${PROJECT_NAME} log.lib)
 
-add_dependencies(${PROJECT_NAME} encoder decoder data_structure stream coding common log)
+add_dependencies(${PROJECT_NAME} encoder decoder object stream coding common log)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../resource")
 

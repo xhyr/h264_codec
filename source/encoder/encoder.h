@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "global_defines.h"
+#include "parameter_set_container.h"
 
 __codec_begin
 
@@ -16,11 +16,15 @@ public:
 
 	void PrepareContext();
 
-
+	bool Encode();
 
 private:
 	std::shared_ptr<EncoderConfig> m_config;
 	std::shared_ptr<EncoderContext> m_context;
+	
+	ParameterSetContainer m_parameter_set_container;
+
+
 };
 
 __codec_end

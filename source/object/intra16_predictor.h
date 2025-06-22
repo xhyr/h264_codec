@@ -1,0 +1,46 @@
+#pragma once
+
+#include <cstdint>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+#include "mb_type.h"
+#include "prediction_type.h"
+#include "block_data.h"
+
+__codec_begin
+
+class Macroblock;
+struct EncoderContext;
+
+class Intra16Predictor
+{
+public:
+	Intra16Predictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
+	~Intra16Predictor();
+
+	Intra16PredictionType Decide();
+
+private:
+	void ObtainLeftAndUpInfo();
+
+	void CalculateAllPredictionData();
+
+
+
+private:
+	std::weak_ptr<Macroblock> m_mb;
+	std::shared_ptr<EncoderContext> m_encoder_context;
+
+	bool m_left_available;
+	bool m_up_available;
+	std::vector<uint8_t> m_left_data;
+	std::vector<uint8_t> m_up_data;
+	std::unordered_map<Intra16PredictionType, BlockData<16, 16>> m_predicted_data;
+
+	Intra16PredictionType m_prediction_type;
+
+};
+
+__codec_end

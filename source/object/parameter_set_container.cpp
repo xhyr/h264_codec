@@ -49,6 +49,16 @@ void ParameterSetContainer::Serial(std::shared_ptr<OStream> ostream)
 	SerialPPS(ostream);
 }
 
+std::shared_ptr<SPS> ParameterSetContainer::GetActiveSPS()
+{
+	return m_sps;
+}
+
+std::shared_ptr<PPS> ParameterSetContainer::GetActivePPS()
+{
+	return m_pps;
+}
+
 void ParameterSetContainer::SerialSPS(std::shared_ptr<OStream> ostream)
 {
 	Nalu nalu(NaluType::SPS, NaluPriority::HIGHEST);

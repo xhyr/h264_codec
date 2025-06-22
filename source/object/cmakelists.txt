@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(data_structure)
+project(object)
 
 macro(source_group_by_dir source_files)
     if(MSVC)

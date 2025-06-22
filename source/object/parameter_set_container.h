@@ -25,6 +25,10 @@ public:
 
 	void Serial(std::shared_ptr<OStream> ostream);
 
+	std::shared_ptr<SPS> GetActiveSPS();
+
+	std::shared_ptr<PPS> GetActivePPS();
+
 private:
 	void SerialSPS(std::shared_ptr<OStream> ostream);
 
