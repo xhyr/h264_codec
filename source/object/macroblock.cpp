@@ -8,7 +8,7 @@
 __codec_begin
 
 Macroblock::Macroblock(uint32_t mb_addr, std::weak_ptr<Slice> slice, std::shared_ptr<EncoderContext> encoder_context):
-	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context), m_neighbors(mb_addr, encoder_context)
+	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context), m_neighbors(shared_from_this(), mb_addr, encoder_context)
 {
 	Init();
 }

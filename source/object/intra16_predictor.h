@@ -27,6 +27,13 @@ private:
 
 	void CalculateAllPredictionData();
 
+	void CalculateVerticalMode();
+
+	void CalculateHorizontalMode();
+
+	void CalculateDCMode();
+
+	void CalculatePlaneMode();
 
 
 private:
