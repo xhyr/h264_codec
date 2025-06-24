@@ -12,7 +12,7 @@ MBNeighbors::MBNeighbors(std::weak_ptr<Macroblock> macroblock, uint32_t mb_addr,
 	Init(encoder_context);
 }
 
-void MBNeighbors::ObtainLeftAndUpData(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data)
+void MBNeighbors::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element)
 {
 	if (m_a_available)
 	{
@@ -29,12 +29,7 @@ void MBNeighbors::ObtainLeftAndUpData(std::vector<uint8_t>& left_data, std::vect
 	if (m_d_available)
 	{
 		auto mb = m_macroblock.lock();
-		auto left_top_value = mb->GetMacroblock(m_addr_d)->GetDownData().back();
-		left_data.insert(left_data.begin(), left_top_value);
-	}
-	else if (m_a_available)
-	{
-		left_data.insert(left_data.begin(), 0);
+		left_up_element = mb->GetMacroblock(m_addr_d)->GetDownData().back();
 	}
 }
 

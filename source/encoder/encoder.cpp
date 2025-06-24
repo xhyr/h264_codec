@@ -4,6 +4,7 @@
 #include "encoder_context.h"
 #include "yuv_frame.h"
 #include "slice.h"
+#include "constant_values.h"
 
 __codec_begin
 
@@ -17,8 +18,8 @@ void Encoder::PrepareContext()
 	m_context->config = m_config;
 	m_context->width = m_config->width;
 	m_context->height = m_config->height;
-	m_context->width_in_mb = m_config->width / MB_WIDTH;
-	m_context->height_in_mb = m_config->height / MB_HEIGHT;
+	m_context->width_in_mb = m_config->width / ConstantValues::s_mb_width;
+	m_context->height_in_mb = m_config->height / ConstantValues::s_mb_height;
 	m_context->mb_num = m_context->width_in_mb * m_context->height_in_mb;
 	m_context->yuv_frame = std::make_shared<YUVFrame>(m_config->width, m_config->height, m_config->input_file_path);
 }

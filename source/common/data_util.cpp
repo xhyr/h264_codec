@@ -2,9 +2,15 @@
 
 __codec_begin
 
-std::vector<uint8_t> DataUtil::ObtainDataInBlock(std::shared_ptr<uint8_t[]> source_data, uint32_t x, uint32_t y, uint32_t block_x, uint32_t block_y, uint32_t width)
+std::vector<uint8_t> DataUtil::ObtainDataInBlock(std::shared_ptr<uint8_t[]> source_data, uint32_t x, uint32_t y, uint32_t block_width, uint32_t block_height, uint32_t width)
 {
-	return {};
+	std::vector<uint8_t> target_data;
+	target_data.reserve(block_width * block_height);
+	auto source_data_ptr = source_data.get();
+	for (uint32_t src_y = y; src_y < y + block_height; ++src_y)
+		for (uint32_t src_x = x; src_x < x + block_width; ++src_x)
+			target_data.push_back(source_data_ptr[src_y * width + src_x]);
+	return target_data;
 }
 
 __codec_end

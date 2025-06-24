@@ -22,7 +22,7 @@ public:
 
 	bool Encode();
 
-	void ObtainLeftAndUpData(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data);
+	void ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element);
 
 	std::vector<uint8_t> GetRightData();
 

@@ -4,6 +4,7 @@
 #include "yuv_frame.h"
 #include "data_util.h"
 #include "slice.h"
+#include "constant_values.h"
 
 __codec_begin
 
@@ -25,9 +26,9 @@ bool Macroblock::Encode()
 	return true;
 }
 
-void Macroblock::ObtainLeftAndUpData(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data)
+void Macroblock::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element)
 {
-	m_neighbors.ObtainLeftAndUpData(left_data, up_data);
+	m_neighbors.ObtainLeftAndUpEdge(left_data, up_data, left_up_element);
 }
 
 std::vector<uint8_t> Macroblock::GetRightData()
@@ -64,7 +65,7 @@ void Macroblock::ObtainData()
 {
 	//luma
 	auto frame_luma_data = m_encoder_context->yuv_frame->y_data;
-	m_luma_data.SetData(DataUtil::ObtainDataInBlock(frame_luma_data, m_pos.x, m_pos.y, MB_WIDTH, MB_HEIGHT, m_encoder_context->width));
+	m_luma_data.SetData(DataUtil::ObtainDataInBlock(frame_luma_data, m_pos.x, m_pos.y, ConstantValues::s_mb_width, ConstantValues::s_mb_height, m_encoder_context->width));
 }
 
 void Macroblock::PreEncode()

@@ -35,6 +35,7 @@ private:
 
 	void CalculatePlaneMode();
 
+	void DecideBySATD();
 
 private:
 	std::weak_ptr<Macroblock> m_mb;
@@ -44,6 +45,7 @@ private:
 	bool m_up_available;
 	std::vector<uint8_t> m_left_data;
 	std::vector<uint8_t> m_up_data;
+	uint8_t m_left_up_element;
 	std::unordered_map<Intra16PredictionType, BlockData<16, 16>> m_predicted_data;
 
 	Intra16PredictionType m_prediction_type;
