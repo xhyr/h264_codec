@@ -5,6 +5,7 @@
 #include "yuv_frame.h"
 #include "slice.h"
 #include "constant_values.h"
+#include "log.h"
 
 __codec_begin
 
@@ -31,9 +32,13 @@ bool Encoder::Encode()
 	parameter_set_container.ConstructSPS();
 	parameter_set_container.ConstructPPS();
 
-	Slice slice;
-	slice.Construct(SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS());
-	slice.Encode(m_context);
+	auto slice = std::make_shared<Slice>();
+	slice->Construct(SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS());
+	slice->Encode(m_context);
+
+	auto cost = slice->GetCost();
+	
+	LOGINFO("cost = %d, average_cost = %lf.", cost, cost * 1.0 / m_context->width / m_context->height);
 
 	return true;
 }

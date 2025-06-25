@@ -22,6 +22,8 @@ public:
 
 	Intra16PredictionType Decide();
 
+	int GetCost() const;
+
 private:
 	void ObtainLeftAndUpInfo();
 
@@ -37,6 +39,8 @@ private:
 
 	void DecideBySATD();
 
+	void DecideBySAD();
+
 private:
 	std::weak_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
@@ -49,7 +53,7 @@ private:
 	std::unordered_map<Intra16PredictionType, BlockData<16, 16>> m_predicted_data;
 
 	Intra16PredictionType m_prediction_type;
-
+	int m_cost{ -1 };
 };
 
 __codec_end

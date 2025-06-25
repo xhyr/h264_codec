@@ -5,11 +5,12 @@
 #include "data_util.h"
 #include "slice.h"
 #include "constant_values.h"
+#include "intra16_predictor.h"
 
 __codec_begin
 
 Macroblock::Macroblock(uint32_t mb_addr, std::weak_ptr<Slice> slice, std::shared_ptr<EncoderContext> encoder_context):
-	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context), m_neighbors(shared_from_this(), mb_addr, encoder_context)
+	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context)
 {
 	Init();
 }
@@ -28,7 +29,7 @@ bool Macroblock::Encode()
 
 void Macroblock::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element)
 {
-	m_neighbors.ObtainLeftAndUpEdge(left_data, up_data, left_up_element);
+	m_neighbors->ObtainLeftAndUpEdge(left_data, up_data, left_up_element);
 }
 
 std::vector<uint8_t> Macroblock::GetRightData()
@@ -45,6 +46,16 @@ std::shared_ptr<Macroblock> Macroblock::GetMacroblock(uint32_t mb_addr)
 {
 	auto slice = m_slice.lock();
 	return slice->GetMacroblock(mb_addr);
+}
+
+BlockData<ConstantValues::s_mb_width, ConstantValues::s_mb_height> Macroblock::GetBlockData() const
+{
+    return m_luma_data;
+}
+
+int Macroblock::GetCost() const
+{
+	return m_cost;
 }
 
 void Macroblock::Init()
@@ -70,6 +81,8 @@ void Macroblock::ObtainData()
 
 void Macroblock::PreEncode()
 {
+	m_neighbors = std::make_unique<MBNeighbors>(shared_from_this(), m_addr, m_encoder_context);
+
 	m_qp = 28;
 }
 
@@ -85,7 +98,9 @@ void Macroblock::PostEncode()
 
 void Macroblock::IntraPredict()
 {
-
+	Intra16Predictor intra16_predictor(shared_from_this(), m_encoder_context);
+	intra16_predictor.Decide();
+	m_cost = intra16_predictor.GetCost();
 }
 
 __codec_end

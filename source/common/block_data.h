@@ -58,7 +58,7 @@ public:
 
 	std::vector<Ty> GetDownData() const
 	{
-		std::vector<Ty> down_data(&m_data[(Height - 1) *Width], &m_data[Height * Width]);
+		std::vector<Ty> down_data(std::next(m_data.begin(), (Height - 1) * Width), m_data.end());
 		return down_data;
 	}
 
@@ -89,6 +89,7 @@ BlockData<Width, Height, int> operator-(const BlockData<Width, Height, Ty>& left
 			output.SetElement(x, y, left_value - right_value);
 		}
 	}
+	return output;
 }
 
 __codec_end

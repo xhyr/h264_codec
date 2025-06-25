@@ -4,7 +4,7 @@
 #include "ostream.h"
 #include "bytes_data.h"
 #include "coding_util.h"
-#include "const_values.h"
+#include "constant_values.h"
 
 __codec_begin
 
@@ -26,7 +26,7 @@ void Nalu::Serial(std::shared_ptr<OStream> ostream)
 	std::shared_ptr<BytesData> bytes_data = std::make_shared<BytesData>();
 	
 	//start code
-	for (uint8_t i = 0; i < ConstValues::s_zero_bytes_start_code; ++i)
+	for (uint8_t i = 0; i < ConstantValues::s_zero_bytes_start_code; ++i)
 		bytes_data->PushByte(0);
 	bytes_data->PushByte(1);
 

@@ -8,6 +8,7 @@
 #include "mb_neighbors.h"
 #include "position.h"
 #include "block_data.h"
+#include "constant_values.h"
 
 __codec_begin
 
@@ -29,6 +30,10 @@ public:
 	std::vector<uint8_t> GetDownData();
 
 	std::shared_ptr<Macroblock> GetMacroblock(uint32_t mb_addr);
+
+	BlockData<ConstantValues::s_mb_width, ConstantValues::s_mb_height> GetBlockData() const;
+
+	int GetCost() const;
 
 private:
 	void Init();
@@ -52,11 +57,14 @@ private:
 
 	Position m_pos_in_mb;
 	Position m_pos;
-	MBNeighbors m_neighbors;
+	std::unique_ptr<MBNeighbors> m_neighbors;
 	uint32_t m_qp;
 	MBType m_type;
 
-	BlockData<16, 16> m_luma_data;
+	//prediction cost
+	int m_cost;
+
+	BlockData<ConstantValues::s_mb_width, ConstantValues::s_mb_height> m_luma_data;
 };
 
 __codec_end

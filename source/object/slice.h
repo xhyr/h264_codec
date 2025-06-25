@@ -25,10 +25,13 @@ public:
 
 	std::shared_ptr<Macroblock> GetMacroblock(uint32_t mb_addr);
 
+	int GetCost() const;
+
 private:
 	SliceType m_type;
 	SliceHeader m_header;
 	std::vector<std::shared_ptr<Macroblock>> m_macroblocks;
+	int m_cost{ 0 };
 };
 
 __codec_end

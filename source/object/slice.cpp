@@ -17,8 +17,9 @@ bool Slice::Encode(std::shared_ptr<EncoderContext> encoder_context)
 {
 	for (uint32_t mb_addr = 0; mb_addr < encoder_context->mb_num; ++mb_addr)
 	{
-		auto macroblock = std::make_shared<Macroblock>(mb_addr, shared_from_this(), encoder_context);
+		auto macroblock = std::make_shared<Macroblock>(mb_addr, weak_from_this(), encoder_context);
 		macroblock->Encode();
+		m_cost += macroblock->GetCost();
 		m_macroblocks.push_back(macroblock);
 	}
 
@@ -39,6 +40,11 @@ void Slice::Serial(std::shared_ptr<OStream> ostream)
 std::shared_ptr<Macroblock> Slice::GetMacroblock(uint32_t mb_addr)
 {
 	return m_macroblocks[mb_addr];
+}
+
+int Slice::GetCost() const
+{
+	return m_cost;
 }
 
 __codec_end
