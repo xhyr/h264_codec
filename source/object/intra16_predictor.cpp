@@ -22,7 +22,7 @@ Intra16PredictionType Intra16Predictor::Decide()
 {
 	ObtainLeftAndUpInfo();
 	CalculateAllPredictionData();
-	DecideBySAD();
+	DecideBySATD();
 	return m_prediction_type;
 }
 

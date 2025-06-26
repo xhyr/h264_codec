@@ -4,6 +4,9 @@
 #include "nalu.h"
 #include "encoder_context.h"
 #include "macroblock.h"
+#include "yuv_frame.h"
+#include "png_predictor.h"
+#include "log.h"
 
 __codec_begin
 
