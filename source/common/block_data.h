@@ -62,6 +62,15 @@ public:
 		return down_data;
 	}
 
+	BlockData<4, 4, int> GetBlock4x4(uint32_t x_in_block, uint32_t y_in_block) const
+	{
+		BlockData<4, 4, int> result;
+		for (uint32_t y = 4 * y_in_block; y < 4 * y_in_block + 4; ++y)
+			for (uint32_t x = 4 * x_in_block; x < 4 * x_in_block + 4; ++x)
+				result.SetElement(x - 4 * x_in_block, y - 4 * y_in_block, GetElement(x, y));
+		return result;
+	}
+
 	int GetSum() const
 	{
 		return std::accumulate(m_data.begin(), m_data.end(), 0);

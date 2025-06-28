@@ -8,8 +8,13 @@ __codec_begin
 
 struct Transformer
 {
-	static BlockData<4, 4, int> Hadamard(BlockData<4, 4, int> block_data);
+	static BlockData<4, 4, int> Hadamard(const BlockData<4, 4, int>& block_data, int divide_factor = 2);
 
+	static BlockData<4, 4, int> InverseHadamard(const BlockData<4, 4, int>& block_data);
+
+	static BlockData<4, 4, int> DCT(const BlockData<4, 4, int>& block_data);
+
+	static BlockData<4, 4, int> InverseDCT(const BlockData<4, 4, int>& block_data);
 
 };
 

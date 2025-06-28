@@ -6,6 +6,8 @@
 #include "encoder_context.h"
 #include "math_util.h"
 #include "constant_values.h"
+#include "transformer.h"
+#include "cost_util.h"
 
 __codec_begin
 
@@ -125,7 +127,30 @@ void Intra16Predictor::CalculatePlaneMode()
 
 void Intra16Predictor::DecideBySATD()
 {
+	auto mb = m_mb.lock();
+	auto origin_block_data = mb->GetBlockData();
 
+	int min_satd = -1;
+	Intra16PredictionType best_prediction_type = Intra16PredictionType::DC;
+
+	std::vector<Intra16PredictionType> prediction_types{ Intra16PredictionType::Vertical, Intra16PredictionType::Horizontal, Intra16PredictionType::DC, Intra16PredictionType::Plane };
+	for (auto prediction_type : prediction_types)
+	{
+		if (m_predicted_data.find(prediction_type) == m_predicted_data.end())
+			continue;
+
+		auto predicted_data = m_predicted_data[prediction_type];
+		auto diff_data = origin_block_data - predicted_data;
+		auto satd = CostUtil::CalculateSATD(diff_data);
+		if (min_satd == -1 || satd < min_satd)
+		{
+			min_satd = satd;
+			best_prediction_type = prediction_type;
+		}
+	}
+
+	m_prediction_type = best_prediction_type;
+	m_cost = min_satd;
 }
 
 void Intra16Predictor::DecideBySAD()
