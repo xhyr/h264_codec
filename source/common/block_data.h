@@ -17,9 +17,14 @@ public:
 
 	}
 
-	void SetData(const std::vector<uint8_t>& in_data)
+	void SetData(const std::vector<Ty>& in_data)
 	{
 		m_data = in_data;
+	}
+
+	std::vector<Ty> GetData() const
+	{
+		return m_data;
 	}
 
 	void SetElement(uint32_t x, uint32_t y, Ty value)
@@ -82,6 +87,7 @@ public:
 	}
 
 private:
+	
 	std::vector<Ty> m_data;
 };
 

@@ -1,6 +1,6 @@
 #include "cost_util.h"
 
-#include "transformer.h"
+#include "transform_util.h"
 
 __codec_begin
 
@@ -13,7 +13,7 @@ int CostUtil::CalculateSATD(const BlockData<16, 16, int>& block_data)
 		for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)
 		{
 			auto block_data_4x4 = block_data.GetBlock4x4(x_in_block, y_in_block);
-			block_data_4x4 = Transformer::Hadamard(block_data_4x4, 1);
+			block_data_4x4 = TransformUtil::Hadamard(block_data_4x4, 1);
 			auto dc_value = block_data_4x4.GetElement(0, 0);
 			satd += block_data_4x4.GetAbstractSum();
 			satd -= abs(dc_value);
@@ -22,7 +22,7 @@ int CostUtil::CalculateSATD(const BlockData<16, 16, int>& block_data)
 		}
 	}
 
-	dc_block_data = Transformer::Hadamard(dc_block_data, 1);
+	dc_block_data = TransformUtil::Hadamard(dc_block_data, 1);
 	satd += dc_block_data.GetAbstractSum();
 	satd /= 2;
 	return satd;

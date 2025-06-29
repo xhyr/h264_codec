@@ -6,7 +6,7 @@
 #include "encoder_context.h"
 #include "math_util.h"
 #include "constant_values.h"
-#include "transformer.h"
+#include "transform_util.h"
 #include "cost_util.h"
 
 __codec_begin
@@ -33,6 +33,16 @@ int Intra16Predictor::GetCost() const
 	return m_cost;
 }
 
+BlockData<16, 16> Intra16Predictor::GetPredictedData() const
+{
+	return m_predicted_data;
+}
+
+BlockData<16, 16, int> Intra16Predictor::GetDiffData() const
+{
+	return m_diff_data;
+}
+
 void Intra16Predictor::ObtainLeftAndUpInfo()
 {
 	auto mb = m_mb.lock();
@@ -55,8 +65,8 @@ void Intra16Predictor::CalculateVerticalMode()
 	if (!m_up_available)
 		return;
 
-	auto& block_data = m_predicted_data[Intra16PredictionType::Vertical];
-	for (uint32_t y = 0; y < ConstantValues::s_mb_height; ++y)
+	auto& block_data = m_predicted_data_map[Intra16PredictionType::Vertical];
+	for (uint32_t y = 0; y < 16; ++y)
 		block_data.SetElementInRow(y, m_up_data);
 }
 
@@ -65,8 +75,8 @@ void Intra16Predictor::CalculateHorizontalMode()
 	if (!m_left_available)
 		return;
 
-	auto& block_data = m_predicted_data[Intra16PredictionType::Horizontal];
-	for (uint32_t x = 0; x < ConstantValues::s_mb_width; ++x)
+	auto& block_data = m_predicted_data_map[Intra16PredictionType::Horizontal];
+	for (uint32_t x = 0; x < 16; ++x)
 		block_data.SetElementInColumn(x, std::vector<uint8_t>(m_left_data.begin(), m_left_data.end()));
 }
 
@@ -90,7 +100,7 @@ void Intra16Predictor::CalculateDCMode()
 		dc_value = MathUtil::RightShift(sum, 4);
 	}
 	
-	auto& block_data = m_predicted_data[Intra16PredictionType::DC];
+	auto& block_data = m_predicted_data_map[Intra16PredictionType::DC];
 	block_data.SetElementAll(dc_value);
 }
 
@@ -113,10 +123,10 @@ void Intra16Predictor::CalculatePlaneMode()
 	int b = MathUtil::RightShift(5 * H, 6);
 	int c = MathUtil::RightShift(5 * V, 6);
 
-	auto& block_data = m_predicted_data[Intra16PredictionType::Plane];
-	for (uint32_t y = 0; y < ConstantValues::s_mb_height; ++y)
+	auto& block_data = m_predicted_data_map[Intra16PredictionType::Plane];
+	for (uint32_t y = 0; y < 16; ++y)
 	{
-		for (uint32_t x = 0; x < ConstantValues::s_mb_width; ++x)
+		for (uint32_t x = 0; x < 16; ++x)
 		{
 			int value = MathUtil::RightShift(a + b * (x - 7) + c * (y - 7), 5);
 			value = MathUtil::Clamp<int>(value, ConstantValues::s_min_color_value, ConstantValues::s_max_color_value);
@@ -128,7 +138,7 @@ void Intra16Predictor::CalculatePlaneMode()
 void Intra16Predictor::DecideBySATD()
 {
 	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetBlockData();
+	auto origin_block_data = mb->GetOriginalBlockData();
 
 	int min_satd = -1;
 	Intra16PredictionType best_prediction_type = Intra16PredictionType::DC;
@@ -136,16 +146,18 @@ void Intra16Predictor::DecideBySATD()
 	std::vector<Intra16PredictionType> prediction_types{ Intra16PredictionType::Vertical, Intra16PredictionType::Horizontal, Intra16PredictionType::DC, Intra16PredictionType::Plane };
 	for (auto prediction_type : prediction_types)
 	{
-		if (m_predicted_data.find(prediction_type) == m_predicted_data.end())
+		if (m_predicted_data_map.find(prediction_type) == m_predicted_data_map.end())
 			continue;
 
-		auto predicted_data = m_predicted_data[prediction_type];
+		auto predicted_data = m_predicted_data_map[prediction_type];
 		auto diff_data = origin_block_data - predicted_data;
 		auto satd = CostUtil::CalculateSATD(diff_data);
 		if (min_satd == -1 || satd < min_satd)
 		{
 			min_satd = satd;
 			best_prediction_type = prediction_type;
+			m_diff_data = diff_data;
+			m_predicted_data = predicted_data;
 		}
 	}
 
@@ -156,7 +168,7 @@ void Intra16Predictor::DecideBySATD()
 void Intra16Predictor::DecideBySAD()
 {
 	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetBlockData();
+	auto origin_block_data = mb->GetOriginalBlockData();
 
 	int min_sad = -1;
 	Intra16PredictionType best_prediction_type = Intra16PredictionType::DC;
@@ -164,10 +176,10 @@ void Intra16Predictor::DecideBySAD()
 	std::vector<Intra16PredictionType> prediction_types{ Intra16PredictionType::Vertical, Intra16PredictionType::Horizontal, Intra16PredictionType::DC, Intra16PredictionType::Plane };
 	for (auto prediction_type : prediction_types)
 	{
-		if (m_predicted_data.find(prediction_type) == m_predicted_data.end())
+		if (m_predicted_data_map.find(prediction_type) == m_predicted_data_map.end())
 			continue;
 
-		auto predicted_data = m_predicted_data[prediction_type];
+		auto predicted_data = m_predicted_data_map[prediction_type];
 		auto diff_data = origin_block_data - predicted_data;
 		auto sad =  diff_data.GetAbstractSum();
 		if (min_sad == -1 || sad < min_sad)

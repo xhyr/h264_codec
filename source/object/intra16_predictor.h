@@ -24,6 +24,10 @@ public:
 
 	int GetCost() const;
 
+	BlockData<16, 16> GetPredictedData() const;
+
+	BlockData<16, 16, int> GetDiffData() const;
+
 private:
 	void ObtainLeftAndUpInfo();
 
@@ -50,10 +54,12 @@ private:
 	std::vector<uint8_t> m_left_data;
 	std::vector<uint8_t> m_up_data;
 	uint8_t m_left_up_element;
-	std::unordered_map<Intra16PredictionType, BlockData<16, 16>> m_predicted_data;
+	std::unordered_map<Intra16PredictionType, BlockData<16, 16>> m_predicted_data_map;
 
 	Intra16PredictionType m_prediction_type;
 	int m_cost{ -1 };
+	BlockData<16, 16> m_predicted_data;
+	BlockData<16, 16, int> m_diff_data;
 };
 
 __codec_end

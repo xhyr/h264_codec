@@ -8,12 +8,12 @@
 #include "mb_neighbors.h"
 #include "position.h"
 #include "block_data.h"
-#include "constant_values.h"
 
 __codec_begin
 
 class Slice;
 struct EncoderContext;
+class Intra16Quantizer;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -31,7 +31,9 @@ public:
 
 	std::shared_ptr<Macroblock> GetMacroblock(uint32_t mb_addr);
 
-	BlockData<ConstantValues::s_mb_width, ConstantValues::s_mb_height> GetBlockData() const;
+	BlockData<16, 16> GetOriginalBlockData() const;
+
+	BlockData<16, 16> GetReconstructedBlockData() const;
 
 	int GetCost() const;
 
@@ -40,7 +42,7 @@ private:
 
 	void ComputePosition();
 
-	void ObtainData();
+	void ObtainOriginalData();
 
 	void PreEncode();
 
@@ -49,6 +51,10 @@ private:
 	void PostEncode();
 
 	void IntraPredict();
+
+	std::shared_ptr<Intra16Quantizer> TransformAndQuantizeIntra16();
+
+	void InverseTransformAndQuantizeIntra16(std::shared_ptr<Intra16Quantizer> quantizer);
 
 private:
 	uint32_t m_addr;
@@ -61,10 +67,12 @@ private:
 	uint32_t m_qp;
 	MBType m_type;
 
-	//prediction cost
-	int m_cost;
+	int m_cost;//prediction cost
+	BlockData<16, 16, int> m_diff_data;
+	BlockData<16, 16> m_predicted_data;
+	BlockData<16, 16> m_reconstructed_data;
 
-	BlockData<ConstantValues::s_mb_width, ConstantValues::s_mb_height> m_luma_data;
+	BlockData<16, 16> m_luma_data;
 };
 
 __codec_end

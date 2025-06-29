@@ -6,6 +6,11 @@
 #include "slice.h"
 #include "constant_values.h"
 #include "intra16_predictor.h"
+#include "intra16_transformer.h"
+#include "intra16_quantizer.h"
+#include "inverse_intra16_quantizer.h"
+#include "transform_util.h"
+#include "intra16_reconstructor.h"
 
 __codec_begin
 
@@ -34,12 +39,12 @@ void Macroblock::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vecto
 
 std::vector<uint8_t> Macroblock::GetRightData()
 {
-	return m_luma_data.GetRightData();
+	return m_reconstructed_data.GetRightData();
 }
 
 std::vector<uint8_t> Macroblock::GetDownData()
 {
-	return m_luma_data.GetDownData();
+	return m_reconstructed_data.GetDownData();
 }
 
 std::shared_ptr<Macroblock> Macroblock::GetMacroblock(uint32_t mb_addr)
@@ -48,9 +53,14 @@ std::shared_ptr<Macroblock> Macroblock::GetMacroblock(uint32_t mb_addr)
 	return slice->GetMacroblock(mb_addr);
 }
 
-BlockData<ConstantValues::s_mb_width, ConstantValues::s_mb_height> Macroblock::GetBlockData() const
+BlockData<16, 16> Macroblock::GetOriginalBlockData() const
 {
     return m_luma_data;
+}
+
+BlockData<16, 16> Macroblock::GetReconstructedBlockData() const
+{
+	return m_reconstructed_data;
 }
 
 int Macroblock::GetCost() const
@@ -61,7 +71,7 @@ int Macroblock::GetCost() const
 void Macroblock::Init()
 {
 	ComputePosition();
-	ObtainData();
+	ObtainOriginalData();
 }
 
 void Macroblock::ComputePosition()
@@ -72,7 +82,7 @@ void Macroblock::ComputePosition()
 	m_pos.y = m_pos_in_mb.y << 4;
 }
 
-void Macroblock::ObtainData()
+void Macroblock::ObtainOriginalData()
 {
 	//luma
 	auto frame_luma_data = m_encoder_context->yuv_frame->y_data;
@@ -89,6 +99,10 @@ void Macroblock::PreEncode()
 void Macroblock::DoEncode()
 {
 	IntraPredict();
+
+	auto quantizer = TransformAndQuantizeIntra16();
+	InverseTransformAndQuantizeIntra16(quantizer);
+	
 }
 
 void Macroblock::PostEncode()
@@ -101,6 +115,36 @@ void Macroblock::IntraPredict()
 	Intra16Predictor intra16_predictor(shared_from_this(), m_encoder_context);
 	intra16_predictor.Decide();
 	m_cost = intra16_predictor.GetCost();
+	m_diff_data = intra16_predictor.GetDiffData();
+	m_predicted_data = intra16_predictor.GetPredictedData();
+}
+
+std::shared_ptr<Intra16Quantizer> Macroblock::TransformAndQuantizeIntra16()
+{
+	Intra16Transformer transformer(m_diff_data);
+	transformer.Transform();
+
+	auto quantizer = std::make_shared<Intra16Quantizer>(m_qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	quantizer->Quantize();
+	return quantizer;
+}
+
+void Macroblock::InverseTransformAndQuantizeIntra16(std::shared_ptr<Intra16Quantizer> quantizer)
+{
+	auto dc_block = quantizer->GetDCBlock();
+	dc_block = TransformUtil::InverseHadamard(dc_block);
+	
+	InverseIntra16Quantizer inverse_quantizer(m_qp, dc_block, quantizer->GetACBlocks());
+	inverse_quantizer.InverseQuantize();
+
+	auto blocks = inverse_quantizer.GetBlocks();
+	for (auto& block : blocks)
+		block = TransformUtil::InverseDCT(block);
+
+	//reconstruct
+	Intra16Reconstructor reconstructor(blocks, m_predicted_data);
+	reconstructor.Reconstruct();
+	m_reconstructed_data = reconstructor.GetBlockData();
 }
 
 __codec_end

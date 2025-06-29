@@ -6,7 +6,7 @@
 
 __codec_begin
 
-struct Transformer
+struct TransformUtil
 {
 	static BlockData<4, 4, int> Hadamard(const BlockData<4, 4, int>& block_data, int divide_factor = 2);
 
