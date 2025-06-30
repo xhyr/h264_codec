@@ -68,7 +68,7 @@ private:
 	MBType m_type;
 
 	int m_cost;//prediction cost
-	BlockData<16, 16, int> m_diff_data;
+	BlockData<16, 16, int32_t> m_diff_data;
 	BlockData<16, 16> m_predicted_data;
 	BlockData<16, 16> m_reconstructed_data;
 

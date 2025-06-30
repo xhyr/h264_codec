@@ -38,7 +38,7 @@ BlockData<16, 16> Intra16Predictor::GetPredictedData() const
 	return m_predicted_data;
 }
 
-BlockData<16, 16, int> Intra16Predictor::GetDiffData() const
+BlockData<16, 16, int32_t> Intra16Predictor::GetDiffData() const
 {
 	return m_diff_data;
 }

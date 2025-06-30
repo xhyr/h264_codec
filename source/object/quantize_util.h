@@ -8,13 +8,13 @@ __codec_begin
 
 struct QuantizeUtil
 {
-	static BlockData<4, 4, int> QuantizeDC(int qp, const BlockData<4, 4, int>& dc_block);
+	static BlockData<4, 4, int32_t> QuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block);
 
-	static BlockData<4, 4, int> InverseQuantizeDC(int qp, const BlockData<4, 4, int>& dc_block);
+	static BlockData<4, 4, int32_t> InverseQuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block);
 
-	static BlockData<4, 4, int> QuantizeAC(int qp, const BlockData<4, 4, int>& ac_block);
+	static BlockData<4, 4, int32_t> QuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block);
 
-	static BlockData<4, 4, int> InverseQuantizeAC(int qp, const BlockData<4, 4, int>& ac_block);
+	static BlockData<4, 4, int32_t> InverseQuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block);
 
 private:
 	static std::tuple<int, int, int> GetQuantizeParameters(int qp, bool is_intra = true);

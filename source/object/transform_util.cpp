@@ -2,9 +2,9 @@
 
 __codec_begin
 
-BlockData<4, 4, int> TransformUtil::Hadamard(const BlockData<4, 4, int>& block_data, int divide_factor)
+BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>& block_data, int divide_factor)
 {
-	BlockData<4, 4, int> intermediate_block;
+	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 4; ++y)
 	{
@@ -24,7 +24,7 @@ BlockData<4, 4, int> TransformUtil::Hadamard(const BlockData<4, 4, int>& block_d
 		intermediate_block.SetElement(3, y, t3 - t2);
 	}
 
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	//left matrix mutiple, vertical
 	for (uint32_t x = 0; x < 4; ++x)
 	{
@@ -47,14 +47,14 @@ BlockData<4, 4, int> TransformUtil::Hadamard(const BlockData<4, 4, int>& block_d
 	return output_block;
 }
 
-BlockData<4, 4, int> TransformUtil::InverseHadamard(const BlockData<4, 4, int>& block_data)
+BlockData<4, 4, int32_t> TransformUtil::InverseHadamard(const BlockData<4, 4, int32_t>& block_data)
 {
 	return Hadamard(block_data, 1);
 }
 
-BlockData<4, 4, int> TransformUtil::DCT(const BlockData<4, 4, int>& block_data)
+BlockData<4, 4, int32_t> TransformUtil::DCT(const BlockData<4, 4, int32_t>& block_data)
 {
-	BlockData<4, 4, int> intermediate_block;
+	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 4; ++y)
 	{
@@ -74,7 +74,7 @@ BlockData<4, 4, int> TransformUtil::DCT(const BlockData<4, 4, int>& block_data)
 		intermediate_block.SetElement(3, y, t3 - (t2 << 1));
 	}
 
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	//left matrix mutiple, vertical
 	for (uint32_t x = 0; x < 4; ++x)
 	{
@@ -97,9 +97,9 @@ BlockData<4, 4, int> TransformUtil::DCT(const BlockData<4, 4, int>& block_data)
 	return output_block;
 }
 
-BlockData<4, 4, int> TransformUtil::InverseDCT(const BlockData<4, 4, int>& block_data)
+BlockData<4, 4, int32_t> TransformUtil::InverseDCT(const BlockData<4, 4, int32_t>& block_data)
 {
-	BlockData<4, 4, int> intermediate_block;
+	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 4; ++y)
 	{
@@ -119,7 +119,7 @@ BlockData<4, 4, int> TransformUtil::InverseDCT(const BlockData<4, 4, int>& block
 		intermediate_block.SetElement(3, y, t0 - t3);
 	}
 
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	//left matrix mutiple, vertical
 	for (uint32_t x = 0; x < 4; ++x)
 	{

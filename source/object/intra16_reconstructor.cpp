@@ -6,7 +6,7 @@
 
 __codec_begin
 
-Intra16Reconstructor::Intra16Reconstructor(const std::vector<BlockData<4, 4, int>>& residual_blocks, const BlockData<16, 16>& predicted_data) :
+Intra16Reconstructor::Intra16Reconstructor(const std::vector<BlockData<4, 4, int32_t>>& residual_blocks, const BlockData<16, 16>& predicted_data) :
 	m_residual_blocks(residual_blocks), m_predicted_data(predicted_data)
 {
 }

@@ -4,7 +4,7 @@
 
 __codec_begin
 
-InverseIntra16Quantizer::InverseIntra16Quantizer(int qp, const BlockData<4, 4, int>& dc_block, const std::vector<BlockData<4, 4, int>>& ac_blocks) :
+InverseIntra16Quantizer::InverseIntra16Quantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks) :
 	m_qp(qp), m_dc_block(dc_block), m_blocks(ac_blocks)
 {
 }
@@ -24,7 +24,7 @@ void InverseIntra16Quantizer::InverseQuantize()
 	}
 }
 
-std::vector<BlockData<4, 4, int>> InverseIntra16Quantizer::GetBlocks() const
+std::vector<BlockData<4, 4, int32_t>> InverseIntra16Quantizer::GetBlocks() const
 {
 	return m_blocks;
 }

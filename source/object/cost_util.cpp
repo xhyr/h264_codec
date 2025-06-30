@@ -4,10 +4,10 @@
 
 __codec_begin
 
-int CostUtil::CalculateSATD(const BlockData<16, 16, int>& block_data)
+int CostUtil::CalculateSATD(const BlockData<16, 16, int32_t>& block_data)
 {
 	int satd = 0;
-	BlockData<4, 4, int> dc_block_data;
+	BlockData<4, 4, int32_t> dc_block_data;
 	for (uint32_t y_in_block = 0; y_in_block < 4; ++y_in_block)
 	{
 		for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)

@@ -67,9 +67,9 @@ public:
 		return down_data;
 	}
 
-	BlockData<4, 4, int> GetBlock4x4(uint32_t x_in_block, uint32_t y_in_block) const
+	BlockData<4, 4, int32_t> GetBlock4x4(uint32_t x_in_block, uint32_t y_in_block) const
 	{
-		BlockData<4, 4, int> result;
+		BlockData<4, 4, int32_t> result;
 		for (uint32_t y = 4 * y_in_block; y < 4 * y_in_block + 4; ++y)
 			for (uint32_t x = 4 * x_in_block; x < 4 * x_in_block + 4; ++x)
 				result.SetElement(x - 4 * x_in_block, y - 4 * y_in_block, GetElement(x, y));

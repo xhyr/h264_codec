@@ -4,7 +4,7 @@
 
 __codec_begin
 
-Intra16Quantizer::Intra16Quantizer(int qp, const BlockData<4, 4, int>& dc_block, const std::vector<BlockData<4, 4, int>>& ac_blocks) :
+Intra16Quantizer::Intra16Quantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks) :
 	m_qp(qp), m_dc_block(dc_block), m_ac_blocks(ac_blocks)
 {
 }
@@ -20,12 +20,12 @@ void Intra16Quantizer::Quantize()
 		ac_block = QuantizeUtil::QuantizeAC(m_qp, ac_block);
 }
 
-BlockData<4, 4, int> Intra16Quantizer::GetDCBlock() const
+BlockData<4, 4, int32_t> Intra16Quantizer::GetDCBlock() const
 {
 	return m_dc_block;
 }
 
-std::vector<BlockData<4, 4, int>> Intra16Quantizer::GetACBlocks() const
+std::vector<BlockData<4, 4, int32_t>> Intra16Quantizer::GetACBlocks() const
 {
 	return m_ac_blocks;
 }

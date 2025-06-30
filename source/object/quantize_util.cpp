@@ -7,7 +7,7 @@
 
 __codec_begin
 
-BlockData<4, 4, int> QuantizeUtil::QuantizeDC(int qp, const BlockData<4, 4, int>& dc_block)
+BlockData<4, 4, int32_t> QuantizeUtil::QuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block)
 {
 	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
 
@@ -20,28 +20,28 @@ BlockData<4, 4, int> QuantizeUtil::QuantizeDC(int qp, const BlockData<4, 4, int>
 		val = val >= 0 ? positive_val : -positive_val;
 	}
 	
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	output_block.SetData(dc_data);
     return output_block;
 }
 
-BlockData<4, 4, int> QuantizeUtil::InverseQuantizeDC(int qp, const BlockData<4, 4, int>& dc_block)
+BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block)
 {
 	auto [qp_per, qp_rem] = GetInverseQuantizeParameters(qp);
 	auto dc_factor = QuantizeConstants::s_dequant_matrix[qp_rem][0][0] << qp_per;
 	auto dc_data = dc_block.GetData();
 	std::transform(dc_data.begin(), dc_data.end(), dc_data.begin(), [dc_factor](int val) {return MathUtil::RightShift(val * dc_factor, 2); });
 
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	output_block.SetData(dc_data);
 	return output_block;
 }
 
-BlockData<4, 4, int> QuantizeUtil::QuantizeAC(int qp, const BlockData<4, 4, int>& ac_block)
+BlockData<4, 4, int32_t> QuantizeUtil::QuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block)
 {
 	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
 
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	for (uint32_t y = 0; y < 4; ++y)
 	{
 		for (uint32_t x = 0; x < 4; ++x)
@@ -61,11 +61,11 @@ BlockData<4, 4, int> QuantizeUtil::QuantizeAC(int qp, const BlockData<4, 4, int>
 	return output_block;
 }
 
-BlockData<4, 4, int> QuantizeUtil::InverseQuantizeAC(int qp, const BlockData<4, 4, int>& ac_block)
+BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block)
 {
 	auto [qp_per, qp_rem] = GetInverseQuantizeParameters(qp);
 
-	BlockData<4, 4, int> output_block;
+	BlockData<4, 4, int32_t> output_block;
 	for (uint32_t y = 0; y < 4; ++y)
 	{
 		for (uint32_t x = 0; x < 4; ++x)

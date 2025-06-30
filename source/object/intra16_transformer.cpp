@@ -6,7 +6,7 @@
 
 __codec_begin
 
-Intra16Transformer::Intra16Transformer(const BlockData<16, 16, int>& block_data) : m_block_data(block_data)
+Intra16Transformer::Intra16Transformer(const BlockData<16, 16, int32_t>& block_data) : m_block_data(block_data)
 {
 }
 
@@ -21,12 +21,12 @@ void Intra16Transformer::Transform()
 	TransformDC();
 }
 
-std::vector<BlockData<4, 4, int>> Intra16Transformer::GetBlocks() const
+std::vector<BlockData<4, 4, int32_t>> Intra16Transformer::GetBlocks() const
 {
 	return m_blocks;
 }
 
-BlockData<4, 4, int> Intra16Transformer::GetDCBlock() const
+BlockData<4, 4, int32_t> Intra16Transformer::GetDCBlock() const
 {
 	return m_dc_block;
 }

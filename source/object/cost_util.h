@@ -9,7 +9,7 @@ __codec_begin
 
 struct CostUtil
 {
-	static int CalculateSATD(const BlockData<16, 16, int>& block_data);
+	static int CalculateSATD(const BlockData<16, 16, int32_t>& block_data);
 
 };
 

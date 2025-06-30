@@ -7,14 +7,14 @@ __codec_begin
 class Intra16Transformer
 {
 public:
-	explicit Intra16Transformer(const BlockData<16, 16, int>& block_data);
+	explicit Intra16Transformer(const BlockData<16, 16, int32_t>& block_data);
 	~Intra16Transformer();
 
 	void Transform();
 
-	std::vector<BlockData<4, 4, int>> GetBlocks() const;
+	std::vector<BlockData<4, 4, int32_t>> GetBlocks() const;
 
-	BlockData<4, 4, int> GetDCBlock() const;
+	BlockData<4, 4, int32_t> GetDCBlock() const;
 
 private:
 	void PickBlocks();
@@ -24,10 +24,10 @@ private:
 	void TransformDC();
 
 private:
-	BlockData<16, 16, int> m_block_data;
+	BlockData<16, 16, int32_t> m_block_data;
 
-	std::vector<BlockData<4, 4, int>> m_blocks;
-	BlockData<4, 4, int> m_dc_block;
+	std::vector<BlockData<4, 4, int32_t>> m_blocks;
+	BlockData<4, 4, int32_t> m_dc_block;
 };
 
 __codec_end

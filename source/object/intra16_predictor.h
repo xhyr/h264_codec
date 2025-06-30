@@ -26,7 +26,7 @@ public:
 
 	BlockData<16, 16> GetPredictedData() const;
 
-	BlockData<16, 16, int> GetDiffData() const;
+	BlockData<16, 16, int32_t> GetDiffData() const;
 
 private:
 	void ObtainLeftAndUpInfo();
@@ -59,7 +59,7 @@ private:
 	Intra16PredictionType m_prediction_type;
 	int m_cost{ -1 };
 	BlockData<16, 16> m_predicted_data;
-	BlockData<16, 16, int> m_diff_data;
+	BlockData<16, 16, int32_t> m_diff_data;
 };
 
 __codec_end
