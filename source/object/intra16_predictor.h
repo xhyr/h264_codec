@@ -49,8 +49,8 @@ private:
 	std::weak_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
 
-	bool m_left_available;
-	bool m_up_available;
+	bool m_left_available{ false };
+	bool m_up_available{ false };
 	std::vector<uint8_t> m_left_data;
 	std::vector<uint8_t> m_up_data;
 	uint8_t m_left_up_element;

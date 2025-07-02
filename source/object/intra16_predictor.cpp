@@ -5,7 +5,7 @@
 #include "macroblock.h"
 #include "encoder_context.h"
 #include "math_util.h"
-#include "constant_values.h"
+#include "common_constant_values.h"
 #include "transform_util.h"
 #include "cost_util.h"
 
@@ -82,7 +82,7 @@ void Intra16Predictor::CalculateHorizontalMode()
 
 void Intra16Predictor::CalculateDCMode()
 {
-	uint8_t dc_value = ConstantValues::s_default_color_value;
+	uint8_t dc_value = CommonConstantValues::s_default_color_value;
 	if (m_left_available && m_up_available)
 	{
 		auto sum = std::accumulate(m_up_data.begin(), m_up_data.end(), 0);
@@ -129,7 +129,7 @@ void Intra16Predictor::CalculatePlaneMode()
 		for (uint32_t x = 0; x < 16; ++x)
 		{
 			int value = MathUtil::RightShift(a + b * (x - 7) + c * (y - 7), 5);
-			value = MathUtil::Clamp<int>(value, ConstantValues::s_min_color_value, ConstantValues::s_max_color_value);
+			value = MathUtil::Clamp<int>(value, CommonConstantValues::s_min_color_value, CommonConstantValues::s_max_color_value);
 			block_data.SetElement(x, y, value);
 		}
 	}

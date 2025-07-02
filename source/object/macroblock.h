@@ -54,7 +54,9 @@ private:
 
 	std::shared_ptr<Intra16Quantizer> TransformAndQuantizeIntra16();
 
-	void InverseTransformAndQuantizeIntra16(std::shared_ptr<Intra16Quantizer> quantizer);
+	void DoCodeCavlc(const std::shared_ptr<Intra16Quantizer>& quantizer);
+
+	void InverseTransformAndQuantizeIntra16(const std::shared_ptr<Intra16Quantizer>& quantizer);
 
 private:
 	uint32_t m_addr;
@@ -66,6 +68,7 @@ private:
 	std::unique_ptr<MBNeighbors> m_neighbors;
 	uint32_t m_qp;
 	MBType m_type;
+	uint8_t m_cbp;
 
 	int m_cost;//prediction cost
 	BlockData<16, 16, int32_t> m_diff_data;

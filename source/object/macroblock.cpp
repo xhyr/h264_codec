@@ -4,13 +4,13 @@
 #include "yuv_frame.h"
 #include "data_util.h"
 #include "slice.h"
-#include "constant_values.h"
 #include "intra16_predictor.h"
 #include "intra16_transformer.h"
 #include "intra16_quantizer.h"
 #include "inverse_intra16_quantizer.h"
 #include "transform_util.h"
 #include "intra16_reconstructor.h"
+#include "cavlc_coder_16x16.h"
 
 __codec_begin
 
@@ -86,7 +86,7 @@ void Macroblock::ObtainOriginalData()
 {
 	//luma
 	auto frame_luma_data = m_encoder_context->yuv_frame->y_data;
-	m_luma_data.SetData(DataUtil::ObtainDataInBlock(frame_luma_data, m_pos.x, m_pos.y, ConstantValues::s_mb_width, ConstantValues::s_mb_height, m_encoder_context->width));
+	m_luma_data.SetData(DataUtil::ObtainDataInBlock(frame_luma_data, m_pos.x, m_pos.y, 16, 16, m_encoder_context->width));
 }
 
 void Macroblock::PreEncode()
@@ -101,6 +101,9 @@ void Macroblock::DoEncode()
 	IntraPredict();
 
 	auto quantizer = TransformAndQuantizeIntra16();
+
+	DoCodeCavlc(quantizer);
+
 	InverseTransformAndQuantizeIntra16(quantizer);
 	
 }
@@ -129,7 +132,14 @@ std::shared_ptr<Intra16Quantizer> Macroblock::TransformAndQuantizeIntra16()
 	return quantizer;
 }
 
-void Macroblock::InverseTransformAndQuantizeIntra16(std::shared_ptr<Intra16Quantizer> quantizer)
+void Macroblock::DoCodeCavlc(const std::shared_ptr<Intra16Quantizer>& quantizer)
+{
+	CavlcCoder16x16 coder;
+	coder.Code(quantizer->GetDCBlock(), quantizer->GetACBlocks());
+	m_cbp = coder.GetCodedBlockPattern();
+}
+
+void Macroblock::InverseTransformAndQuantizeIntra16(const std::shared_ptr<Intra16Quantizer>& quantizer)
 {
 	auto dc_block = quantizer->GetDCBlock();
 	dc_block = TransformUtil::InverseHadamard(dc_block);

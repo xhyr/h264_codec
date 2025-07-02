@@ -6,7 +6,7 @@
 
 __codec_begin
 
-struct ConstantValues
+struct CommonConstantValues
 {
 	constexpr static uint32_t s_zero_bytes_short_start_code{ 2 };
 	constexpr static uint32_t s_zero_bytes_start_code{ 3 };

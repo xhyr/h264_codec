@@ -4,7 +4,7 @@
 #include <numeric>
 #include <vector>
 
-#include "global_defines.h"
+#include "position.h"
 
 __codec_begin
 
@@ -35,6 +35,11 @@ public:
 	Ty GetElement(uint32_t x, uint32_t y) const
 	{
 		return m_data[y * Width + x];
+	}
+
+	Ty GetElement(Position position) const
+	{
+		return m_data[position.y * Width + position.x];
 	}
 
 	void SetElementInRow(uint32_t y, const std::vector<uint8_t>& values)

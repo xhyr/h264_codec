@@ -2,7 +2,7 @@
 
 #include "math_util.h"
 #include "quantize_constants.h"
-#include "constant_values.h"
+#include "common_constant_values.h"
 
 __codec_begin
 
@@ -25,7 +25,7 @@ void Intra16Reconstructor::Reconstruct()
 			uint32_t block_index = (y / 4) * 4 + x / 4;
 			auto residual_val = m_residual_blocks[block_index].GetElement(x % 4, y % 4);
 			auto val = MathUtil::RightShift(residual_val + (predicted_val << QuantizeConstants::s_dq_bits), QuantizeConstants::s_dq_bits);
-			val = MathUtil::Clamp<int>(val, ConstantValues::s_min_color_value, ConstantValues::s_max_color_value);
+			val = MathUtil::Clamp<int>(val, CommonConstantValues::s_min_color_value, CommonConstantValues::s_max_color_value);
 			m_block_data.SetElement(x, y, val);
 		}
 	}

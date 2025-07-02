@@ -1,7 +1,7 @@
 #include "coding_util.h"
 
 #include "bytes_data.h"
-#include "constant_values.h"
+#include "common_constant_values.h"
 
 __codec_begin
 
@@ -67,7 +67,7 @@ void CodingUtil::RBSP2EBSP(std::shared_ptr<BytesData> bytes_data)
 	uint32_t zero_count = 0;
 	while (index < bytes_count)
 	{
-		if (zero_count == ConstantValues::s_zero_bytes_short_start_code)
+		if (zero_count == CommonConstantValues::s_zero_bytes_short_start_code)
 		{
 			new_bytes_data.PushByte(3);
 			zero_count = 0;
