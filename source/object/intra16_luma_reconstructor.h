@@ -7,11 +7,11 @@
 
 __codec_begin
 
-class Intra16Reconstructor
+class Intra16LumaReconstructor
 {
 public:
-	Intra16Reconstructor(const std::vector<BlockData<4, 4, int32_t>>& residual_blocks, const BlockData<16, 16>& predicted_data);
-	~Intra16Reconstructor();
+	Intra16LumaReconstructor(const std::vector<BlockData<4, 4, int32_t>>& residual_blocks, const BlockData<16, 16>& predicted_data);
+	~Intra16LumaReconstructor();
 
 	void Reconstruct();
 

@@ -4,11 +4,11 @@
 
 __codec_begin
 
-class Intra16Transformer
+class Intra16LumaTransformer
 {
 public:
-	explicit Intra16Transformer(const BlockData<16, 16, int32_t>& block_data);
-	~Intra16Transformer();
+	explicit Intra16LumaTransformer(const BlockData<16, 16, int32_t>& block_data);
+	~Intra16LumaTransformer();
 
 	void Transform();
 

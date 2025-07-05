@@ -12,24 +12,24 @@ MBNeighbors::MBNeighbors(std::weak_ptr<Macroblock> macroblock, uint32_t mb_addr,
 	Init(encoder_context);
 }
 
-void MBNeighbors::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element)
+void MBNeighbors::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element, PlaneType plane_type)
 {
 	if (m_a_available)
 	{
 		auto mb = m_macroblock.lock();
-		left_data = mb->GetMacroblock(m_addr_a)->GetRightData();
+		left_data = mb->GetMacroblock(m_addr_a)->GetRightData(plane_type);
 	}
 
 	if (m_b_available)
 	{
 		auto mb = m_macroblock.lock();
-		up_data = mb->GetMacroblock(m_addr_b)->GetDownData();
+		up_data = mb->GetMacroblock(m_addr_b)->GetDownData(plane_type);
 	}
 
 	if (m_d_available)
 	{
 		auto mb = m_macroblock.lock();
-		left_up_element = mb->GetMacroblock(m_addr_d)->GetDownData().back();
+		left_up_element = mb->GetMacroblock(m_addr_d)->GetDownData(plane_type).back();
 	}
 }
 

@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "global_defines.h"
+#include "common_types.h"
 
 __codec_begin
 
@@ -16,7 +16,7 @@ struct MBNeighbors
 public:
 	MBNeighbors(std::weak_ptr<Macroblock> macroblock, uint32_t mb_addr, std::shared_ptr<EncoderContext> encoder_context);
 
-	void ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element);
+	void ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element, PlaneType plane_type);
 
 private:
 	void Init(std::shared_ptr<EncoderContext> encoder_context);

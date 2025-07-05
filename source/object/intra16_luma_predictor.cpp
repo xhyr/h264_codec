@@ -1,6 +1,4 @@
-#include "intra16_predictor.h"
-
-#include <numeric>
+#include "intra16_luma_predictor.h"
 
 #include "macroblock.h"
 #include "encoder_context.h"
@@ -47,7 +45,7 @@ void Intra16Predictor::ObtainLeftAndUpInfo()
 {
 	auto mb = m_mb.lock();
 
-	mb->ObtainLeftAndUpEdge(m_left_data, m_up_data, m_left_up_element);
+	mb->ObtainLeftAndUpEdge(m_left_data, m_up_data, m_left_up_element, PlaneType::Luma);
 	m_left_available = !m_left_data.empty();
 	m_up_available = !m_up_data.empty();
 }
@@ -138,7 +136,7 @@ void Intra16Predictor::CalculatePlaneMode()
 void Intra16Predictor::DecideBySATD()
 {
 	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetOriginalBlockData();
+	auto origin_block_data = mb->GetOriginalLumaBlockData();
 
 	int min_satd = -1;
 	Intra16PredictionType best_prediction_type = Intra16PredictionType::DC;
@@ -168,7 +166,7 @@ void Intra16Predictor::DecideBySATD()
 void Intra16Predictor::DecideBySAD()
 {
 	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetOriginalBlockData();
+	auto origin_block_data = mb->GetOriginalLumaBlockData();
 
 	int min_sad = -1;
 	Intra16PredictionType best_prediction_type = Intra16PredictionType::DC;

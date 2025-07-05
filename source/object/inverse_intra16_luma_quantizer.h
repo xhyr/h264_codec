@@ -6,11 +6,11 @@
 
 __codec_begin
 
-class InverseIntra16Quantizer
+class InverseIntra16LumaQuantizer
 {
 public:
-	InverseIntra16Quantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
-	~InverseIntra16Quantizer();
+	InverseIntra16LumaQuantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
+	~InverseIntra16LumaQuantizer();
 
 	void InverseQuantize();
 

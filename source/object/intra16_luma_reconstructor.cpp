@@ -1,4 +1,4 @@
-#include "intra16_reconstructor.h"
+#include "intra16_luma_reconstructor.h"
 
 #include "math_util.h"
 #include "quantize_constants.h"
@@ -6,16 +6,16 @@
 
 __codec_begin
 
-Intra16Reconstructor::Intra16Reconstructor(const std::vector<BlockData<4, 4, int32_t>>& residual_blocks, const BlockData<16, 16>& predicted_data) :
+Intra16LumaReconstructor::Intra16LumaReconstructor(const std::vector<BlockData<4, 4, int32_t>>& residual_blocks, const BlockData<16, 16>& predicted_data) :
 	m_residual_blocks(residual_blocks), m_predicted_data(predicted_data)
 {
 }
 
-Intra16Reconstructor::~Intra16Reconstructor()
+Intra16LumaReconstructor::~Intra16LumaReconstructor()
 {
 }
 
-void Intra16Reconstructor::Reconstruct()
+void Intra16LumaReconstructor::Reconstruct()
 {
 	for (uint32_t y = 0; y < 16; ++y)
 	{
@@ -31,7 +31,7 @@ void Intra16Reconstructor::Reconstruct()
 	}
 }
 
-BlockData<16, 16> Intra16Reconstructor::GetBlockData() const
+BlockData<16, 16> Intra16LumaReconstructor::GetBlockData() const
 {
 	return m_block_data;
 }

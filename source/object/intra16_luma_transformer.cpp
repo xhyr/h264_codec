@@ -1,4 +1,4 @@
-#include "intra16_transformer.h"
+#include "intra16_luma_transformer.h"
 
 #include <algorithm>
 
@@ -6,32 +6,32 @@
 
 __codec_begin
 
-Intra16Transformer::Intra16Transformer(const BlockData<16, 16, int32_t>& block_data) : m_block_data(block_data)
+Intra16LumaTransformer::Intra16LumaTransformer(const BlockData<16, 16, int32_t>& block_data) : m_block_data(block_data)
 {
 }
 
-Intra16Transformer::~Intra16Transformer()
+Intra16LumaTransformer::~Intra16LumaTransformer()
 {
 }
 
-void Intra16Transformer::Transform()
+void Intra16LumaTransformer::Transform()
 {
 	PickBlocks();
 	TransformAll();
 	TransformDC();
 }
 
-std::vector<BlockData<4, 4, int32_t>> Intra16Transformer::GetBlocks() const
+std::vector<BlockData<4, 4, int32_t>> Intra16LumaTransformer::GetBlocks() const
 {
 	return m_blocks;
 }
 
-BlockData<4, 4, int32_t> Intra16Transformer::GetDCBlock() const
+BlockData<4, 4, int32_t> Intra16LumaTransformer::GetDCBlock() const
 {
 	return m_dc_block;
 }
 
-void Intra16Transformer::PickBlocks()
+void Intra16LumaTransformer::PickBlocks()
 {
 	m_blocks.reserve(16);
 	for (uint32_t y_in_block = 0; y_in_block < 4; ++y_in_block)
@@ -39,12 +39,12 @@ void Intra16Transformer::PickBlocks()
 			m_blocks.emplace_back(m_block_data.GetBlock4x4(x_in_block, y_in_block));
 }
 
-void Intra16Transformer::TransformAll()
+void Intra16LumaTransformer::TransformAll()
 {
 	std::transform(m_blocks.begin(), m_blocks.end(), m_blocks.begin(), &TransformUtil::DCT);	
 }
 
-void Intra16Transformer::TransformDC()
+void Intra16LumaTransformer::TransformDC()
 {
 	for (uint32_t y = 0; y < 4; ++y)
 		for (uint32_t x = 0; x < 4; ++x)

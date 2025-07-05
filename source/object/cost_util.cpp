@@ -1,6 +1,7 @@
 #include "cost_util.h"
 
 #include "transform_util.h"
+#include "math_util.h"
 
 __codec_begin
 
@@ -25,6 +26,22 @@ int CostUtil::CalculateSATD(const BlockData<16, 16, int32_t>& block_data)
 	dc_block_data = TransformUtil::Hadamard(dc_block_data, 1);
 	satd += dc_block_data.GetAbstractSum();
 	satd /= 2;
+	return satd;
+}
+
+int CostUtil::CalculateSATD(const BlockData<8, 8, int32_t>& block_data)
+{
+	int satd = 0;
+	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
+	{
+		for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)
+		{
+			auto block_data_4x4 = block_data.GetBlock4x4(x_in_block, y_in_block);
+			block_data_4x4 = TransformUtil::Hadamard(block_data_4x4, 1);
+			auto block_satd = block_data_4x4.GetAbstractSum() >> 1;
+			satd += block_satd;
+		}
+	}
 	return satd;
 }
 

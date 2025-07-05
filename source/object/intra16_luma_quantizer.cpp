@@ -1,4 +1,4 @@
-#include "intra16_quantizer.h"
+#include "intra16_luma_quantizer.h"
 
 #include "quantize_util.h"
 
