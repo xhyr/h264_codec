@@ -6,11 +6,11 @@
 
 __codec_begin
 
-class Intra16Quantizer
+class Intra16LumaQuantizer
 {
 public:
-	Intra16Quantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
-	~Intra16Quantizer();
+	Intra16LumaQuantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
+	~Intra16LumaQuantizer();
 
 	void Quantize();
 

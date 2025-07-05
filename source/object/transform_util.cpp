@@ -47,9 +47,41 @@ BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>&
 	return output_block;
 }
 
+BlockData<2, 2, int32_t> TransformUtil::Hadamard(const BlockData<2, 2, int32_t>& block_data)
+{
+	BlockData<2, 2, int32_t> intermediate_block;
+	//right matrix mutiple, horizontal
+	for (uint32_t y = 0; y < 2; ++y)
+	{
+		auto p0 = block_data.GetElement(0, y);
+		auto p1 = block_data.GetElement(1, y);
+
+		intermediate_block.SetElement(0, y, p0 + p1);
+		intermediate_block.SetElement(1, y, p0 - p1);
+	}
+
+	BlockData<2, 2, int32_t> output_block;
+	//left matrix mutiple, vertical
+	for (uint32_t x = 0; x < 2; ++x)
+	{
+		auto p0 = intermediate_block.GetElement(x, 0);
+		auto p1 = intermediate_block.GetElement(x, 1);
+
+		output_block.SetElement(x, 0, p0 + p1);
+		output_block.SetElement(x, 1, p0 - p1);
+	}
+
+	return output_block;
+}
+
 BlockData<4, 4, int32_t> TransformUtil::InverseHadamard(const BlockData<4, 4, int32_t>& block_data)
 {
 	return Hadamard(block_data, 1);
+}
+
+BlockData<2, 2, int32_t> TransformUtil::InverseHadamard(const BlockData<2, 2, int32_t>& block_data)
+{
+	return Hadamard(block_data);
 }
 
 BlockData<4, 4, int32_t> TransformUtil::DCT(const BlockData<4, 4, int32_t>& block_data)

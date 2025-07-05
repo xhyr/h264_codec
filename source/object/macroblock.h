@@ -14,7 +14,8 @@ __codec_begin
 
 class Slice;
 struct EncoderContext;
-class Intra16Quantizer;
+class Intra16LumaQuantizer;
+class Intra8ChromaQuantizer;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -53,15 +54,19 @@ private:
 
 	void PostEncode();
 
-	BlockData<16, 16, int> IntraLumaPredict();
+	BlockData<16, 16, int32_t> IntraLumaPredict();
 
-	std::shared_ptr<Intra16Quantizer> TransformAndQuantizeIntra16Luma(const BlockData<16, 16, int>& diff_data);
+	std::shared_ptr<Intra16LumaQuantizer> TransformAndQuantizeIntra16Luma(const BlockData<16, 16, int32_t>& diff_data);
 
-	void DoCodeCavlcLuma(const std::shared_ptr<Intra16Quantizer>& quantizer);
+	void DoCodeCavlcLuma(const std::shared_ptr<Intra16LumaQuantizer>& quantizer);
 
-	void InverseTransformAndQuantizeIntra16Luma(const std::shared_ptr<Intra16Quantizer>& quantizer);
+	void InverseTransformAndQuantizeIntra16Luma(const std::shared_ptr<Intra16LumaQuantizer>& quantizer);
 
-	void IntraChromaPredict();
+	std::pair<BlockData<8, 8, int32_t>, BlockData<8, 8, int32_t>> IntraChromaPredict();
+
+	std::shared_ptr<Intra8ChromaQuantizer> TransformAndQuantizeIntra8Chroma(const BlockData<8, 8, int32_t>& diff_data);
+
+	void InverseTransformAndQuantizeIntra8Chroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type);
 
 private:
 	uint32_t m_addr;
@@ -77,6 +82,8 @@ private:
 
 	int m_luma_cost;//prediction cost
 	BlockData<16, 16> m_predicted_luma_data;
+	BlockData<8, 8> m_predicted_cb_data;
+	BlockData<8, 8> m_predicted_cr_data;
 
 	BlockData<16, 16> m_reconstructed_luma_data;
 	BlockData<8, 8> m_reconstructed_cb_data;
