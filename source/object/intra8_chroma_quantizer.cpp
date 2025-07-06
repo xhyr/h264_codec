@@ -4,7 +4,8 @@
 
 __codec_begin
 
-Intra8ChromaQuantizer::Intra8ChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks)
+Intra8ChromaQuantizer::Intra8ChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks) :
+	m_qp(qp), m_dc_block(dc_block), m_ac_blocks(ac_blocks)
 {
 }
 
@@ -27,6 +28,12 @@ BlockData<2, 2, int32_t> Intra8ChromaQuantizer::GetDCBlock() const
 std::vector<BlockData<4, 4, int32_t>> Intra8ChromaQuantizer::GetACBlocks() const
 {
 	return m_ac_blocks;
+}
+
+void Intra8ChromaQuantizer::ResetACToZeros()
+{
+	for (auto& ac_block : m_ac_blocks)
+		ac_block.Reset(0);
 }
 
 __codec_end

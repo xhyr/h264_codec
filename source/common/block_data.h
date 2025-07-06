@@ -42,6 +42,11 @@ public:
 		return m_data[position.y * Width + position.x];
 	}
 
+	Ty GetElement(uint32_t index) const
+	{
+		return m_data[index];
+	}
+
 	void SetElementInRow(uint32_t y, const std::vector<uint8_t>& values)
 	{
 		std::copy(values.begin(), values.end(), std::next(m_data.begin(), y * Width));
@@ -89,6 +94,11 @@ public:
 	int GetAbstractSum() const
 	{
 		return std::reduce(m_data.begin(), m_data.end(), 0, [](int sum, Ty value) {return sum + std::abs(value); });
+	}
+
+	void Reset(Ty value)
+	{
+		std::fill(m_data.begin(), m_data.end(), value);
 	}
 
 private:

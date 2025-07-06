@@ -9,6 +9,7 @@
 #include "position.h"
 #include "block_data.h"
 #include "common_types.h"
+#include "prediction_type.h"
 
 __codec_begin
 
@@ -68,6 +69,8 @@ private:
 
 	void InverseTransformAndQuantizeIntra8Chroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type);
 
+	void DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer);
+
 private:
 	uint32_t m_addr;
 	std::weak_ptr<Slice> m_slice;
@@ -78,7 +81,11 @@ private:
 	std::unique_ptr<MBNeighbors> m_neighbors;
 	uint32_t m_qp;
 	MBType m_type;
-	uint8_t m_cbp;
+	uint8_t m_luma_cbp{ 0 };
+	uint8_t m_chroma_cbp{ 0 };
+	uint8_t m_cbp{ 0 };
+
+	Intra16LumaPredictionType m_intra16_luma_prediction_type;
 
 	int m_luma_cost;//prediction cost
 	BlockData<16, 16> m_predicted_luma_data;

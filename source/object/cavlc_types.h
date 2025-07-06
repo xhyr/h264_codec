@@ -11,6 +11,8 @@ struct LevelAndRuns
 {
 	std::vector<int32_t> levels;
 	std::vector<uint8_t> runs;
+
+	void Clear();
 };
 
 __codec_end

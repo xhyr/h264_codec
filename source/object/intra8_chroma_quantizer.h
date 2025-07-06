@@ -18,6 +18,8 @@ public:
 
 	std::vector<BlockData<4, 4, int32_t>> GetACBlocks() const;
 
+	void ResetACToZeros();
+
 private:
 	int m_qp;
 	BlockData<2, 2, int32_t> m_dc_block;
