@@ -13,6 +13,14 @@ struct LevelAndRuns
 	std::vector<uint8_t> runs;
 
 	void Clear();
+
+	int GetNonZeroNum() const;
+
+	int GetTrailingOnes() const;
+
+	int GetTotalZeros() const;
+
+
 };
 
 __codec_end
