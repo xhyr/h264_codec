@@ -13,12 +13,16 @@ class BytesData;
 class CavlcNonCdcCoder
 {
 public:
-	CavlcNonCdcCoder();
+	explicit CavlcNonCdcCoder(std::shared_ptr<BytesData> bytes_data);
 	~CavlcNonCdcCoder();
 
-	void Code(const LevelAndRuns& input);
+	void CodeDC(const LevelAndRuns& input);
+
+	void CodeACs(const std::vector<LevelAndRuns>& inputs);
 
 private:
+	void DoCode(const LevelAndRuns& input, uint8_t max_coeff_num);
+
 	void ObtainVlcTableIndex();
 
 	void WriteCoeffNumAndTrailingOnes();
@@ -39,6 +43,7 @@ private:
 	std::shared_ptr<BytesData> m_bytes_data;
 
 	uint8_t m_coeff_num;
+	uint8_t m_max_coeff_num;
 	uint8_t m_trailing_ones;
 	uint8_t m_total_zeros;
 	uint8_t m_vlc_table_index;

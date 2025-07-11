@@ -19,6 +19,7 @@ struct CommonConstantValues
 	constexpr static uint8_t s_min_color_value{ 0 };
 	constexpr static uint8_t s_max_color_value{ 255 };
 	constexpr static uint8_t s_default_color_value{ 128 };
+
 };
 
 __codec_end

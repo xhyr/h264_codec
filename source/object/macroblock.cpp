@@ -19,11 +19,12 @@
 #include "cavlc_coder_chroma_8x8.h"
 #include "mb_util.h"
 #include "cavlc_non_cdc_coder.h"
+#include "bytes_data.h"
 
 __codec_begin
 
 Macroblock::Macroblock(uint32_t mb_addr, std::weak_ptr<Slice> slice, std::shared_ptr<EncoderContext> encoder_context):
-	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context)
+	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context), m_bytes_data(std::make_shared<BytesData>())
 {
 	Init();
 }
@@ -260,8 +261,15 @@ void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>&
 
 void Macroblock::Convert2Binary()
 {
-	CavlcNonCdcCoder coder;
-	coder.Code(m_luma_dc_level_and_runs);
+	CavlcNonCdcCoder coder(m_bytes_data);
+	
+	//luma dc
+	coder.CodeDC(m_luma_dc_level_and_runs);
+
+	//luma ac
+	if (m_cbp & 15)
+		coder.CodeACs(m_luma_ac_level_and_runs);
+
 }
 
 __codec_end

@@ -7,7 +7,7 @@
 
 __codec_begin
 
-CavlcNonCdcCoder::CavlcNonCdcCoder() : m_bytes_data(std::make_shared<BytesData>())
+CavlcNonCdcCoder::CavlcNonCdcCoder(std::shared_ptr<BytesData> bytes_data) : m_bytes_data(bytes_data)
 {
 }
 
@@ -15,8 +15,20 @@ CavlcNonCdcCoder::~CavlcNonCdcCoder()
 {
 }
 
-void CavlcNonCdcCoder::Code(const LevelAndRuns& input)
+void CavlcNonCdcCoder::CodeDC(const LevelAndRuns& input)
 {
+	DoCode(input, 16);
+}
+
+void CavlcNonCdcCoder::CodeACs(const std::vector<LevelAndRuns>& inputs)
+{
+	for (uint32_t index = 0; index < inputs.size(); ++index)
+		DoCode(inputs[CavlcConstantValues::s_scan_block_orders[index]], 15);
+}
+
+void CavlcNonCdcCoder::DoCode(const LevelAndRuns& input, uint8_t max_coeff_num)
+{
+	m_max_coeff_num = max_coeff_num;
 	m_coeff_num = input.GetNonZeroNum();
 	m_trailing_ones = input.GetTrailingOnes();
 	m_total_zeros = input.GetTotalZeros();
@@ -102,7 +114,7 @@ void CavlcNonCdcCoder::WriteLevels()
 
 void CavlcNonCdcCoder::WriteTotalZeros()
 {
-	if (m_coeff_num == CavlcConstantValues::s_max_coeff_num)
+	if (m_coeff_num == m_max_coeff_num)
 		return;
 
 	uint8_t len = CavlcConstantValues::s_total_zeros_len_table[m_coeff_num - 1][m_total_zeros];
