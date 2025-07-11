@@ -10,6 +10,7 @@
 #include "block_data.h"
 #include "common_types.h"
 #include "prediction_type.h"
+#include "cavlc_types.h"
 
 __codec_begin
 
@@ -17,6 +18,7 @@ class Slice;
 struct EncoderContext;
 class Intra16LumaQuantizer;
 class Intra8ChromaQuantizer;
+class BytesData;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -25,6 +27,8 @@ public:
 	~Macroblock();
 
 	bool Encode();
+
+	std::shared_ptr<BytesData> GetBytesData() const;
 
 	void ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element, PlaneType plane_type);
 
@@ -71,6 +75,8 @@ private:
 
 	void DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer);
 
+	void Convert2Binary();
+
 private:
 	uint32_t m_addr;
 	std::weak_ptr<Slice> m_slice;
@@ -84,6 +90,7 @@ private:
 	uint8_t m_luma_cbp{ 0 };
 	uint8_t m_chroma_cbp{ 0 };
 	uint8_t m_cbp{ 0 };
+	uint8_t m_intra16_offset;
 
 	Intra16LumaPredictionType m_intra16_luma_prediction_type;
 
@@ -99,6 +106,11 @@ private:
 	BlockData<16, 16> m_luma_data;
 	BlockData<8, 8> m_cb_data;
 	BlockData<8, 8> m_cr_data;
+
+	LevelAndRuns m_luma_dc_level_and_runs;
+	std::vector<LevelAndRuns> m_luma_ac_level_and_runs;
+
+	std::shared_ptr<BytesData> m_bytes_data;
 };
 
 __codec_end

@@ -12,6 +12,10 @@ public:
 
 	uint8_t GetCodedBlockPattern() const;
 
+	LevelAndRuns GetDCLevelAndRuns() const;
+
+	std::vector<LevelAndRuns> GetACLevelAndRuns() const;
+
 private:
 	void CodeDCBlock(const BlockData<4, 4, int32_t>& dc_block);
 

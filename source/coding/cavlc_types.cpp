@@ -20,7 +20,7 @@ int LevelAndRuns::GetTrailingOnes() const
 	int cnt = 0;
 	for (auto iter = levels.rbegin(); iter != levels.rend() && cnt < 3; ++iter)
 	{
-		if (*iter == 1)
+		if (*iter == 1 || *iter == -1)
 			++cnt;
 		else break;
 	}

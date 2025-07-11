@@ -18,6 +18,16 @@ uint8_t CavlcCoderLuma16x16::GetCodedBlockPattern() const
 	return m_coded_block_pattern;
 }
 
+LevelAndRuns CavlcCoderLuma16x16::GetDCLevelAndRuns() const
+{
+	return m_dc_level_runs;
+}
+
+std::vector<LevelAndRuns> CavlcCoderLuma16x16::GetACLevelAndRuns() const
+{
+	return m_ac_level_runs;
+}
+
 void CavlcCoderLuma16x16::CodeDCBlock(const BlockData<4, 4, int32_t>& dc_block)
 {
 	int run = -1;

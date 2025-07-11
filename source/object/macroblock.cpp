@@ -18,6 +18,7 @@
 #include "intra8_chroma_reconstructor.h"
 #include "cavlc_coder_chroma_8x8.h"
 #include "mb_util.h"
+#include "cavlc_non_cdc_coder.h"
 
 __codec_begin
 
@@ -37,6 +38,11 @@ bool Macroblock::Encode()
 	DoEncode();
 	PostEncode();
 	return true;
+}
+
+std::shared_ptr<BytesData> Macroblock::GetBytesData() const
+{
+	return m_bytes_data;
 }
 
 void Macroblock::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element, PlaneType plane_type)
@@ -121,8 +127,8 @@ void Macroblock::ObtainOriginalData()
 
 void Macroblock::PreEncode()
 {
+	m_type = MBType::I16;
 	m_neighbors = std::make_unique<MBNeighbors>(shared_from_this(), m_addr, m_encoder_context);
-
 	m_qp = 28;
 }
 
@@ -151,9 +157,10 @@ void Macroblock::DoEncode()
 
 void Macroblock::PostEncode()
 {
-	auto intra16_offset = MBUtil::CalculateIntra16Offset(m_cbp, m_intra16_luma_prediction_type);
+	if(m_type == MBType::I16)
+		m_intra16_offset = MBUtil::CalculateIntra16Offset(m_cbp, m_intra16_luma_prediction_type);
 
-	
+	Convert2Binary();
 }
 
 BlockData<16, 16, int32_t> Macroblock::IntraLumaPredict()
@@ -172,6 +179,7 @@ std::shared_ptr<Intra16LumaQuantizer> Macroblock::TransformAndQuantizeIntra16Lum
 
 	auto quantizer = std::make_shared<Intra16LumaQuantizer>(m_qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	quantizer->Quantize();
+
 	return quantizer;
 }
 
@@ -180,6 +188,8 @@ void Macroblock::DoCodeCavlcLuma(const std::shared_ptr<Intra16LumaQuantizer>& qu
 	CavlcCoderLuma16x16 coder;
 	coder.Code(quantizer->GetDCBlock(), quantizer->GetACBlocks());
 	m_luma_cbp = coder.GetCodedBlockPattern();
+	m_luma_dc_level_and_runs = coder.GetDCLevelAndRuns();
+	m_luma_ac_level_and_runs = coder.GetACLevelAndRuns();
 }
 
 void Macroblock::InverseTransformAndQuantizeIntra16Luma(const std::shared_ptr<Intra16LumaQuantizer>& quantizer)
@@ -246,6 +256,12 @@ void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>&
 
 	if (coder.HasResetCofficients())
 		quantizer->ResetACToZeros();
+}
+
+void Macroblock::Convert2Binary()
+{
+	CavlcNonCdcCoder coder;
+	coder.Code(m_luma_dc_level_and_runs);
 }
 
 __codec_end
