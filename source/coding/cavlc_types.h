@@ -19,8 +19,17 @@ struct LevelAndRuns
 	int GetTrailingOnes() const;
 
 	int GetTotalZeros() const;
+};
 
-
+enum class CavlcDataType
+{
+	NormalLuma = 0,
+	LumaDC,
+	LumaAC,
+	CbDC,
+	CrDC,
+	CbAC,
+	CrAC
 };
 
 __codec_end

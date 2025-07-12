@@ -7,6 +7,7 @@
 #include "yuv_frame.h"
 #include "png_predictor.h"
 #include "log.h"
+#include "cavlc_context.h"
 
 __codec_begin
 
@@ -18,6 +19,8 @@ void Slice::Construct(SliceType slice_type, std::shared_ptr<SPS> sps, std::share
 
 bool Slice::Encode(std::shared_ptr<EncoderContext> encoder_context)
 {
+	m_cavlc_context = std::make_shared<CavlcContext>(encoder_context->width_in_mb, encoder_context->height_in_mb);
+
 	for (uint32_t mb_addr = 0; mb_addr < encoder_context->mb_num; ++mb_addr)
 	{
 		auto macroblock = std::make_shared<Macroblock>(mb_addr, weak_from_this(), encoder_context);
@@ -48,6 +51,11 @@ std::shared_ptr<Macroblock> Slice::GetMacroblock(uint32_t mb_addr)
 int Slice::GetCost() const
 {
 	return m_cost;
+}
+
+std::shared_ptr<CavlcContext> Slice::GetCavlcContext()
+{
+    return m_cavlc_context;
 }
 
 __codec_end

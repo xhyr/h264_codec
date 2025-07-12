@@ -3,27 +3,28 @@
 #include <memory>
 #include <vector>
 
-#include "global_defines.h"
+#include "cavlc_types.h"
 
 __codec_begin
 
-struct LevelAndRuns;
 class BytesData;
+class CavlcContext;
+struct LevelAndRuns;
 
 class CavlcNonCdcCoder
 {
 public:
-	explicit CavlcNonCdcCoder(std::shared_ptr<BytesData> bytes_data);
+	CavlcNonCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data);
 	~CavlcNonCdcCoder();
 
-	void CodeDC(const LevelAndRuns& input);
+	void CodeLumaDC(const LevelAndRuns& input);
 
-	void CodeACs(const std::vector<LevelAndRuns>& inputs);
+	void CodeLumaACs(const std::vector<LevelAndRuns>& inputs);
 
 private:
-	void DoCode(const LevelAndRuns& input, uint8_t max_coeff_num);
+	void DoCode(const LevelAndRuns& input, CavlcDataType data_type);
 
-	void ObtainVlcTableIndex();
+	void ObtainVlcTableIndex(CavlcDataType data_type);
 
 	void WriteCoeffNumAndTrailingOnes();
 
@@ -40,8 +41,11 @@ private:
 	void WriteLevelN(int level, uint32_t suffix_length);
 
 private:
+	uint32_t m_mb_addr;
+	std::shared_ptr<CavlcContext> m_cavlc_context;
 	std::shared_ptr<BytesData> m_bytes_data;
 
+	uint8_t m_block_index;
 	uint8_t m_coeff_num;
 	uint8_t m_max_coeff_num;
 	uint8_t m_trailing_ones;

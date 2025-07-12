@@ -4,10 +4,15 @@
 #include "cavlc_types.h"
 #include "cavlc_constant_values.h"
 #include "coding_util.h"
+#include "cavlc_util.h"
+#include "cavlc_context.h"
 
 __codec_begin
 
-CavlcNonCdcCoder::CavlcNonCdcCoder(std::shared_ptr<BytesData> bytes_data) : m_bytes_data(bytes_data)
+CavlcNonCdcCoder::CavlcNonCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data) : 
+	m_mb_addr(mb_addr),
+	m_cavlc_context(cavlc_context),
+	m_bytes_data(bytes_data)
 {
 }
 
@@ -15,27 +20,31 @@ CavlcNonCdcCoder::~CavlcNonCdcCoder()
 {
 }
 
-void CavlcNonCdcCoder::CodeDC(const LevelAndRuns& input)
+void CavlcNonCdcCoder::CodeLumaDC(const LevelAndRuns& input)
 {
-	DoCode(input, 16);
+	m_block_index = 0;
+	DoCode(input, CavlcDataType::LumaDC);
 }
 
-void CavlcNonCdcCoder::CodeACs(const std::vector<LevelAndRuns>& inputs)
+void CavlcNonCdcCoder::CodeLumaACs(const std::vector<LevelAndRuns>& inputs)
 {
 	for (uint32_t index = 0; index < inputs.size(); ++index)
-		DoCode(inputs[CavlcConstantValues::s_scan_block_orders[index]], 15);
+	{
+		m_block_index = CavlcConstantValues::s_scan_block_orders[index];
+		DoCode(inputs[m_block_index], CavlcDataType::LumaAC);
+	}
 }
 
-void CavlcNonCdcCoder::DoCode(const LevelAndRuns& input, uint8_t max_coeff_num)
+void CavlcNonCdcCoder::DoCode(const LevelAndRuns& input, CavlcDataType data_type)
 {
-	m_max_coeff_num = max_coeff_num;
+	m_max_coeff_num = CavlcUtil::GetMaxCoeffNum(data_type);
 	m_coeff_num = input.GetNonZeroNum();
 	m_trailing_ones = input.GetTrailingOnes();
 	m_total_zeros = input.GetTotalZeros();
 	m_levels = input.levels;
 	m_runs = input.runs;
 
-	ObtainVlcTableIndex();
+	ObtainVlcTableIndex(data_type);
 
 	WriteCoeffNumAndTrailingOnes();
 
@@ -49,9 +58,18 @@ void CavlcNonCdcCoder::DoCode(const LevelAndRuns& input, uint8_t max_coeff_num)
 	WriteRuns();
 }
 
-void CavlcNonCdcCoder::ObtainVlcTableIndex()
+void CavlcNonCdcCoder::ObtainVlcTableIndex(CavlcDataType data_type)
 {
-	m_vlc_table_index = 0;
+	uint8_t nc = m_cavlc_context->GetNC(data_type, m_mb_addr, m_block_index);
+	if (nc < 2)
+		m_vlc_table_index = 0;
+	else if (nc < 4)
+		m_vlc_table_index = 1;
+	else if (nc < 8)
+		m_vlc_table_index = 2;
+	else m_vlc_table_index = 3;
+
+	m_cavlc_context->SetCoeffNum(data_type, m_mb_addr, m_block_index, m_coeff_num);
 }
 
 void CavlcNonCdcCoder::WriteCoeffNumAndTrailingOnes()

@@ -13,6 +13,7 @@ class PPS;
 struct EncoderContext;
 class OStream;
 class Macroblock;
+class CavlcContext;
 
 class Slice : public std::enable_shared_from_this<Slice>
 {
@@ -27,11 +28,14 @@ public:
 
 	int GetCost() const;
 
+	std::shared_ptr<CavlcContext> GetCavlcContext();
+
 private:
 	SliceType m_type;
 	SliceHeader m_header;
 	std::vector<std::shared_ptr<Macroblock>> m_macroblocks;
 	int m_cost{ 0 };
+	std::shared_ptr<CavlcContext> m_cavlc_context;
 };
 
 __codec_end

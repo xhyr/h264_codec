@@ -261,14 +261,16 @@ void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>&
 
 void Macroblock::Convert2Binary()
 {
-	CavlcNonCdcCoder coder(m_bytes_data);
-	
+	auto slice = m_slice.lock();
+
+	CavlcNonCdcCoder coder(m_addr, slice->GetCavlcContext(), m_bytes_data);
+		
 	//luma dc
-	coder.CodeDC(m_luma_dc_level_and_runs);
+	coder.CodeLumaDC(m_luma_dc_level_and_runs);
 
 	//luma ac
 	if (m_cbp & 15)
-		coder.CodeACs(m_luma_ac_level_and_runs);
+		coder.CodeLumaACs(m_luma_ac_level_and_runs);
 
 }
 
