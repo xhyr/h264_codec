@@ -73,9 +73,11 @@ private:
 
 	void InverseTransformAndQuantizeIntra8Chroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type);
 
-	void DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer);
+	void DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type);
 
 	void Convert2Binary();
+
+	void DoConvertCoeffs();
 
 private:
 	uint32_t m_addr;
@@ -93,6 +95,7 @@ private:
 	uint8_t m_intra16_offset;
 
 	Intra16LumaPredictionType m_intra16_luma_prediction_type;
+	IntraChromaPredictionType m_intra_chroma_prediction_type;
 
 	int m_luma_cost;//prediction cost
 	BlockData<16, 16> m_predicted_luma_data;
@@ -107,8 +110,7 @@ private:
 	BlockData<8, 8> m_cb_data;
 	BlockData<8, 8> m_cr_data;
 
-	LevelAndRuns m_luma_dc_level_and_runs;
-	std::vector<LevelAndRuns> m_luma_ac_level_and_runs;
+	CavlcDataSource m_cavlc_data_source;
 
 	std::shared_ptr<BytesData> m_bytes_data;
 };

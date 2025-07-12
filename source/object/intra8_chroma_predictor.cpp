@@ -18,7 +18,7 @@ Intra8ChromaPredictor::~Intra8ChromaPredictor()
 {
 }
 
-Intra8ChromaPredictionType Intra8ChromaPredictor::Decide()
+IntraChromaPredictionType Intra8ChromaPredictor::Decide()
 {
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
 	for (auto plane_type : plane_types)
@@ -64,7 +64,7 @@ void Intra8ChromaPredictor::CalculateAllPredictionData(PlaneType plane_type)
 
 void Intra8ChromaPredictor::CalculateDCMode(PlaneType plane_type)
 {
-	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][Intra8ChromaPredictionType::DC];
+	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][IntraChromaPredictionType::DC];
 	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
 	{
 		for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)
@@ -156,7 +156,7 @@ void Intra8ChromaPredictor::CalculateHorizontalMode(PlaneType plane_type)
 	if (!m_left_available)
 		return;
 
-	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][Intra8ChromaPredictionType::Horizontal];
+	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][IntraChromaPredictionType::Horizontal];
 	for (uint32_t y = 0; y < 8; ++y)
 		predicted_data.SetElementInRow(y, std::vector<uint8_t>(8, m_left_data[y]));
 }
@@ -166,7 +166,7 @@ void Intra8ChromaPredictor::CalculateVerticalMode(PlaneType plane_type)
 	if (!m_up_available)
 		return;
 
-	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][Intra8ChromaPredictionType::Vertical];
+	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][IntraChromaPredictionType::Vertical];
 	for (uint32_t x = 0; x < 8; ++x)
 		predicted_data.SetElementInColumn(x, std::vector<uint8_t>(8, m_up_data[x]));
 }
@@ -176,7 +176,7 @@ void Intra8ChromaPredictor::CalculatePlaneMode(PlaneType plane_type)
 	if (!m_left_available || !m_up_available)
 		return;
 
-	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][Intra8ChromaPredictionType::Plane];
+	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][IntraChromaPredictionType::Plane];
 	int x_cf = 0;
 	int y_cf = 0;
 
@@ -212,8 +212,8 @@ void Intra8ChromaPredictor::DecideBySATD()
 		origial_block_data_map[plane_type] = mb->GetOriginalChromaBlockData(plane_type);
 
 	int min_satd = -1;
-	Intra8ChromaPredictionType best_prediction_type = Intra8ChromaPredictionType::DC;
-	std::vector<Intra8ChromaPredictionType> prediction_types{ Intra8ChromaPredictionType::DC, Intra8ChromaPredictionType::Horizontal, Intra8ChromaPredictionType::Vertical, Intra8ChromaPredictionType::Plane };
+	IntraChromaPredictionType best_prediction_type = IntraChromaPredictionType::DC;
+	std::vector<IntraChromaPredictionType> prediction_types{ IntraChromaPredictionType::DC, IntraChromaPredictionType::Horizontal, IntraChromaPredictionType::Vertical, IntraChromaPredictionType::Plane };
 	for (auto prediction_type : prediction_types)
 	{
 		if (m_predicted_data_map[0].find(prediction_type) == m_predicted_data_map[0].end())

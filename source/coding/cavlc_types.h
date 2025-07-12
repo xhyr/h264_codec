@@ -7,6 +7,17 @@
 
 __codec_begin
 
+enum class CavlcDataType
+{
+	NormalLuma = 0,
+	LumaDC,
+	LumaAC,
+	CbDC,
+	CrDC,
+	CbAC,
+	CrAC
+};
+
 struct LevelAndRuns
 {
 	std::vector<int32_t> levels;
@@ -21,15 +32,16 @@ struct LevelAndRuns
 	int GetTotalZeros() const;
 };
 
-enum class CavlcDataType
+struct CavlcDataSource
 {
-	NormalLuma = 0,
-	LumaDC,
-	LumaAC,
-	CbDC,
-	CrDC,
-	CbAC,
-	CrAC
+	LevelAndRuns luma_dc;
+	std::vector<LevelAndRuns> luma_acs;
+
+	LevelAndRuns cb_dc;
+	std::vector<LevelAndRuns> cb_acs;
+
+	LevelAndRuns cr_dc;
+	std::vector<LevelAndRuns> cr_acs;
 };
 
 __codec_end

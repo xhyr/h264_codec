@@ -18,6 +18,8 @@ class CavlcContext;
 class Slice : public std::enable_shared_from_this<Slice>
 {
 public:
+	SliceType GetType() const;
+
 	void Construct(SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps);
 
 	bool Encode(std::shared_ptr<EncoderContext> encoder_context);

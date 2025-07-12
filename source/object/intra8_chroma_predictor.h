@@ -21,7 +21,7 @@ public:
 	Intra8ChromaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
 	~Intra8ChromaPredictor();
 
-	Intra8ChromaPredictionType Decide();
+	IntraChromaPredictionType Decide();
 
 	int GetCost() const;
 
@@ -53,9 +53,9 @@ private:
 	std::vector<uint8_t> m_left_data;
 	std::vector<uint8_t> m_up_data;
 	uint8_t m_left_up_element;
-	std::unordered_map<Intra8ChromaPredictionType, BlockData<8, 8>> m_predicted_data_map[2];
+	std::unordered_map<IntraChromaPredictionType, BlockData<8, 8>> m_predicted_data_map[2];
 
-	Intra8ChromaPredictionType m_prediction_type;
+	IntraChromaPredictionType m_prediction_type;
 	int m_cost{ -1 };
 	BlockData<8, 8> m_predicted_data[2];
 	BlockData<8, 8, int32_t> m_diff_data[2];

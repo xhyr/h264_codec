@@ -18,8 +18,8 @@
 #include "intra8_chroma_reconstructor.h"
 #include "cavlc_coder_chroma_8x8.h"
 #include "mb_util.h"
-#include "cavlc_non_cdc_coder.h"
 #include "bytes_data.h"
+#include "mb_binaryer.h"
 
 __codec_begin
 
@@ -148,7 +148,7 @@ void Macroblock::DoEncode()
 	{
 		auto diff_data = plane_type == PlaneType::Cb ? cb_diff_data : cr_diff_data;
 		auto quantizer = TransformAndQuantizeIntra8Chroma(diff_data);
-		DoCodeCavlcChroma(quantizer);
+		DoCodeCavlcChroma(quantizer, plane_type);
 		InverseTransformAndQuantizeIntra8Chroma(quantizer, plane_type);
 	}
 
@@ -189,8 +189,8 @@ void Macroblock::DoCodeCavlcLuma(const std::shared_ptr<Intra16LumaQuantizer>& qu
 	CavlcCoderLuma16x16 coder;
 	coder.Code(quantizer->GetDCBlock(), quantizer->GetACBlocks());
 	m_luma_cbp = coder.GetCodedBlockPattern();
-	m_luma_dc_level_and_runs = coder.GetDCLevelAndRuns();
-	m_luma_ac_level_and_runs = coder.GetACLevelAndRuns();
+	m_cavlc_data_source.luma_dc = coder.GetDCLevelAndRuns();
+	m_cavlc_data_source.luma_acs = coder.GetACLevelAndRuns();
 }
 
 void Macroblock::InverseTransformAndQuantizeIntra16Luma(const std::shared_ptr<Intra16LumaQuantizer>& quantizer)
@@ -214,7 +214,7 @@ void Macroblock::InverseTransformAndQuantizeIntra16Luma(const std::shared_ptr<In
 std::pair<BlockData<8, 8, int32_t>, BlockData<8, 8, int32_t>> Macroblock::IntraChromaPredict()
 {
 	Intra8ChromaPredictor predictor(shared_from_this(), m_encoder_context);
-	predictor.Decide();
+	m_intra_chroma_prediction_type = predictor.Decide();
 	m_predicted_cb_data = predictor.GetPredictedData(PlaneType::Cb);
 	m_predicted_cr_data = predictor.GetPredictedData(PlaneType::Cr);
 	return std::make_pair(predictor.GetDiffData(PlaneType::Cb), predictor.GetDiffData(PlaneType::Cr));
@@ -248,7 +248,7 @@ void Macroblock::InverseTransformAndQuantizeIntra8Chroma(const std::shared_ptr<I
 	reconstructed_data = reconstructor.GetBlockData();
 }
 
-void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer)
+void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type)
 {
 	CavlcCoderChroma8x8 coder;
 	coder.Code(quantizer->GetDCBlock(), quantizer->GetACBlocks());
@@ -257,21 +257,28 @@ void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>&
 
 	if (coder.HasResetCofficients())
 		quantizer->ResetACToZeros();
+
+	if (plane_type == PlaneType::Cb)
+	{
+		m_cavlc_data_source.cb_dc = coder.GetDCLevelAndRuns();
+		m_cavlc_data_source.cb_acs = coder.GetACLevelAndRuns();
+	}
+	else
+	{
+		m_cavlc_data_source.cr_dc = coder.GetDCLevelAndRuns();
+		m_cavlc_data_source.cr_acs = coder.GetACLevelAndRuns();
+	}
 }
 
 void Macroblock::Convert2Binary()
 {
-	auto slice = m_slice.lock();
-
-	CavlcNonCdcCoder coder(m_addr, slice->GetCavlcContext(), m_bytes_data);
-		
-	//luma dc
-	coder.CodeLumaDC(m_luma_dc_level_and_runs);
-
-	//luma ac
-	if (m_cbp & 15)
-		coder.CodeLumaACs(m_luma_ac_level_and_runs);
-
+	MBBinaryer binaryer(m_slice, m_addr, m_bytes_data);
+	binaryer.OutputMBType(m_type, m_intra16_offset);
+	binaryer.OutputChromaPredMode(m_intra_chroma_prediction_type);
+	binaryer.OutputCBP(m_cbp);
+	binaryer.OutputQPDelta(0);
+	binaryer.OutputLumaCoeffs(m_cavlc_data_source);
+	binaryer.OutputChromaCoeffs(m_cavlc_data_source);
 }
 
 __codec_end

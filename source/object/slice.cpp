@@ -11,6 +11,11 @@
 
 __codec_begin
 
+SliceType Slice::GetType() const
+{
+	return m_type;
+}
+
 void Slice::Construct(SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps)
 {
 	m_type = slice_type;

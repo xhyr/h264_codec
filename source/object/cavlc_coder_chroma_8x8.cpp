@@ -29,6 +29,16 @@ bool CavlcCoderChroma8x8::HasResetCofficients() const
 	return m_has_reset_coefficients;
 }
 
+LevelAndRuns CavlcCoderChroma8x8::GetDCLevelAndRuns() const
+{
+    return m_dc_level_runs;
+}
+
+std::vector<LevelAndRuns> CavlcCoderChroma8x8::GetACLevelAndRuns() const
+{
+	return m_ac_level_runs;
+}
+
 void CavlcCoderChroma8x8::CodeDCBlock(const BlockData<2, 2, int32_t>& dc_block)
 {
 	int run = -1;
@@ -40,7 +50,7 @@ void CavlcCoderChroma8x8::CodeDCBlock(const BlockData<2, 2, int32_t>& dc_block)
 		{
 			m_dc_level_runs.levels.push_back(level);
 			m_dc_level_runs.runs.push_back(run);
-			run = 0;
+			run = -1;
 			m_coded_block_pattern = 1;
 		}
 	}

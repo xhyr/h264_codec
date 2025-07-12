@@ -14,6 +14,10 @@ public:
 
 	bool HasResetCofficients() const;
 
+	LevelAndRuns GetDCLevelAndRuns() const;
+
+	std::vector<LevelAndRuns> GetACLevelAndRuns() const;
+
 private:
 	void CodeDCBlock(const BlockData<2, 2, int32_t>& dc_block);
 

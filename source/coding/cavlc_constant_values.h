@@ -69,12 +69,26 @@ struct CavlcConstantValues
 		}
 	};
 
+	constexpr static uint8_t s_cdc_len_table[4][5] = 
+	{
+		{ 2, 6, 6, 6, 6,},
+		{ 0, 1, 6, 7, 8,},
+		{ 0, 0, 3, 7, 8,},
+		{ 0, 0, 0, 6, 7,},
+	};
+
+	constexpr static uint8_t s_cdc_code_table[4][5] = 
+	{
+		{1,7,4,3,2},
+		{0,1,6,3,3},
+		{0,0,1,2,2},
+		{0,0,0,5,0},
+	};
+
 	constexpr static uint32_t s_suffix_length_inc_table[] =
 	{ 0, 3, 6, 12, 24, 48, 32768 };
 
-	constexpr static uint8_t s_max_coeff_num = 16;
-
-	constexpr static uint8_t s_total_zeros_len_table[s_max_coeff_num - 1][16] =
+	constexpr static uint8_t s_no_cdc_total_zeros_len_table[15][16] =
 	{
 		{ 1,3,3,4,4,5,5,6,6,7,7,8,8,9,9,9},
 		{ 3,3,3,3,3,4,4,4,4,5,5,6,6,6,6},
@@ -93,7 +107,7 @@ struct CavlcConstantValues
 		{ 1,1},
 	};
 
-	constexpr static uint8_t s_total_zeros_code_table[s_max_coeff_num - 1][16] =
+	constexpr static uint8_t s_no_cdc_total_zeros_code_table[15][16] =
 	{
 		{1,3,2,3,2,3,2,3,2,3,2,3,2,3,2,1},
 		{7,6,5,4,3,5,4,3,2,3,2,3,2,1,0},
@@ -110,6 +124,20 @@ struct CavlcConstantValues
 		{0,1,1,1},
 		{0,1,1},
 		{0,1},
+	};
+
+	constexpr static uint8_t s_cdc_total_zeros_len_table[3][4] =
+	{
+		{ 1, 2, 3, 3,},
+		{ 1, 2, 2, 0,},
+		{ 1, 1, 0, 0,},
+	};
+
+	constexpr static uint8_t s_cdc_total_zeros_code_table[3][4] =
+	{
+		{ 1, 1, 1, 0,},
+		{ 1, 1, 0, 0,},
+		{ 1, 0, 0, 0,},
 	};
 
 	constexpr static uint8_t s_run_table_no_cdc_size = 7;

@@ -1,4 +1,4 @@
-#include "cavlc_non_cdc_coder.h"
+#include "cavlc_cdc_coder.h"
 
 #include "bytes_data.h"
 #include "cavlc_types.h"
@@ -6,56 +6,35 @@
 #include "coding_util.h"
 #include "cavlc_util.h"
 #include "cavlc_context.h"
+#include "cavlc_cdc_coder.h"
 
 __codec_begin
 
-CavlcNonCdcCoder::CavlcNonCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data) : 
+CavlcCdcCoder::CavlcCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data) : 
 	m_mb_addr(mb_addr),
 	m_cavlc_context(cavlc_context),
 	m_bytes_data(bytes_data)
 {
 }
 
-CavlcNonCdcCoder::~CavlcNonCdcCoder()
+CavlcCdcCoder::~CavlcCdcCoder()
 {
 }
 
-void CavlcNonCdcCoder::CodeLumaDC(const LevelAndRuns& input)
+void CavlcCdcCoder::CodeChromaDC(CavlcDataType data_type, const LevelAndRuns& input)
 {
 	m_block_index = 0;
-	DoCode(input, CavlcDataType::LumaDC);
+	DoCode(input, data_type);
 }
 
-void CavlcNonCdcCoder::CodeLumaACs(const std::vector<LevelAndRuns>& inputs)
+void CavlcCdcCoder::DoCode(const LevelAndRuns& input, CavlcDataType data_type)
 {
-	for (uint32_t index = 0; index < inputs.size(); ++index)
-	{
-		m_block_index = CavlcConstantValues::s_scan_block_orders[index];
-		DoCode(inputs[m_block_index], CavlcDataType::LumaAC);
-	}
-}
-
-void CavlcNonCdcCoder::CodeChromaACs(CavlcDataType data_type, const std::vector<LevelAndRuns>& inputs)
-{
-	for (uint32_t index = 0; index < inputs.size(); ++index)
-	{
-		m_block_index = index;
-		DoCode(inputs[m_block_index], data_type);
-	}
-}
-
-void CavlcNonCdcCoder::DoCode(const LevelAndRuns& input, CavlcDataType data_type)
-{
-	int a = m_bytes_data->GetBitsCount();
-
 	m_max_coeff_num = CavlcUtil::GetMaxCoeffNum(data_type);
 	m_coeff_num = input.GetNonZeroNum();
 	m_trailing_ones = input.GetTrailingOnes();
 	m_total_zeros = input.GetTotalZeros();
 	m_levels = input.levels;
 	m_runs = input.runs;
-
-	ObtainVlcTableIndex(data_type);
 
 	WriteCoeffNumAndTrailingOnes();
 
@@ -67,44 +46,16 @@ void CavlcNonCdcCoder::DoCode(const LevelAndRuns& input, CavlcDataType data_type
 	WriteLevels();
 	WriteTotalZeros();
 	WriteRuns();
-
-	int b = m_bytes_data->GetBitsCount() - a;
 }
 
-void CavlcNonCdcCoder::ObtainVlcTableIndex(CavlcDataType data_type)
+void CavlcCdcCoder::WriteCoeffNumAndTrailingOnes()
 {
-	uint8_t nc = m_cavlc_context->GetNC(data_type, m_mb_addr, m_block_index);
-	if (nc < 2)
-		m_vlc_table_index = 0;
-	else if (nc < 4)
-		m_vlc_table_index = 1;
-	else if (nc < 8)
-		m_vlc_table_index = 2;
-	else m_vlc_table_index = 3;
-
-	m_cavlc_context->SetCoeffNum(data_type, m_mb_addr, m_block_index, m_coeff_num);
+	auto len = CavlcConstantValues::s_cdc_len_table[m_trailing_ones][m_coeff_num];
+	uint32_t code = CavlcConstantValues::s_cdc_code_table[m_trailing_ones][m_coeff_num];
+	CodingUtil::U_V(len, code, m_bytes_data);
 }
 
-void CavlcNonCdcCoder::WriteCoeffNumAndTrailingOnes()
-{
-	if (m_vlc_table_index == 3)
-	{
-		if (m_coeff_num > 0)
-		{
-			CodingUtil::U_V(4, m_coeff_num  - 1, m_bytes_data);
-			CodingUtil::U_V(2, m_trailing_ones, m_bytes_data);
-		}
-		else CodingUtil::U_V(6, 3, m_bytes_data);
-	}
-	else
-	{
-		auto len = CavlcConstantValues::s_non_cdc_len_table[m_vlc_table_index][m_trailing_ones][m_coeff_num];
-		uint32_t code = CavlcConstantValues::s_non_cdc_code_table[m_vlc_table_index][m_trailing_ones][m_coeff_num];
-		CodingUtil::U_V(len, code, m_bytes_data);
-	}
-}
-
-void CavlcNonCdcCoder::WriteTrailingSigns()
+void CavlcCdcCoder::WriteTrailingSigns()
 {
 	if (m_trailing_ones == 0)
 		return;
@@ -113,7 +64,7 @@ void CavlcNonCdcCoder::WriteTrailingSigns()
 		CodingUtil::U_1(m_levels[index] > 0 ? 0 : 1, m_bytes_data);
 }
 
-void CavlcNonCdcCoder::WriteLevels()
+void CavlcCdcCoder::WriteLevels()
 {
 	bool level_two_or_higher = !(m_coeff_num > 3 && m_trailing_ones == 3);
 	int suffix_length = m_coeff_num > 10 && m_trailing_ones < 3 ? 1 : 0;
@@ -143,17 +94,17 @@ void CavlcNonCdcCoder::WriteLevels()
 	}
 }
 
-void CavlcNonCdcCoder::WriteTotalZeros()
+void CavlcCdcCoder::WriteTotalZeros()
 {
 	if (m_coeff_num == m_max_coeff_num)
 		return;
 
-	uint8_t len = CavlcConstantValues::s_no_cdc_total_zeros_len_table[m_coeff_num - 1][m_total_zeros];
-	uint8_t code = CavlcConstantValues::s_no_cdc_total_zeros_code_table[m_coeff_num - 1][m_total_zeros];
+	uint8_t len = CavlcConstantValues::s_cdc_total_zeros_len_table[m_coeff_num - 1][m_total_zeros];
+	uint8_t code = CavlcConstantValues::s_cdc_total_zeros_code_table[m_coeff_num - 1][m_total_zeros];
 	CodingUtil::U_V(len, code, m_bytes_data);
 }
 
-void CavlcNonCdcCoder::WriteRuns()
+void CavlcCdcCoder::WriteRuns()
 {
 	auto left_zeros = m_total_zeros;
 	auto left_coeffs = m_coeff_num;
@@ -174,7 +125,7 @@ void CavlcNonCdcCoder::WriteRuns()
 	}
 }
 
-void CavlcNonCdcCoder::WriteLevel0(int level)
+void CavlcCdcCoder::WriteLevel0(int level)
 {
 	uint32_t sign = level < 0 ? 1 : 0;
 	uint32_t level_abs = abs(level);
@@ -210,7 +161,7 @@ void CavlcNonCdcCoder::WriteLevel0(int level)
 	CodingUtil::U_V(len, value, m_bytes_data);
 }
 
-void CavlcNonCdcCoder::WriteLevelN(int level, uint32_t suffix_length)
+void CavlcCdcCoder::WriteLevelN(int level, uint32_t suffix_length)
 {
 	uint32_t sign = level < 0 ? 1 : 0;
 	uint32_t level_abs = abs(level) - 1;
@@ -250,3 +201,4 @@ void CavlcNonCdcCoder::WriteLevelN(int level, uint32_t suffix_length)
 }
 
 __codec_end
+

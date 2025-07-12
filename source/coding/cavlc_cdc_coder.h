@@ -11,22 +11,16 @@ class BytesData;
 class CavlcContext;
 struct LevelAndRuns;
 
-class CavlcNonCdcCoder
+class CavlcCdcCoder
 {
 public:
-	CavlcNonCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data);
-	~CavlcNonCdcCoder();
+	CavlcCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data);
+	~CavlcCdcCoder();
 
-	void CodeLumaDC(const LevelAndRuns& input);
-
-	void CodeLumaACs(const std::vector<LevelAndRuns>& inputs);
-
-	void CodeChromaACs(CavlcDataType data_type, const std::vector<LevelAndRuns>& inputs);
+	void CodeChromaDC(CavlcDataType data_type, const LevelAndRuns& input);
 
 private:
 	void DoCode(const LevelAndRuns& input, CavlcDataType data_type);
-
-	void ObtainVlcTableIndex(CavlcDataType data_type);
 
 	void WriteCoeffNumAndTrailingOnes();
 
