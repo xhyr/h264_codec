@@ -11,11 +11,11 @@ uint32_t CodingUtil::U_1(uint8_t value, std::shared_ptr<BytesData> bytes_data)
 	return 1;
 }
 
-uint32_t CodingUtil::U_V(uint8_t n, uint8_t value, std::shared_ptr<BytesData> bytes_data)
+uint32_t CodingUtil::U_V(uint8_t n, uint32_t value, std::shared_ptr<BytesData> bytes_data)
 {
 	for (int index = n - 1; index >= 0; --index)
 	{
-		uint8_t mask = 1 << index;
+		uint32_t mask = 1 << index;
 		bytes_data->PushBit((mask & value) ? 1 : 0);
 	}
 	return n;
@@ -67,12 +67,12 @@ void CodingUtil::RBSP2EBSP(std::shared_ptr<BytesData> bytes_data)
 	uint32_t zero_count = 0;
 	while (index < bytes_count)
 	{
-		if (zero_count == CommonConstantValues::s_zero_bytes_short_start_code)
+		auto value = bytes_data->GetByte(index++);
+		if (zero_count == CommonConstantValues::s_zero_bytes_short_start_code && !(value & 0xFC))
 		{
 			new_bytes_data.PushByte(3);
 			zero_count = 0;
 		}
-		auto value = bytes_data->GetByte(index++);
 		new_bytes_data.PushByte(value);
 		zero_count = value == 0 ? (zero_count + 1) : 0;
 	}

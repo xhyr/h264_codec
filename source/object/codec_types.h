@@ -6,6 +6,7 @@ __codec_begin
 
 enum class NaluType
 {
+	Slice = 1,
 	IDR = 5,
 	SPS = 7,
 	PPS = 8

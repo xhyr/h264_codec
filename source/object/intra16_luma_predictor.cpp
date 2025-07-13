@@ -115,7 +115,7 @@ void Intra16Predictor::CalculatePlaneMode()
 	//calculate V
 	int V = 8 * (m_left_data[15] - m_left_up_element);
 	for (uint32_t y = 0; y < 7; ++y)
-		V += (y + 1) * (m_left_data[1 + 8 + y] - m_left_data[1 + 6 - y]);
+		V += (y + 1) * (m_left_data[8 + y] - m_left_data[6 - y]);
 
 	int a = 16 * (m_left_data[15] + m_up_data[15]);
 	int b = MathUtil::RightShift(5 * H, 6);

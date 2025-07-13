@@ -13,7 +13,7 @@ struct CodingUtil
 {
 	static uint32_t U_1(uint8_t value, std::shared_ptr<BytesData> bytes_data);
 
-	static uint32_t U_V(uint8_t n, uint8_t value, std::shared_ptr<BytesData> bytes_data);
+	static uint32_t U_V(uint8_t n, uint32_t value, std::shared_ptr<BytesData> bytes_data);
 
 	static uint32_t UE_V(uint32_t value, std::shared_ptr<BytesData> bytes_data);
 

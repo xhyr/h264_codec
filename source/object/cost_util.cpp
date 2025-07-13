@@ -14,7 +14,7 @@ int CostUtil::CalculateSATD(const BlockData<16, 16, int32_t>& block_data)
 		for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)
 		{
 			auto block_data_4x4 = block_data.GetBlock4x4(x_in_block, y_in_block);
-			block_data_4x4 = TransformUtil::Hadamard(block_data_4x4, 1);
+			block_data_4x4 = TransformUtil::Hadamard(block_data_4x4, 0);
 			auto dc_value = block_data_4x4.GetElement(0, 0);
 			satd += block_data_4x4.GetAbstractSum();
 			satd -= abs(dc_value);
@@ -23,7 +23,7 @@ int CostUtil::CalculateSATD(const BlockData<16, 16, int32_t>& block_data)
 		}
 	}
 
-	dc_block_data = TransformUtil::Hadamard(dc_block_data, 1);
+	dc_block_data = TransformUtil::Hadamard(dc_block_data, 0);
 	satd += dc_block_data.GetAbstractSum();
 	satd /= 2;
 	return satd;
@@ -37,7 +37,7 @@ int CostUtil::CalculateSATD(const BlockData<8, 8, int32_t>& block_data)
 		for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)
 		{
 			auto block_data_4x4 = block_data.GetBlock4x4(x_in_block, y_in_block);
-			block_data_4x4 = TransformUtil::Hadamard(block_data_4x4, 1);
+			block_data_4x4 = TransformUtil::Hadamard(block_data_4x4, 0);
 			auto block_satd = block_data_4x4.GetAbstractSum() >> 1;
 			satd += block_satd;
 		}

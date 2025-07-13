@@ -17,8 +17,9 @@ SliceType Slice::GetType() const
 
 void Slice::Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps)
 {
+	m_tick = tick;
 	m_type = slice_type;
-	m_header.Construct(tick, slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData());
+	m_header.Construct(m_tick, m_tick == 0 && slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData());
 }
 
 bool Slice::Encode(std::shared_ptr<EncoderContext> encoder_context)
@@ -31,9 +32,6 @@ bool Slice::Encode(std::shared_ptr<EncoderContext> encoder_context)
 	{
 		auto macroblock = std::make_shared<Macroblock>(mb_addr, weak_from_this(), encoder_context);
 		auto old_bit_count = m_bytes_data->GetBitsCount();
-
-		if (mb_addr == 55)
-			int sb = 1;
 
 		macroblock->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
@@ -49,9 +47,10 @@ bool Slice::Encode(std::shared_ptr<EncoderContext> encoder_context)
 
 void Slice::Serial(std::shared_ptr<OStream> ostream)
 {
-	Nalu nalu(NaluType::IDR, NaluPriority::HIGHEST);
+	Nalu nalu(m_tick == 0 ? NaluType::IDR : NaluType::Slice, m_tick == 0 ? NaluPriority::HIGHEST : NaluPriority::HIGH);
+
+	LOGINFO("serial bit count = %d.", m_bytes_data->GetBitsCount());
 	
-	//header
 	nalu.SetData(m_bytes_data);
 
 	//write out

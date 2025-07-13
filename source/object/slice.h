@@ -33,6 +33,7 @@ public:
 	std::shared_ptr<CavlcContext> GetCavlcContext();
 
 private:
+	uint32_t m_tick;
 	SliceType m_type;
 	SliceHeader m_header;
 	std::vector<std::shared_ptr<Macroblock>> m_macroblocks;

@@ -8,7 +8,7 @@ __codec_begin
 
 struct TransformUtil
 {
-	static BlockData<4, 4, int32_t> Hadamard(const BlockData<4, 4, int32_t>& block_data, int divide_factor = 2);
+	static BlockData<4, 4, int32_t> Hadamard(const BlockData<4, 4, int32_t>& block_data, int shfit_bits = 1);
 
 	static BlockData<2, 2, int32_t> Hadamard(const BlockData<2, 2, int32_t>& block_data);
 

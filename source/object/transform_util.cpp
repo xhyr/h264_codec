@@ -2,7 +2,7 @@
 
 __codec_begin
 
-BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>& block_data, int divide_factor)
+BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>& block_data, int shift_bits)
 {
 	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
@@ -38,10 +38,10 @@ BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>&
 		auto t2 = p1 - p2;
 		auto t3 = p0 - p3;
 
-		output_block.SetElement(x, 0, (t0 + t1) / divide_factor);
-		output_block.SetElement(x, 1, (t2 + t3) / divide_factor);
-		output_block.SetElement(x, 2, (t0 - t1) / divide_factor);
-		output_block.SetElement(x, 3, (t3 - t2) / divide_factor);
+		output_block.SetElement(x, 0, (t0 + t1) >> shift_bits);
+		output_block.SetElement(x, 1, (t2 + t3) >> shift_bits);
+		output_block.SetElement(x, 2, (t0 - t1) >> shift_bits);
+		output_block.SetElement(x, 3, (t3 - t2) >> shift_bits);
 	}
 
 	return output_block;
@@ -76,7 +76,7 @@ BlockData<2, 2, int32_t> TransformUtil::Hadamard(const BlockData<2, 2, int32_t>&
 
 BlockData<4, 4, int32_t> TransformUtil::InverseHadamard(const BlockData<4, 4, int32_t>& block_data)
 {
-	return Hadamard(block_data, 1);
+	return Hadamard(block_data, 0);
 }
 
 BlockData<2, 2, int32_t> TransformUtil::InverseHadamard(const BlockData<2, 2, int32_t>& block_data)

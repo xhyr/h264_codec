@@ -210,37 +210,27 @@ void CavlcNonCdcCoder::WriteLevel0(int level)
 void CavlcNonCdcCoder::WriteLevelN(int level, uint32_t suffix_length)
 {
 	uint32_t sign = level < 0 ? 1 : 0;
-	uint32_t level_abs = abs(level) - 1;
+	uint32_t level_abs = abs(level);
 
 	uint8_t len;
 	uint32_t value;
 	uint32_t shift = suffix_length - 1;
-	uint32_t escape = 15 << shift;
+	uint32_t escape = (15 << shift) + 1;
+
+	uint32_t prefix_num = (level_abs - 1) >> shift;
 
 	if (level_abs < escape)
 	{
 		uint32_t sufmask = ~((0xffffffff) << shift);
-		uint32_t suffix = level_abs & sufmask;
+		uint32_t suffix = (level_abs - 1) & sufmask;
 	
-		len = (level_abs >> shift) + 1 + suffix_length;
-		value = (2 << shift) | (suffix << 1) | sign;
+		len = prefix_num + 1 + suffix_length;
+		value = (1 << (shift + 1)) | (suffix << 1) | sign;
 	}
 	else
 	{
-		uint32_t mask = 4096;
-		uint32_t level_abs1 = level_abs - escape + 2048;
-		uint32_t prefix_num = 0;
-
-		if (level_abs1 >= 4096)
-		{
-			++prefix_num;
-			while (level_abs1 >= (4096u << prefix_num))
-				++prefix_num;
-		}
-
-		mask <<= prefix_num;
-		value = mask | ((level_abs1 << 1) - mask) | sign;
-		len = 28 + (prefix_num << 1);
+		len = 28;
+		value = (1 << 12) | ((level_abs - escape) << 1) | sign;
 	}
 
 	CodingUtil::U_V(len, value, m_bytes_data);
