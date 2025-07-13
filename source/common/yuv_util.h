@@ -18,7 +18,7 @@ struct YUVUtil
 
 	static bool Serial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]> y_data, std::shared_ptr<uint8_t[]> u_data, std::shared_ptr<uint8_t[]> v_data);
 
-	static bool Unserial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]>& y_data, std::shared_ptr<uint8_t[]>& u_data, std::shared_ptr<uint8_t[]>& v_data);
+	static bool Unserial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]>& y_data, std::shared_ptr<uint8_t[]>& u_data, std::shared_ptr<uint8_t[]>& v_data, uint32_t tick);
 
 };
 

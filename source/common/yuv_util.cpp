@@ -75,17 +75,20 @@ bool YUVUtil::Serial(uint32_t width, uint32_t height, const std::string& file_pa
 	return true;
 }
 
-bool YUVUtil::Unserial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]>& y_data, std::shared_ptr<uint8_t[]>& u_data, std::shared_ptr<uint8_t[]>& v_data)
+bool YUVUtil::Unserial(uint32_t width, uint32_t height, const std::string& file_path, std::shared_ptr<uint8_t[]>& y_data, std::shared_ptr<uint8_t[]>& u_data, std::shared_ptr<uint8_t[]>& v_data, uint32_t tick)
 {
 	auto file_handle = fopen(file_path.c_str(), "rb");
 	if (!file_handle)
 		return false;
 
+	if (tick != 0)
+		fseek(file_handle, tick * width * height * 3 / 2, SEEK_SET);
+
 	y_data.reset(new uint8_t[width * height]);
 	u_data.reset(new uint8_t[width * height / 4]);
 	v_data.reset(new uint8_t[width * height / 4]);
 
-	fread(y_data.get(), 1, width * height, file_handle);
+    fread(y_data.get(), 1, width * height, file_handle);
 	fread(u_data.get(), 1, width * height / 4, file_handle);
 	fread(v_data.get(), 1, width * height / 4, file_handle);
 

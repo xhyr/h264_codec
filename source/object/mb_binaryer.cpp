@@ -77,8 +77,6 @@ void MBBinaryer::OutputChromaCoeffs(const CavlcDataSource& data_source)
 		non_cdc_coder.CodeChromaACs(CavlcDataType::CbAC, data_source.cb_acs);
 		non_cdc_coder.CodeChromaACs(CavlcDataType::CrAC, data_source.cr_acs);
 	}
-
-	int s = 1;
 }
 
 __codec_end

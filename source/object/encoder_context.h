@@ -8,6 +8,7 @@
 __codec_begin
 
 struct YUVFrame;
+class OStream;
 struct EncoderConfig;
 
 struct EncoderContext
@@ -18,6 +19,7 @@ struct EncoderContext
 	uint32_t height_in_mb;
 	uint32_t mb_num;
 	std::shared_ptr<YUVFrame> yuv_frame;
+	std::shared_ptr<OStream> out_stream;
 
 	std::shared_ptr<EncoderConfig> config;
 };

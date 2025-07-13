@@ -60,7 +60,7 @@ void CavlcCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4, 4
 {
 	int run = -1;
 	auto& level_runs = m_ac_level_runs[block_index];
-	for (uint32_t index = 1; index < 4; ++index)
+	for (uint32_t index = 1; index < 16; ++index)
 	{
 		auto pos = CavlcConstantValues::s_zigzag_orders[index];
 		auto level = ac_block.GetElement(pos);
@@ -69,7 +69,7 @@ void CavlcCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4, 4
 		{
 			level_runs.levels.push_back(level);
 			level_runs.runs.push_back(run);
-			m_coded_block_pattern = 2;
+			m_ac_cbp = 2;
 
 			if (level > 1)
 				m_coeff_cost += CavlcConstantValues::s_max_coeff_cost;

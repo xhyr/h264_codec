@@ -71,19 +71,20 @@ void CavlcCdcCoder::WriteLevels()
 	for (int index = m_last_index - m_trailing_ones; index >= 0; --index)
 	{
 		auto level = m_levels[index];
+		auto modified_level = level;
 
 		if (level_two_or_higher)
 		{
-			if (level > 0) --level;
-			else ++level;
+			if (modified_level > 0) --modified_level;
+			else ++modified_level;
 
 			level_two_or_higher = false;
 		}
 
 		if (suffix_length == 0)
-			WriteLevel0(level);
+			WriteLevel0(modified_level);
 		else
-			WriteLevelN(level, suffix_length);
+			WriteLevelN(modified_level, suffix_length);
 
 		//update suffix length
 		if (abs(level) > CavlcConstantValues::s_suffix_length_inc_table[suffix_length])

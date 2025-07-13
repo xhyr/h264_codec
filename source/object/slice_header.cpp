@@ -6,8 +6,11 @@
 
 __codec_begin
 
-void SliceHeader::Construct(bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data)
+void SliceHeader::Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data)
 {
+	frame_num = tick;
+	pic_order_cnt_lsb = tick * 2;
+
 	log2_max_frame_num_minus4 = sps_data->log2_max_frame_num_minus4;
 	idr_pic_flag = _idr_pic_flag;
 	log2_max_pic_order_cnt_lsb_minus4 = sps_data->log2_max_pic_order_cnt_lsb_minus4;
@@ -37,6 +40,7 @@ std::shared_ptr<BytesData> SliceHeader::Convert2BytesData() const
 	}
 
 	CodingUtil::SE_V(slice_qp_delta, bytes_data);
+	CodingUtil::UE_V(disable_deblocking_filter_idc, bytes_data);
 	return bytes_data;
 }
 

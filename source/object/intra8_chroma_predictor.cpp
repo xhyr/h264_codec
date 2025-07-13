@@ -182,11 +182,11 @@ void Intra8ChromaPredictor::CalculatePlaneMode(PlaneType plane_type)
 
 	int H = (3 + 1) * (m_up_data[7] - m_left_up_element);
 	for (int x = 0; x < 3; ++x)
-		H += (x + 1) * (m_up_data[4 + x] - m_left_data[2 - x]);
+		H += (x + 1) * (m_up_data[4 + x] - m_up_data[2 - x]);
 
 	int V = (3 + 1) * (m_left_data[7] - m_left_up_element);
 	for (int y = 0; y < 3; ++y)
-		V += (y + 1) * (m_left_data[4 + y] - m_up_data[2 - y]);
+		V += (y + 1) * (m_left_data[4 + y] - m_left_data[2 - y]);
 
 	int a = 16 * (m_left_data[7] + m_up_data[7]);
 	int b = MathUtil::RightShift(34 * H, 6);

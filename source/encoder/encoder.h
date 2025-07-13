@@ -8,6 +8,7 @@ __codec_begin
 
 struct EncoderConfig;
 struct EncoderContext;
+struct YUVFrame;
 
 class Encoder
 {
@@ -19,12 +20,15 @@ public:
 	bool Encode();
 
 private:
+	std::shared_ptr<YUVFrame> GetNextFrame();
+
+private:
 	std::shared_ptr<EncoderConfig> m_config;
 	std::shared_ptr<EncoderContext> m_context;
 	
 	ParameterSetContainer m_parameter_set_container;
 
-
+	uint32_t m_tick{ 0 };
 };
 
 __codec_end

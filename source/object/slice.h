@@ -20,7 +20,7 @@ class Slice : public std::enable_shared_from_this<Slice>
 public:
 	SliceType GetType() const;
 
-	void Construct(SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps);
+	void Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps);
 
 	bool Encode(std::shared_ptr<EncoderContext> encoder_context);
 
@@ -38,6 +38,7 @@ private:
 	std::vector<std::shared_ptr<Macroblock>> m_macroblocks;
 	int m_cost{ 0 };
 	std::shared_ptr<CavlcContext> m_cavlc_context;
+	std::shared_ptr<BytesData> m_bytes_data;
 };
 
 __codec_end

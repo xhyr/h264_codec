@@ -40,7 +40,9 @@ struct SliceHeader
 
 	int32_t slice_qp_delta{ 2 }; //se(v)
 
-	void Construct(bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data);
+	uint32_t disable_deblocking_filter_idc{ 1 }; //ue(v)
+
+	void Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data);
 
 	std::shared_ptr<BytesData> Convert2BytesData() const;
 };

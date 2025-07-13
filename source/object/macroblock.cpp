@@ -24,7 +24,7 @@
 __codec_begin
 
 Macroblock::Macroblock(uint32_t mb_addr, std::weak_ptr<Slice> slice, std::shared_ptr<EncoderContext> encoder_context):
-	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context), m_bytes_data(std::make_shared<BytesData>())
+	m_addr(mb_addr), m_slice(slice), m_encoder_context(encoder_context)
 {
 	Init();
 }
@@ -33,8 +33,10 @@ Macroblock::~Macroblock()
 {
 }
 
-bool Macroblock::Encode()
+bool Macroblock::Encode(std::shared_ptr<BytesData> bytes_data)
 {
+	m_bytes_data = bytes_data;
+
 	PreEncode();
 	DoEncode();
 	PostEncode();

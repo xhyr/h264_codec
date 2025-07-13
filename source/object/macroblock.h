@@ -26,7 +26,7 @@ public:
 	Macroblock(uint32_t mb_addr, std::weak_ptr<Slice> slice, std::shared_ptr<EncoderContext> encoder_context);
 	~Macroblock();
 
-	bool Encode();
+	bool Encode(std::shared_ptr<BytesData> bytes_data);
 
 	std::shared_ptr<BytesData> GetBytesData() const;
 
