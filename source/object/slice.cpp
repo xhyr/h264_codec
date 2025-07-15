@@ -7,6 +7,7 @@
 #include "log.h"
 #include "cavlc_context.h"
 #include "bytes_data.h"
+#include "encoder_config.h"
 
 __codec_begin
 
@@ -15,28 +16,30 @@ SliceType Slice::GetType() const
 	return m_type;
 }
 
-void Slice::Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps)
+void Slice::Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> sps, std::shared_ptr<PPS> pps, std::shared_ptr<EncoderContext> encoder_context)
 {
 	m_tick = tick;
 	m_type = slice_type;
-	m_header.Construct(m_tick, m_tick == 0 && slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData());
+	m_qp = encoder_context->config->qp;
+	m_encoder_context = encoder_context;
+	m_header.Construct(m_tick, m_tick == 0 && slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData(), m_qp);
 }
 
-bool Slice::Encode(std::shared_ptr<EncoderContext> encoder_context)
+bool Slice::Encode()
 {
-	m_cavlc_context = std::make_shared<CavlcContext>(encoder_context->width_in_mb, encoder_context->height_in_mb);
+	m_cavlc_context = std::make_shared<CavlcContext>(m_encoder_context->width_in_mb, m_encoder_context->height_in_mb);
 
 	m_bytes_data = m_header.Convert2BytesData();
 
-	for (uint32_t mb_addr = 0; mb_addr < encoder_context->mb_num; ++mb_addr)
+	for (uint32_t mb_addr = 0; mb_addr < m_encoder_context->mb_num; ++mb_addr)
 	{
-		auto macroblock = std::make_shared<Macroblock>(mb_addr, weak_from_this(), encoder_context);
+		auto macroblock = std::make_shared<Macroblock>(mb_addr, weak_from_this(), m_encoder_context);
 		auto old_bit_count = m_bytes_data->GetBitsCount();
 
 		macroblock->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
-		LOGINFO("%d, used_bit_count = %d.", mb_addr, used_bit_count);
+		//LOGINFO("%d, used_bit_count = %d.", mb_addr, used_bit_count);
 
 		m_cost += macroblock->GetCost();
 		m_macroblocks.push_back(macroblock);
@@ -70,6 +73,11 @@ int Slice::GetCost() const
 std::shared_ptr<CavlcContext> Slice::GetCavlcContext()
 {
     return m_cavlc_context;
+}
+
+uint8_t Slice::GetQP() const
+{
+	return m_qp;
 }
 
 __codec_end

@@ -20,6 +20,8 @@ struct EncoderConfig
 	uint32_t profile_idc;
 	uint32_t level_idc;
 	uint32_t ref_frame_number;
+	
+	uint8_t qp;
 };
 
 __codec_end

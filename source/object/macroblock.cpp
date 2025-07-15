@@ -132,7 +132,9 @@ void Macroblock::PreEncode()
 {
 	m_type = MBType::I16;
 	m_neighbors = std::make_unique<MBNeighbors>(shared_from_this(), m_addr, m_encoder_context);
-	m_qp = 28;
+	
+	auto slice = m_slice.lock();
+	m_qp = slice->GetQP();
 }
 
 void Macroblock::DoEncode()

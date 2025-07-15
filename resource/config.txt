@@ -1,11 +1,11 @@
 
-input_file_path = foreman_part_qcif.yuv
+input_file_path = foreman_cif.yuv
 
-output_file_path = foreman_part_qcif.264
+output_file_path = foreman_cif.264
 
-width = 176
+width = 352
 
-height = 144
+height = 288
 
 frames_to_encode = 300
 
@@ -14,3 +14,5 @@ profile_idc = 66
 level_idc = 30
 
 ref_frame_number = 10
+
+qp = 26

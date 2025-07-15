@@ -39,8 +39,8 @@ bool Encoder::Encode()
 		m_context->yuv_frame = next_yuv_frame;
 
 		auto slice = std::make_shared<Slice>();
-		slice->Construct(m_tick, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS());
-		slice->Encode(m_context);
+		slice->Construct(m_tick, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
+		slice->Encode();
 		auto cost = slice->GetCost();
 
 		LOGINFO("cost = %d, average_cost = %lf.", cost, cost * 1.0 / m_context->width / m_context->height);

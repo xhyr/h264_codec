@@ -38,11 +38,11 @@ struct SliceHeader
 	uint8_t adaptive_ref_pic_marking_mode_flag{ 0 }; //u(1)
 	//endif(IdrPicFlag)
 
-	int32_t slice_qp_delta{ 2 }; //se(v)
+	int32_t slice_qp_delta; //se(v)
 
 	uint32_t disable_deblocking_filter_idc{ 1 }; //ue(v)
 
-	void Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data);
+	void Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data, uint8_t qp);
 
 	std::shared_ptr<BytesData> Convert2BytesData() const;
 };

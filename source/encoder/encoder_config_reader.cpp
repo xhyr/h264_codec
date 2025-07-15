@@ -67,6 +67,11 @@ std::shared_ptr<EncoderConfig> EncoderConfigReader::ParseConfigMap(const std::un
 			break;
 		config->ref_frame_number = std::stoi(iter->second);
 
+		iter = config_map.find("qp");
+		if (iter == config_map.end())
+			break;
+		config->qp = std::stoi(iter->second);
+
 		return config;
 	} while (0);
 
