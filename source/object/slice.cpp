@@ -75,7 +75,7 @@ std::shared_ptr<CavlcContext> Slice::GetCavlcContext()
     return m_cavlc_context;
 }
 
-uint8_t Slice::GetQP() const
+int Slice::GetQP() const
 {
 	return m_qp;
 }

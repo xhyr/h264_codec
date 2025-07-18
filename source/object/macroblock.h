@@ -38,13 +38,25 @@ public:
 
 	std::shared_ptr<Macroblock> GetMacroblock(uint32_t mb_addr);
 
+	std::shared_ptr<Macroblock> GetLeftMacroblock();
+
+	std::shared_ptr<Macroblock> GetUpMacroblock();
+
 	BlockData<16, 16> GetOriginalLumaBlockData() const;
 
 	BlockData<8, 8> GetOriginalChromaBlockData(PlaneType plane_type) const;
 
-	BlockData<16, 16> GetReconstructedBlockData() const;
+	BlockData<16, 16> GetReconstructedLumaBlockData() const;
+
+	void SetReconstructedLumaBlockData(const BlockData<16, 16>& block_data);
 
 	int GetCost() const;
+
+	uint32_t GetAddress() const;
+
+	std::pair<uint32_t, uint32_t> GetPositionInMb() const;
+
+	int GetQP() const;
 
 private:
 	void Init();
@@ -77,8 +89,6 @@ private:
 
 	void Convert2Binary();
 
-	void DoConvertCoeffs();
-
 private:
 	uint32_t m_addr;
 	std::weak_ptr<Slice> m_slice;
@@ -87,7 +97,7 @@ private:
 	Position m_pos_in_mb;
 	Position m_pos;
 	std::unique_ptr<MBNeighbors> m_neighbors;
-	uint32_t m_qp;
+	int m_qp;
 	MBType m_type;
 	uint8_t m_luma_cbp{ 0 };
 	uint8_t m_chroma_cbp{ 0 };

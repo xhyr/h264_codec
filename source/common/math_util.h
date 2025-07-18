@@ -30,6 +30,7 @@ struct MathUtil
 	{
 		return (value + (1 << (bits - 1))) >> bits;
 	}
+
 };
 
 __codec_end

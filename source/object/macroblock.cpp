@@ -79,6 +79,22 @@ std::shared_ptr<Macroblock> Macroblock::GetMacroblock(uint32_t mb_addr)
 	return slice->GetMacroblock(mb_addr);
 }
 
+std::shared_ptr<Macroblock> Macroblock::GetLeftMacroblock()
+{
+	if (m_addr % m_encoder_context->width_in_mb == 0)
+		return nullptr;
+	else
+		return GetMacroblock(m_addr - 1);
+}
+
+std::shared_ptr<Macroblock> Macroblock::GetUpMacroblock()
+{
+	if (m_addr / m_encoder_context->width_in_mb == 0)
+		return nullptr;
+	else
+		return GetMacroblock(m_addr - m_encoder_context->width_in_mb);
+}
+
 BlockData<16, 16> Macroblock::GetOriginalLumaBlockData() const
 {
     return m_luma_data;
@@ -89,9 +105,14 @@ BlockData<8, 8> Macroblock::GetOriginalChromaBlockData(PlaneType plane_type) con
 	return plane_type == PlaneType::Cb ? m_cb_data : m_cr_data;
 }
 
-BlockData<16, 16> Macroblock::GetReconstructedBlockData() const
+BlockData<16, 16> Macroblock::GetReconstructedLumaBlockData() const
 {
 	return m_reconstructed_luma_data;
+}
+
+void Macroblock::SetReconstructedLumaBlockData(const BlockData<16, 16>& block_data)
+{
+	m_reconstructed_luma_data = block_data;
 }
 
 int Macroblock::GetCost() const
@@ -283,6 +304,21 @@ void Macroblock::Convert2Binary()
 	binaryer.OutputQPDelta(0);
 	binaryer.OutputLumaCoeffs(m_cavlc_data_source);
 	binaryer.OutputChromaCoeffs(m_cavlc_data_source);
+}
+
+uint32_t Macroblock::GetAddress() const
+{
+	return m_addr;
+}
+
+std::pair<uint32_t, uint32_t> Macroblock::GetPositionInMb() const
+{
+	return std::make_pair(m_addr % m_encoder_context->width_in_mb, m_addr / m_encoder_context->width_in_mb);
+}
+
+int Macroblock::GetQP() const
+{
+	return m_qp;
 }
 
 __codec_end

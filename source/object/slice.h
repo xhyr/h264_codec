@@ -32,7 +32,7 @@ public:
 
 	std::shared_ptr<CavlcContext> GetCavlcContext();
 
-	uint8_t GetQP() const;
+	int GetQP() const;
 
 private:
 	uint32_t m_tick;
@@ -42,7 +42,7 @@ private:
 	std::vector<std::shared_ptr<Macroblock>> m_macroblocks;
 	int m_cost{ 0 };
 	std::shared_ptr<CavlcContext> m_cavlc_context;
-	uint8_t m_qp;
+	int m_qp;
 	std::shared_ptr<BytesData> m_bytes_data;
 };
 
