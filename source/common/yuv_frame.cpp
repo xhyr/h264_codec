@@ -21,6 +21,15 @@ YUVFrame::YUVFrame(uint32_t _width, uint32_t _height, const std::string& file_pa
 	Unserial(width, height, file_path, tick);
 }
 
+YUVFrame::YUVFrame(uint32_t _width, uint32_t _height)
+{
+	width = _width;
+	height = _height;
+	y_data.reset(new uint8_t[width * height]);
+	u_data.reset(new uint8_t[width * height / 4]);
+	v_data.reset(new uint8_t[width * height / 4]);
+}
+
 bool YUVFrame::Serial(const std::string& file_path)
 {
 	return YUVUtil::Serial(width, height, file_path, y_data, u_data, v_data);

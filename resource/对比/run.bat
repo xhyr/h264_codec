@@ -1,0 +1,1 @@
+ffmpeg -f rawvideo -pix_fmt yuv420p -s 176x144 -r 30 -i output1.yuv -c:v libx265 -x265-params lossless=1 -pix_fmt yuv420p -qp 0 output1.mp4

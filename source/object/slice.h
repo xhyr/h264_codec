@@ -14,6 +14,7 @@ struct EncoderContext;
 class OStream;
 class Macroblock;
 class CavlcContext;
+struct YUVFrame;
 
 class Slice : public std::enable_shared_from_this<Slice>
 {
@@ -34,6 +35,13 @@ public:
 
 	int GetQP() const;
 
+	std::shared_ptr<YUVFrame> GetFrameData();
+
+private:
+	void DeblockFilter();
+
+	void CollectFrameData();
+
 private:
 	uint32_t m_tick;
 	SliceType m_type;
@@ -44,6 +52,7 @@ private:
 	std::shared_ptr<CavlcContext> m_cavlc_context;
 	int m_qp;
 	std::shared_ptr<BytesData> m_bytes_data;
+	std::shared_ptr<YUVFrame> m_frame_data;
 };
 
 __codec_end

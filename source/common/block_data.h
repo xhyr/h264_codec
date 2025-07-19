@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <numeric>
 #include <vector>
 
@@ -99,6 +100,13 @@ public:
 	void Reset(Ty value)
 	{
 		std::fill(m_data.begin(), m_data.end(), value);
+	}
+
+	std::shared_ptr<Ty[]> Convert2DataPtr() const
+	{
+		std::shared_ptr<Ty[]> data_ptr(new Ty[Width * Height]);
+		std::copy(m_data.begin(), m_data.end(), data_ptr.get());
+		return data_ptr;
 	}
 
 private:

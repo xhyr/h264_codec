@@ -16,6 +16,7 @@ struct YUVFrame
 	YUVFrame();
 	explicit YUVFrame(std::shared_ptr<ColorData> color_data);
 	YUVFrame(uint32_t _width, uint32_t _height, const std::string& file_path, uint32_t tick = 0);
+	YUVFrame(uint32_t _width, uint32_t _height);
 
 	bool Serial(const std::string& file_path);
 

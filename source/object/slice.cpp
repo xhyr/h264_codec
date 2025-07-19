@@ -8,6 +8,9 @@
 #include "cavlc_context.h"
 #include "bytes_data.h"
 #include "encoder_config.h"
+#include "loop_filter.h"
+#include "yuv_frame.h"
+#include "data_util.h"
 
 __codec_begin
 
@@ -45,14 +48,16 @@ bool Slice::Encode()
 		m_macroblocks.push_back(macroblock);
 	}
 
+	DeblockFilter();
+
+	CollectFrameData();
+
 	return true;
 }
 
 void Slice::Serial(std::shared_ptr<OStream> ostream)
 {
 	Nalu nalu(m_tick == 0 ? NaluType::IDR : NaluType::Slice, m_tick == 0 ? NaluPriority::HIGHEST : NaluPriority::HIGH);
-
-	LOGINFO("serial bit count = %d.", m_bytes_data->GetBitsCount());
 	
 	nalu.SetData(m_bytes_data);
 
@@ -78,6 +83,36 @@ std::shared_ptr<CavlcContext> Slice::GetCavlcContext()
 int Slice::GetQP() const
 {
 	return m_qp;
+}
+
+std::shared_ptr<YUVFrame> Slice::GetFrameData()
+{
+	return m_frame_data;
+}
+
+void Slice::DeblockFilter()
+{
+	LoopFilter loop_filter;
+	for (auto mb : m_macroblocks)
+		loop_filter.Filter(mb);
+}
+
+void Slice::CollectFrameData()
+{
+	m_frame_data = std::make_shared<YUVFrame>(m_encoder_context->width, m_encoder_context->height);
+
+	for (auto mb : m_macroblocks)
+	{
+		auto [x_in_mb, y_in_mb] = mb->GetPositionInMb();
+		auto luma_data = mb->GetReconstructedLumaBlockData();
+		DataUtil::SetData(m_frame_data->y_data, luma_data.Convert2DataPtr(), x_in_mb * 16, y_in_mb * 16, 16, 16, m_encoder_context->width);
+
+		auto cb_data = mb->GetReconstructedChromaBlockData(PlaneType::Cb);
+		DataUtil::SetData(m_frame_data->u_data, cb_data.Convert2DataPtr(), x_in_mb * 8, y_in_mb * 8, 8, 8, m_encoder_context->width / 2);
+
+		auto cr_data = mb->GetReconstructedChromaBlockData(PlaneType::Cr);
+		DataUtil::SetData(m_frame_data->v_data, cr_data.Convert2DataPtr(), x_in_mb * 8, y_in_mb * 8, 8, 8, m_encoder_context->width / 2);
+	}
 }
 
 __codec_end

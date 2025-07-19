@@ -34,6 +34,8 @@ bool Encoder::Encode()
 	parameter_set_container.ConstructPPS();
 	parameter_set_container.Serial(m_context->out_stream);
 
+	FILE* out_handle = fopen("output.yuv", "wb");
+
 	while (auto next_yuv_frame = GetNextFrame())
 	{
 		m_context->yuv_frame = next_yuv_frame;
@@ -43,15 +45,21 @@ bool Encoder::Encode()
 		slice->Encode();
 		auto cost = slice->GetCost();
 
-		LOGINFO("cost = %d, average_cost = %lf.", cost, cost * 1.0 / m_context->width / m_context->height);
-
 		slice->Serial(m_context->out_stream);
+
+		auto frame_data = slice->GetFrameData();
+
+		fwrite(frame_data->y_data.get(), 1, frame_data->width * frame_data->height, out_handle);
+		fwrite(frame_data->u_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);
+		fwrite(frame_data->v_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);
 
 		++m_tick;
 
 		if (m_tick == m_config->frames_to_encode)
 			break;
 	}
+
+	fclose(out_handle);
 
 	return true;
 }

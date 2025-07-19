@@ -110,9 +110,19 @@ BlockData<16, 16> Macroblock::GetReconstructedLumaBlockData() const
 	return m_reconstructed_luma_data;
 }
 
+BlockData<8, 8> Macroblock::GetReconstructedChromaBlockData(PlaneType plane_type) const
+{
+	return plane_type == PlaneType::Cb ? m_reconstructed_cb_data : m_reconstructed_cr_data;
+}
+
 void Macroblock::SetReconstructedLumaBlockData(const BlockData<16, 16>& block_data)
 {
 	m_reconstructed_luma_data = block_data;
+}
+
+void Macroblock::SetReconstructedChromaBlockData(const BlockData<8, 8>& block_data, PlaneType plane_type)
+{
+	(plane_type == PlaneType::Cb ? m_reconstructed_cb_data : m_reconstructed_cr_data) = block_data;
 }
 
 int Macroblock::GetCost() const
@@ -314,6 +324,11 @@ uint32_t Macroblock::GetAddress() const
 std::pair<uint32_t, uint32_t> Macroblock::GetPositionInMb() const
 {
 	return std::make_pair(m_addr % m_encoder_context->width_in_mb, m_addr / m_encoder_context->width_in_mb);
+}
+
+std::pair<uint32_t, uint32_t> Macroblock::GetPosition() const
+{
+	return std::make_pair(m_addr % m_encoder_context->width_in_mb * 16, m_addr / m_encoder_context->width_in_mb * 16);
 }
 
 int Macroblock::GetQP() const

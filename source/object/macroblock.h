@@ -48,13 +48,19 @@ public:
 
 	BlockData<16, 16> GetReconstructedLumaBlockData() const;
 
+	BlockData<8, 8> GetReconstructedChromaBlockData(PlaneType plane_type) const;
+
 	void SetReconstructedLumaBlockData(const BlockData<16, 16>& block_data);
+
+	void SetReconstructedChromaBlockData(const BlockData<8, 8>& block_data, PlaneType plane_type);
 
 	int GetCost() const;
 
 	uint32_t GetAddress() const;
 
 	std::pair<uint32_t, uint32_t> GetPositionInMb() const;
+
+	std::pair<uint32_t, uint32_t> GetPosition() const;
 
 	int GetQP() const;
 
