@@ -64,6 +64,8 @@ public:
 
 	int GetQP() const;
 
+	std::shared_ptr<Slice> GetSlice();
+
 private:
 	void Init();
 

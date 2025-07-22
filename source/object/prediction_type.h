@@ -14,6 +14,19 @@ enum class Intra16LumaPredictionType : uint8_t
 	Plane
 };
 
+enum class Intra4LumaPredictionType : uint8_t
+{
+	Vertical = 0,
+	Horizontal,
+	DC,
+	DownLeft,
+	DownRight,
+	VerticalLeft,
+	HorizontalDown,
+	VerticalRight,
+	HorizontalUp
+};
+
 enum class IntraChromaPredictionType : uint8_t
 {
 	DC = 0,

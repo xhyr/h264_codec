@@ -40,7 +40,9 @@ public:
 private:
 	void DeblockFilter();
 
-	void CollectFrameData();
+	void CollectFrameData(std::shared_ptr<Macroblock> mb);
+
+	void CollectAllFrameData();
 
 private:
 	uint32_t m_tick;

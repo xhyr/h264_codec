@@ -20,6 +20,7 @@
 #include "mb_util.h"
 #include "bytes_data.h"
 #include "mb_binaryer.h"
+#include "intra4_luma_predictor.h"
 
 __codec_begin
 
@@ -201,6 +202,10 @@ void Macroblock::PostEncode()
 
 BlockData<16, 16, int32_t> Macroblock::IntraLumaPredict()
 {
+	Intra4Predictor intra4_predictor(shared_from_this(), m_encoder_context);
+	intra4_predictor.Decide();
+	
+
 	Intra16Predictor intra16_predictor(shared_from_this(), m_encoder_context);
 	m_intra16_luma_prediction_type = intra16_predictor.Decide();
 	m_luma_cost = intra16_predictor.GetCost();
@@ -334,6 +339,11 @@ std::pair<uint32_t, uint32_t> Macroblock::GetPosition() const
 int Macroblock::GetQP() const
 {
 	return m_qp;
+}
+
+std::shared_ptr<Slice> Macroblock::GetSlice()
+{
+	return m_slice.lock();
 }
 
 __codec_end
