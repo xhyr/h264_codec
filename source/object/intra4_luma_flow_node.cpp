@@ -6,6 +6,7 @@
 #include "quantize_util.h"
 #include "math_util.h"
 #include "reconstruct_util.h"
+#include "cavlc_coder_luma_4x4.h"
 
 __codec_begin
 
@@ -38,6 +39,25 @@ int Intra4LumaFlowNode::GetCost() const
 bool Intra4LumaFlowNode::IsAllZero() const
 {
 	return m_is_all_zero;
+}
+
+Intra4LumaPredictionType Intra4LumaFlowNode::GetMostProbablePredictionType() const
+{
+	return m_predictor->GetMostProbablePredictionType();
+}
+
+Intra4LumaPredictionType Intra4LumaFlowNode::GetPredictionType() const
+{
+	return m_predictor->GetPredictionType();
+}
+
+uint32_t Intra4LumaFlowNode::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
+{
+	CavlcCoderLuma4x4 coder;
+	coder.Code(m_diff_data);
+	auto level_and_runs = coder.GetLevelAndRuns();
+
+	return 0;
 }
 
 void Intra4LumaFlowNode::Predict()

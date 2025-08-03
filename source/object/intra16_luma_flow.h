@@ -11,6 +11,7 @@ class Macroblock;
 struct EncoderContext;
 class Intra16LumaPredictor;
 class Intra16LumaQuantizer;
+class BytesData;
 
 class Intra16LumaFlow : public IntraLumaFlowBase
 {
@@ -20,7 +21,7 @@ public:
 
 	void Frontend() override;
 
-	void Backend() override;
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) override;
 
 	Intra16LumaPredictionType GetPredictionType() const;
 

@@ -27,9 +27,10 @@ void Intra16LumaFlow::Frontend()
 	Reconstruct();
 }
 
-void Intra16LumaFlow::Backend()
+uint32_t Intra16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
 
+	return 0;
 }
 
 Intra16LumaPredictionType Intra16LumaFlow::GetPredictionType() const

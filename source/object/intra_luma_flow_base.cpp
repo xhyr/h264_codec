@@ -11,6 +11,10 @@ IntraLumaFlowBase::~IntraLumaFlowBase()
 {
 }
 
+void IntraLumaFlowBase::OutputPredictionTypes(std::shared_ptr<BytesData> bytes_data)
+{
+}
+
 BlockData<16, 16> IntraLumaFlowBase::GetReconstructedData() const
 {
 	return m_reconstructed_data;

@@ -24,6 +24,11 @@ int Intra4LumaPredictor::GetCost() const
 	return m_cost;
 }
 
+Intra4LumaPredictionType Intra4LumaPredictor::GetMostProbablePredictionType() const
+{
+	return m_most_probable_prediction_type;
+}
+
 Intra4LumaPredictionType Intra4LumaPredictor::GetPredictionType() const
 {
 	return m_prediction_type;
@@ -34,7 +39,7 @@ void Intra4LumaPredictor::Decide()
 	m_block_neighbors = std::make_unique<BlockNeighbors>(m_mb, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
 	m_edge_data = m_block_neighbors->GetEdgeData();
 
-	CalculateProbablePredictionType();
+	CalculateMostProbablePredictionType();
 	CalculateAllPredictionData();
 	DecideBySATD(m_x_in_block, m_y_in_block);
 }
@@ -49,7 +54,7 @@ BlockData<4, 4, int32_t> Intra4LumaPredictor::GetDiffData() const
 	return m_diff_data;
 }
 
-void Intra4LumaPredictor::CalculateProbablePredictionType()
+void Intra4LumaPredictor::CalculateMostProbablePredictionType()
 {
 	bool dc_pred_mode_predicted_flag = !m_block_neighbors->IsLeftAvailable() || !m_block_neighbors->IsUpAvailable();
 	
@@ -65,7 +70,7 @@ void Intra4LumaPredictor::CalculateProbablePredictionType()
 		pred_mode_b = m_block_neighbors->GetUpPredictionType();
 	}
 
-	m_probable_prediction_type = std::min(pred_mode_a, pred_mode_b);
+	m_most_probable_prediction_type = std::min(pred_mode_a, pred_mode_b);
 }
 
 void Intra4LumaPredictor::CalculateAllPredictionData()
@@ -301,7 +306,7 @@ void Intra4LumaPredictor::DecideBySATD(uint32_t x_in_block, uint32_t y_in_block)
 		if (m_predicted_data_map.find(prediction_type) == m_predicted_data_map.end())
 			continue;
 
-		int cost = prediction_type == m_probable_prediction_type ? 0 : 4 * m_encoder_context->lambda;
+		int cost = prediction_type == m_most_probable_prediction_type ? 0 : 4 * m_encoder_context->lambda;
 		const auto& predicted_data = m_predicted_data_map[prediction_type];
 		auto diff_data = original_block_data - predicted_data;
 		cost += CostUtil::CalculateSATD(diff_data);

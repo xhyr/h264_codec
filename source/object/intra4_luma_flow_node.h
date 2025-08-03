@@ -11,6 +11,7 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class Intra4LumaPredictor;
+class BytesData;
 
 class Intra4LumaFlowNode
 {
@@ -23,6 +24,12 @@ public:
 	int GetCost() const;
 
 	bool IsAllZero() const;
+
+	Intra4LumaPredictionType GetMostProbablePredictionType() const;
+
+	Intra4LumaPredictionType GetPredictionType() const;
+
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data);
 
 private:
 	void Predict();
@@ -47,7 +54,6 @@ private:
 
 	std::unique_ptr<Intra4LumaPredictor> m_predictor;
 	BlockData<4, 4, int32_t> m_diff_data;
-
 	bool m_is_all_zero{ true };
 };
 

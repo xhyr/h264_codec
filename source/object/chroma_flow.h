@@ -31,6 +31,8 @@ public:
 
 	uint8_t GetCBP() const;
 
+	uint32_t OutputCoefficients(std::shared_ptr<BinaryBlock>& binary_block);
+
 private:
 	void Predict();
 

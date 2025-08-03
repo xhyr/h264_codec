@@ -11,6 +11,7 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class Intra4LumaFlowNode;
+class BytesData;
 
 class Intra4LumaFlow : public IntraLumaFlowBase
 {
@@ -20,7 +21,9 @@ public:
 
 	void Frontend() override;
 
-	void Backend() override;
+	void OutputPredictionTypes(std::shared_ptr<BytesData> bytes_data) override;
+
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) override;
 
 	std::vector<Intra4LumaPredictionType> GetPredictionTypes() const;
 

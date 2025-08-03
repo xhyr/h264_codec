@@ -10,6 +10,7 @@ __codec_begin
 
 class Macroblock;
 struct EncoderContext;
+class BytesData;
 
 class IntraLumaFlowBase
 {
@@ -19,7 +20,9 @@ public:
 
 	virtual void Frontend() = 0;
 
-	virtual void Backend() = 0;
+	virtual void OutputPredictionTypes(std::shared_ptr<BytesData> bytes_data);
+
+	virtual uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) = 0;
 
 	BlockData<16, 16> GetReconstructedData() const;
 

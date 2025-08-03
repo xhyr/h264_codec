@@ -11,7 +11,7 @@ uint32_t CodingUtil::U_1(uint8_t value, std::shared_ptr<BytesData> bytes_data)
 	return 1;
 }
 
-uint32_t CodingUtil::U_V(uint8_t n, uint32_t value, std::shared_ptr<BytesData> bytes_data)
+uint32_t CodingUtil::U_V(uint32_t n, uint32_t value, std::shared_ptr<BytesData> bytes_data)
 {
 	for (int index = n - 1; index >= 0; --index)
 	{

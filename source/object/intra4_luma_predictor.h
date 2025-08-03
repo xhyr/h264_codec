@@ -30,10 +30,12 @@ public:
 
 	int GetCost() const;
 
+	Intra4LumaPredictionType GetMostProbablePredictionType() const;
+
 	Intra4LumaPredictionType GetPredictionType() const;
 
 private:
-	void CalculateProbablePredictionType();
+	void CalculateMostProbablePredictionType();
 
 	void CalculateAllPredictionData();
 
@@ -68,7 +70,7 @@ private:
 
 	std::unordered_map<Intra4LumaPredictionType, BlockData<4, 4>> m_predicted_data_map;
 
-	Intra4LumaPredictionType m_probable_prediction_type;
+	Intra4LumaPredictionType m_most_probable_prediction_type;
 	Intra4LumaPredictionType m_prediction_type;
 	BlockData<4, 4> m_predicted_data;
 	BlockData<4, 4, int32_t> m_diff_data;
