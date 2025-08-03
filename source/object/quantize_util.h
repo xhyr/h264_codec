@@ -20,6 +20,10 @@ struct QuantizeUtil
 
 	static BlockData<4, 4, int32_t> InverseQuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block);
 
+	static BlockData<4, 4, int32_t> QuantizeNormal(int qp, const BlockData<4, 4, int32_t>& block);
+
+	static BlockData<4, 4, int32_t> InverseQuantizeNormal(int qp, const BlockData<4, 4, int32_t>& block);
+
 private:
 	static std::tuple<int, int, int> GetQuantizeParameters(int qp, bool is_intra = true);
 

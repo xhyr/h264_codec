@@ -45,5 +45,12 @@ int CostUtil::CalculateSATD(const BlockData<8, 8, int32_t>& block_data)
 	return satd;
 }
 
+int CostUtil::CalculateSATD(const BlockData<4, 4, int32_t>& block_data)
+{
+	auto transformed_block_data = TransformUtil::Hadamard(block_data, 0);
+	auto block_satd = transformed_block_data.GetAbstractSum() >> 1;
+	return block_satd;
+}
+
 __codec_end
 

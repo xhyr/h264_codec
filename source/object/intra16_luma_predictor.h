@@ -14,19 +14,21 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 
-class Intra16Predictor
+class Intra16LumaPredictor
 {
 public:
-	Intra16Predictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
-	~Intra16Predictor();
+	Intra16LumaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
+	~Intra16LumaPredictor();
 
-	Intra16LumaPredictionType Decide();
+	void Decide();
 
 	int GetCost() const;
 
 	BlockData<16, 16> GetPredictedData() const;
 
 	BlockData<16, 16, int32_t> GetDiffData() const;
+
+	Intra16LumaPredictionType GetPredictionType() const;
 
 private:
 	void ObtainLeftAndUpInfo();

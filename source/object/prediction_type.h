@@ -6,6 +6,12 @@
 
 __codec_begin
 
+enum class IntraLumaType : uint8_t
+{
+	Intra16 = 0,
+	Intra4
+};
+
 enum class Intra16LumaPredictionType : uint8_t
 {
 	Vertical = 0,

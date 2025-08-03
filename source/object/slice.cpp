@@ -43,9 +43,6 @@ bool Slice::Encode()
 		mb->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
-		//LOGINFO("%d, used_bit_count = %d.", mb_addr, used_bit_count);
-
-		m_cost += mb->GetCost();
 		m_macroblocks.push_back(mb);
 
 		CollectFrameData(mb);
@@ -73,11 +70,6 @@ std::shared_ptr<Macroblock> Slice::GetMacroblock(uint32_t mb_addr)
 	return m_macroblocks[mb_addr];
 }
 
-int Slice::GetCost() const
-{
-	return m_cost;
-}
-
 std::shared_ptr<CavlcContext> Slice::GetCavlcContext()
 {
     return m_cavlc_context;
@@ -91,6 +83,13 @@ int Slice::GetQP() const
 std::shared_ptr<YUVFrame> Slice::GetFrameData()
 {
 	return m_frame_data;
+}
+
+void Slice::RefreshBlockData(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block, const BlockData<4, 4>& block_data)
+{
+	x_in_block = (mb_addr % m_encoder_context->width_in_mb) * 4 + x_in_block;
+	y_in_block = (mb_addr / m_encoder_context->width_in_mb) * 4 + y_in_block;
+	DataUtil::SetData(m_frame_data->y_data, block_data.Convert2DataPtr(), x_in_block * 4, y_in_block * 4, 4, 4, m_encoder_context->width);
 }
 
 void Slice::DeblockFilter()

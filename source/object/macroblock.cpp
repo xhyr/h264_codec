@@ -4,23 +4,10 @@
 #include "yuv_frame.h"
 #include "data_util.h"
 #include "slice.h"
-#include "intra16_luma_predictor.h"
-#include "intra16_luma_transformer.h"
-#include "intra16_luma_quantizer.h"
-#include "inverse_intra16_luma_quantizer.h"
-#include "transform_util.h"
-#include "intra16_luma_reconstructor.h"
-#include "cavlc_coder_luma_16x16.h"
-#include "intra8_chroma_predictor.h"
-#include "intra8_chroma_transformer.h"
-#include "intra8_chroma_quantizer.h"
-#include "inverse_intra8_chroma_quantizer.h"
-#include "intra8_chroma_reconstructor.h"
-#include "cavlc_coder_chroma_8x8.h"
-#include "mb_util.h"
+#include "intra16_luma_flow.h"
+#include "intra4_luma_flow.h"
 #include "bytes_data.h"
-#include "mb_binaryer.h"
-#include "intra4_luma_predictor.h"
+#include "rdo_util.h"
 
 __codec_begin
 
@@ -96,9 +83,14 @@ std::shared_ptr<Macroblock> Macroblock::GetUpMacroblock()
 		return GetMacroblock(m_addr - m_encoder_context->width_in_mb);
 }
 
-BlockData<16, 16> Macroblock::GetOriginalLumaBlockData() const
+BlockData<16, 16> Macroblock::GetOriginalLumaBlockData16x16() const
 {
     return m_luma_data;
+}
+
+BlockData<4, 4> Macroblock::GetOriginalLumaBlockData4x4(uint32_t x_in_block, uint32_t y_in_block) const
+{
+	return m_luma_data.GetBlock4x4<uint8_t>(x_in_block, y_in_block);
 }
 
 BlockData<8, 8> Macroblock::GetOriginalChromaBlockData(PlaneType plane_type) const
@@ -124,11 +116,6 @@ void Macroblock::SetReconstructedLumaBlockData(const BlockData<16, 16>& block_da
 void Macroblock::SetReconstructedChromaBlockData(const BlockData<8, 8>& block_data, PlaneType plane_type)
 {
 	(plane_type == PlaneType::Cb ? m_reconstructed_cb_data : m_reconstructed_cr_data) = block_data;
-}
-
-int Macroblock::GetCost() const
-{
-	return m_luma_cost;
 }
 
 void Macroblock::Init()
@@ -162,163 +149,49 @@ void Macroblock::ObtainOriginalData()
 
 void Macroblock::PreEncode()
 {
-	m_type = MBType::I16;
 	m_neighbors = std::make_unique<MBNeighbors>(shared_from_this(), m_addr, m_encoder_context);
 	
 	auto slice = m_slice.lock();
 	m_qp = slice->GetQP();
+
+	m_encoder_context->lambda = RDOUtil::GetLambda(m_qp);
 }
 
 void Macroblock::DoEncode()
 {
-	//luma
-	auto luma_diff_data = IntraLumaPredict();
-	auto luma_quantizer = TransformAndQuantizeIntra16Luma(luma_diff_data);
-	DoCodeCavlcLuma(luma_quantizer);
-	InverseTransformAndQuantizeIntra16Luma(luma_quantizer);
-	
-	//chroma
-	auto [cb_diff_data, cr_diff_data] = IntraChromaPredict();
-	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
-	for (auto plane_type : plane_types)
+	DecideLumaMode();
+}
+
+void Macroblock::DecideLumaMode()
+{
+	auto intra4_luma_flow = std::make_unique<Intra4LumaFlow>(shared_from_this(), m_encoder_context);
+	intra4_luma_flow->Frontend();
+	int intra4_cost = intra4_luma_flow->GetCost();
+
+	auto intra16_luma_flow = std::make_unique<Intra16LumaFlow>(shared_from_this(), m_encoder_context);
+	intra16_luma_flow->Frontend();
+	int intra16_cost = intra16_luma_flow->GetCost();
+
+	if (intra4_cost <= intra16_cost)
 	{
-		auto diff_data = plane_type == PlaneType::Cb ? cb_diff_data : cr_diff_data;
-		auto quantizer = TransformAndQuantizeIntra8Chroma(diff_data);
-		DoCodeCavlcChroma(quantizer, plane_type);
-		InverseTransformAndQuantizeIntra8Chroma(quantizer, plane_type);
+		m_type = MBType::I4;
+		m_intra4_luma_prediction_types = intra4_luma_flow->GetPredictionTypes();
+		m_intra_luma_flow.reset(intra4_luma_flow.release());
+	}
+	else
+	{
+		m_type = MBType::I16;
+		m_intra16_prediction_type = intra16_luma_flow->GetPredictionType();
+		m_intra_luma_flow.reset(intra16_luma_flow.release());
 	}
 
-	//cbp
-	m_cbp = m_luma_cbp | (m_chroma_cbp << 4);
+	m_reconstructed_luma_data = m_intra_luma_flow->GetReconstructedData();
+	m_luma_cbp = m_intra_luma_flow->GetCBP();
 }
 
 void Macroblock::PostEncode()
 {
-	if(m_type == MBType::I16)
-		m_intra16_offset = MBUtil::CalculateIntra16Offset(m_cbp, m_intra16_luma_prediction_type);
-
-	Convert2Binary();
-}
-
-BlockData<16, 16, int32_t> Macroblock::IntraLumaPredict()
-{
-	Intra4Predictor intra4_predictor(shared_from_this(), m_encoder_context);
-	intra4_predictor.Decide();
 	
-
-	Intra16Predictor intra16_predictor(shared_from_this(), m_encoder_context);
-	m_intra16_luma_prediction_type = intra16_predictor.Decide();
-	m_luma_cost = intra16_predictor.GetCost();
-	m_predicted_luma_data = intra16_predictor.GetPredictedData();
-	return intra16_predictor.GetDiffData();
-}
-
-std::shared_ptr<Intra16LumaQuantizer> Macroblock::TransformAndQuantizeIntra16Luma(const BlockData<16, 16, int32_t>& diff_data)
-{
-	Intra16LumaTransformer transformer(diff_data);
-	transformer.Transform();
-
-	auto quantizer = std::make_shared<Intra16LumaQuantizer>(m_qp, transformer.GetDCBlock(), transformer.GetBlocks());
-	quantizer->Quantize();
-
-	return quantizer;
-}
-
-void Macroblock::DoCodeCavlcLuma(const std::shared_ptr<Intra16LumaQuantizer>& quantizer)
-{
-	CavlcCoderLuma16x16 coder;
-	coder.Code(quantizer->GetDCBlock(), quantizer->GetACBlocks());
-	m_luma_cbp = coder.GetCodedBlockPattern();
-	m_cavlc_data_source.luma_dc = coder.GetDCLevelAndRuns();
-	m_cavlc_data_source.luma_acs = coder.GetACLevelAndRuns();
-}
-
-void Macroblock::InverseTransformAndQuantizeIntra16Luma(const std::shared_ptr<Intra16LumaQuantizer>& quantizer)
-{
-	auto dc_block = quantizer->GetDCBlock();
-	dc_block = TransformUtil::InverseHadamard(dc_block);
-	
-	InverseIntra16LumaQuantizer inverse_quantizer(m_qp, dc_block, quantizer->GetACBlocks());
-	inverse_quantizer.InverseQuantize();
-
-	auto blocks = inverse_quantizer.GetBlocks();
-	for (auto& block : blocks)
-		block = TransformUtil::InverseDCT(block);
-
-	//reconstruct
-	Intra16LumaReconstructor reconstructor(blocks, m_predicted_luma_data);
-	reconstructor.Reconstruct();
-	m_reconstructed_luma_data = reconstructor.GetBlockData();
-}
-
-std::pair<BlockData<8, 8, int32_t>, BlockData<8, 8, int32_t>> Macroblock::IntraChromaPredict()
-{
-	Intra8ChromaPredictor predictor(shared_from_this(), m_encoder_context);
-	m_intra_chroma_prediction_type = predictor.Decide();
-	m_predicted_cb_data = predictor.GetPredictedData(PlaneType::Cb);
-	m_predicted_cr_data = predictor.GetPredictedData(PlaneType::Cr);
-	return std::make_pair(predictor.GetDiffData(PlaneType::Cb), predictor.GetDiffData(PlaneType::Cr));
-}
-
-std::shared_ptr<Intra8ChromaQuantizer> Macroblock::TransformAndQuantizeIntra8Chroma(const BlockData<8, 8, int32_t>& diff_data)
-{
-	Intra8ChromaTransformer transformer(diff_data);
-	transformer.Transform();
-
-	auto quantizer = std::make_shared<Intra8ChromaQuantizer>(m_qp, transformer.GetDCBlock(), transformer.GetBlocks());
-	quantizer->Quantize();
-	return quantizer;
-}
-
-void Macroblock::InverseTransformAndQuantizeIntra8Chroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type)
-{
-	auto dc_block = quantizer->GetDCBlock();
-	dc_block = TransformUtil::InverseHadamard(dc_block);
-
-	InverseIntra8ChromaQuantizer inverse_quantizer(m_qp, dc_block, quantizer->GetACBlocks());
-	inverse_quantizer.InverseQuantize();
-
-	auto blocks = inverse_quantizer.GetBlocks();
-	for (auto& block : blocks)
-		block = TransformUtil::InverseDCT(block);
-
-	Intra8ChromaReconstructor reconstructor(blocks, plane_type == PlaneType::Cb ? m_predicted_cb_data : m_predicted_cr_data);
-	reconstructor.Reconstruct();
-	auto& reconstructed_data = plane_type == PlaneType::Cb ? m_reconstructed_cb_data : m_reconstructed_cr_data;
-	reconstructed_data = reconstructor.GetBlockData();
-}
-
-void Macroblock::DoCodeCavlcChroma(const std::shared_ptr<Intra8ChromaQuantizer>& quantizer, PlaneType plane_type)
-{
-	CavlcCoderChroma8x8 coder;
-	coder.Code(quantizer->GetDCBlock(), quantizer->GetACBlocks());
-	
-	m_chroma_cbp = std::max(m_chroma_cbp, coder.GetCodedBlockPattern());
-
-	if (coder.HasResetCofficients())
-		quantizer->ResetACToZeros();
-
-	if (plane_type == PlaneType::Cb)
-	{
-		m_cavlc_data_source.cb_dc = coder.GetDCLevelAndRuns();
-		m_cavlc_data_source.cb_acs = coder.GetACLevelAndRuns();
-	}
-	else
-	{
-		m_cavlc_data_source.cr_dc = coder.GetDCLevelAndRuns();
-		m_cavlc_data_source.cr_acs = coder.GetACLevelAndRuns();
-	}
-}
-
-void Macroblock::Convert2Binary()
-{
-	MBBinaryer binaryer(m_slice, m_addr, m_bytes_data);
-	binaryer.OutputMBType(m_type, m_intra16_offset);
-	binaryer.OutputChromaPredMode(m_intra_chroma_prediction_type);
-	binaryer.OutputCBP(m_cbp);
-	binaryer.OutputQPDelta(0);
-	binaryer.OutputLumaCoeffs(m_cavlc_data_source);
-	binaryer.OutputChromaCoeffs(m_cavlc_data_source);
 }
 
 uint32_t Macroblock::GetAddress() const
@@ -344,6 +217,16 @@ int Macroblock::GetQP() const
 std::shared_ptr<Slice> Macroblock::GetSlice()
 {
 	return m_slice.lock();
+}
+
+MBType Macroblock::GetType() const
+{
+	return m_type;
+}
+
+Intra4LumaPredictionType Macroblock::GetIntra4LumaPredicionType(uint32_t x_in_block, uint32_t y_in_block) const
+{
+	return m_intra4_luma_prediction_types[x_in_block + 4 * y_in_block];
 }
 
 __codec_end

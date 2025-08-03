@@ -21,6 +21,8 @@ struct EncoderContext
 	std::shared_ptr<YUVFrame> yuv_frame;
 	std::shared_ptr<OStream> out_stream;
 
+	double lambda;
+
 	std::shared_ptr<EncoderConfig> config;
 };
 

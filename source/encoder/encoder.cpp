@@ -43,7 +43,6 @@ bool Encoder::Encode()
 		auto slice = std::make_shared<Slice>();
 		slice->Construct(m_tick, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
 		slice->Encode();
-		auto cost = slice->GetCost();
 
 		slice->Serial(m_context->out_stream);
 

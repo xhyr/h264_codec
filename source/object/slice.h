@@ -5,6 +5,7 @@
 
 #include "slice_type.h"
 #include "slice_header.h"
+#include "block_data.h"
 
 __codec_begin
 
@@ -29,13 +30,13 @@ public:
 
 	std::shared_ptr<Macroblock> GetMacroblock(uint32_t mb_addr);
 
-	int GetCost() const;
-
 	std::shared_ptr<CavlcContext> GetCavlcContext();
 
 	int GetQP() const;
 
 	std::shared_ptr<YUVFrame> GetFrameData();
+
+	void RefreshBlockData(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block, const BlockData<4, 4>& block_data);
 
 private:
 	void DeblockFilter();

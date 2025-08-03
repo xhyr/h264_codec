@@ -113,6 +113,46 @@ BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeAC(int qp, const BlockData
 	return output_block;
 }
 
+BlockData<4, 4, int32_t> QuantizeUtil::QuantizeNormal(int qp, const BlockData<4, 4, int32_t>& block)
+{
+	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
+
+	BlockData<4, 4, int32_t> output_block;
+	for (uint32_t y = 0; y < 4; ++y)
+	{
+		for (uint32_t x = 0; x < 4; ++x)
+		{
+			auto val = block.GetElement(x, y);
+			auto ac_factor = QuantizeConstants::s_quant_matrix[qp_rem][y][x];
+			auto positive_val = abs(val);
+			positive_val = (positive_val * ac_factor + qp_offset) >> qp_bits;
+			val = val >= 0 ? positive_val : -positive_val;
+			output_block.SetElement(x, y, val);
+		}
+	}
+
+	return output_block;
+}
+
+BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeNormal(int qp, const BlockData<4, 4, int32_t>& block)
+{
+	auto [qp_per, qp_rem] = GetInverseQuantizeParameters(qp);
+
+	BlockData<4, 4, int32_t> output_block;
+	for (uint32_t y = 0; y < 4; ++y)
+	{
+		for (uint32_t x = 0; x < 4; ++x)
+		{
+			auto val = block.GetElement(x, y);
+			auto ac_factor = QuantizeConstants::s_dequant_matrix[qp_rem][y][x];
+			val = (val * ac_factor) << qp_per;
+			output_block.SetElement(x, y, val);
+		}
+	}
+
+	return output_block;
+}
+
 std::tuple<int, int, int> QuantizeUtil::GetQuantizeParameters(int qp, bool is_intra) 
 {
 	int qp_per = qp / 6;

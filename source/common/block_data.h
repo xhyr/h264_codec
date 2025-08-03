@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <algorithm>
 #include <memory>
 #include <numeric>
 #include <vector>
@@ -78,13 +79,21 @@ public:
 		return down_data;
 	}
 
-	BlockData<4, 4, int32_t> GetBlock4x4(uint32_t x_in_block, uint32_t y_in_block) const
+	template<typename out_type = int32_t>
+	BlockData<4, 4, out_type> GetBlock4x4(uint32_t x_in_block, uint32_t y_in_block) const
 	{
-		BlockData<4, 4, int32_t> result;
+		BlockData<4, 4, out_type> result;
 		for (uint32_t y = 4 * y_in_block; y < 4 * y_in_block + 4; ++y)
 			for (uint32_t x = 4 * x_in_block; x < 4 * x_in_block + 4; ++x)
 				result.SetElement(x - 4 * x_in_block, y - 4 * y_in_block, GetElement(x, y));
 		return result;
+	}
+
+	void SetBlock4x4(uint32_t x_in_block, uint32_t y_in_block, const BlockData<4, 4, Ty>& block_data)
+	{
+		for (uint32_t y = 4 * y_in_block; y < 4 * y_in_block + 4; ++y)
+			for (uint32_t x = 4 * x_in_block; x < 4 * x_in_block + 4; ++x)
+				m_data[x + y * Width] = block_data.GetElement(x - 4 * x_in_block, y - 4 * y_in_block);
 	}
 
 	int GetSum() const
@@ -107,6 +116,11 @@ public:
 		std::shared_ptr<Ty[]> data_ptr(new Ty[Width * Height]);
 		std::copy(m_data.begin(), m_data.end(), data_ptr.get());
 		return data_ptr;
+	}
+
+	bool AllEqual(Ty value) const
+	{
+		return std::all_of(m_data.begin(), m_data.end(), [value](Ty input) {return input == value; });
 	}
 
 private:

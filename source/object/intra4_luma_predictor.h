@@ -13,27 +13,68 @@ __codec_begin
 
 class Macroblock;
 struct EncoderContext;
+class BlockNeighbors;
+struct NeighborEdgeData;
 
-class Intra4Predictor
+class Intra4LumaPredictor
 {
 public:
-	Intra4Predictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
-	~Intra4Predictor();
+	Intra4LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t x_in_block, uint8_t y_in_block, const BlockData<16, 16>& reconstructed_data, const std::vector<Intra4LumaPredictionType>& prediction_tpyes);
+	~Intra4LumaPredictor();
 
-	std::vector<Intra4LumaPredictionType> Decide();
+	void Decide();
+
+	BlockData<4, 4> GetPredictedData() const;
+
+	BlockData<4, 4, int32_t> GetDiffData() const;
 
 	int GetCost() const;
 
-private:
-	Intra4LumaPredictionType Decide(uint8_t index_in_block8x8, uint8_t block_index);
-
-	void ObtainNeighborBlocksInfo();
+	Intra4LumaPredictionType GetPredictionType() const;
 
 private:
-	std::weak_ptr<Macroblock> m_mb;
+	void CalculateProbablePredictionType();
+
+	void CalculateAllPredictionData();
+
+	void CalculateVerticalMode();
+
+	void CalculateHorizontalMode();
+
+	void CalculateDCMode();
+
+	void CalculateDownLeftMode();
+
+	void CalculateDownRightMode();
+
+	void CalculateVerticalRightMode();
+
+	void CalculateHorizontalDownMode();
+
+	void CalculateVerticalLeftMode();
+
+	void CalculateHorizontalUpMode();
+
+	void DecideBySATD(uint32_t x_in_block, uint32_t y_in_block);
+
+private:
+	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
+	uint8_t m_x_in_block;
+	uint8_t m_y_in_block;
 
-	
+	std::unique_ptr<BlockNeighbors> m_block_neighbors;
+	std::shared_ptr<NeighborEdgeData> m_edge_data;
+
+	std::unordered_map<Intra4LumaPredictionType, BlockData<4, 4>> m_predicted_data_map;
+
+	Intra4LumaPredictionType m_probable_prediction_type;
+	Intra4LumaPredictionType m_prediction_type;
+	BlockData<4, 4> m_predicted_data;
+	BlockData<4, 4, int32_t> m_diff_data;
+	const BlockData<16, 16>& m_reconstructed_data;
+	const std::vector<Intra4LumaPredictionType> m_prediction_types;
+	int m_cost;
 };
 
 __codec_end

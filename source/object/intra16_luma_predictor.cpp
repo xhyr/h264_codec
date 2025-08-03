@@ -9,39 +9,43 @@
 
 __codec_begin
 
-Intra16Predictor::Intra16Predictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context):
+Intra16LumaPredictor::Intra16LumaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context):
 	m_mb(macroblock), m_encoder_context(encoder_context)
 {
 }
 
-Intra16Predictor::~Intra16Predictor()
+Intra16LumaPredictor::~Intra16LumaPredictor()
 {
 }
 
-Intra16LumaPredictionType Intra16Predictor::Decide()
+void Intra16LumaPredictor::Decide()
 {
 	ObtainLeftAndUpInfo();
 	CalculateAllPredictionData();
 	DecideBySATD();
-	return m_prediction_type;
 }
 
-int Intra16Predictor::GetCost() const
+int Intra16LumaPredictor::GetCost() const
 {
 	return m_cost;
 }
 
-BlockData<16, 16> Intra16Predictor::GetPredictedData() const
+BlockData<16, 16> Intra16LumaPredictor::GetPredictedData() const
 {
 	return m_predicted_data;
 }
 
-BlockData<16, 16, int32_t> Intra16Predictor::GetDiffData() const
+BlockData<16, 16, int32_t> Intra16LumaPredictor::GetDiffData() const
 {
 	return m_diff_data;
 }
 
-void Intra16Predictor::ObtainLeftAndUpInfo()
+Intra16LumaPredictionType Intra16LumaPredictor::GetPredictionType() const
+{
+	return m_prediction_type;
+}
+
+void Intra16LumaPredictor::ObtainLeftAndUpInfo()
 {
 	auto mb = m_mb.lock();
 
@@ -50,7 +54,7 @@ void Intra16Predictor::ObtainLeftAndUpInfo()
 	m_up_available = !m_up_data.empty();
 }
 
-void Intra16Predictor::CalculateAllPredictionData()
+void Intra16LumaPredictor::CalculateAllPredictionData()
 {
 	CalculateVerticalMode();
 	CalculateHorizontalMode();
@@ -58,7 +62,7 @@ void Intra16Predictor::CalculateAllPredictionData()
 	CalculatePlaneMode();
 }
 
-void Intra16Predictor::CalculateVerticalMode()
+void Intra16LumaPredictor::CalculateVerticalMode()
 {
 	if (!m_up_available)
 		return;
@@ -68,7 +72,7 @@ void Intra16Predictor::CalculateVerticalMode()
 		block_data.SetElementInRow(y, m_up_data);
 }
 
-void Intra16Predictor::CalculateHorizontalMode()
+void Intra16LumaPredictor::CalculateHorizontalMode()
 {
 	if (!m_left_available)
 		return;
@@ -78,7 +82,7 @@ void Intra16Predictor::CalculateHorizontalMode()
 		block_data.SetElementInColumn(x, std::vector<uint8_t>(m_left_data.begin(), m_left_data.end()));
 }
 
-void Intra16Predictor::CalculateDCMode()
+void Intra16LumaPredictor::CalculateDCMode()
 {
 	uint8_t dc_value = CommonConstantValues::s_default_color_value;
 	if (m_left_available && m_up_available)
@@ -102,7 +106,7 @@ void Intra16Predictor::CalculateDCMode()
 	block_data.SetElementAll(dc_value);
 }
 
-void Intra16Predictor::CalculatePlaneMode()
+void Intra16LumaPredictor::CalculatePlaneMode()
 {
 	if (!m_left_available || !m_up_available)
 		return;
@@ -133,10 +137,10 @@ void Intra16Predictor::CalculatePlaneMode()
 	}
 }
 
-void Intra16Predictor::DecideBySATD()
+void Intra16LumaPredictor::DecideBySATD()
 {
 	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetOriginalLumaBlockData();
+	auto original_block_data = mb->GetOriginalLumaBlockData16x16();
 
 	int min_satd = -1;
 	Intra16LumaPredictionType best_prediction_type = Intra16LumaPredictionType::DC;
@@ -147,8 +151,8 @@ void Intra16Predictor::DecideBySATD()
 		if (m_predicted_data_map.find(prediction_type) == m_predicted_data_map.end())
 			continue;
 
-		auto predicted_data = m_predicted_data_map[prediction_type];
-		auto diff_data = origin_block_data - predicted_data;
+		const auto& predicted_data = m_predicted_data_map[prediction_type];
+		auto diff_data = original_block_data - predicted_data;
 		auto satd = CostUtil::CalculateSATD(diff_data);
 		if (min_satd == -1 || satd < min_satd)
 		{
@@ -163,10 +167,10 @@ void Intra16Predictor::DecideBySATD()
 	m_cost = min_satd;
 }
 
-void Intra16Predictor::DecideBySAD()
+void Intra16LumaPredictor::DecideBySAD()
 {
 	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetOriginalLumaBlockData();
+	auto origin_block_data = mb->GetOriginalLumaBlockData16x16();
 
 	int min_sad = -1;
 	Intra16LumaPredictionType best_prediction_type = Intra16LumaPredictionType::DC;

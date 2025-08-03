@@ -15,4 +15,4 @@ level_idc = 30
 
 ref_frame_number = 10
 
-qp = 26
+qp = 28
