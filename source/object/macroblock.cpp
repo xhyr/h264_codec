@@ -8,6 +8,7 @@
 #include "intra4_luma_flow.h"
 #include "bytes_data.h"
 #include "rdo_util.h"
+#include "chroma_flow.h"
 
 __codec_begin
 
@@ -160,6 +161,7 @@ void Macroblock::PreEncode()
 void Macroblock::DoEncode()
 {
 	DecideLumaMode();
+	DecideChromaMode();
 }
 
 void Macroblock::DecideLumaMode()
@@ -187,6 +189,15 @@ void Macroblock::DecideLumaMode()
 
 	m_reconstructed_luma_data = m_intra_luma_flow->GetReconstructedData();
 	m_luma_cbp = m_intra_luma_flow->GetCBP();
+}
+
+void Macroblock::DecideChromaMode()
+{
+	m_chroma_flow = std::make_unique<ChromaFlow>(shared_from_this(), m_encoder_context);
+	m_chroma_flow->Frontend();
+	m_reconstructed_cb_data = m_chroma_flow->GetReconstructedData(PlaneType::Cb);
+	m_reconstructed_cr_data = m_chroma_flow->GetReconstructedData(PlaneType::Cr);
+	m_chroma_cbp = m_chroma_flow->GetCBP();
 }
 
 void Macroblock::PostEncode()

@@ -30,4 +30,21 @@ BlockData<16, 16> ReconstructUtil::Reconstruct(const std::vector<BlockData<4, 4,
 	return reconstructed_data;
 }
 
+BlockData<8, 8> ReconstructUtil::Reconstruct(const std::vector<BlockData<4, 4, int32_t>>& residual_blocks, const BlockData<8, 8>& predicted_data)
+{
+	BlockData<8, 8> reconstructed_data;
+	for (uint32_t y = 0; y < 8; ++y)
+	{
+		for (uint32_t x = 0; x < 8; ++x)
+		{
+			auto predicted_val = predicted_data.GetElement(x, y);
+			uint32_t block_index = (y / 4) * 2 + x / 4;
+			auto residual_val = residual_blocks[block_index].GetElement(x % 4, y % 4);
+			auto val = Reconstruct(predicted_val, residual_val);
+			reconstructed_data.SetElement(x, y, val);
+		}
+	}
+	return reconstructed_data;
+}
+
 __codec_end

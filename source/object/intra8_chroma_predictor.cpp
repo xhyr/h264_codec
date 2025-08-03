@@ -18,7 +18,7 @@ Intra8ChromaPredictor::~Intra8ChromaPredictor()
 {
 }
 
-IntraChromaPredictionType Intra8ChromaPredictor::Decide()
+void Intra8ChromaPredictor::Decide()
 {
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
 	for (auto plane_type : plane_types)
@@ -27,6 +27,10 @@ IntraChromaPredictionType Intra8ChromaPredictor::Decide()
 		CalculateAllPredictionData(plane_type);
 	}
 	DecideBySATD();
+}
+
+IntraChromaPredictionType Intra8ChromaPredictor::GetPredictionType() const
+{
 	return m_prediction_type;
 }
 

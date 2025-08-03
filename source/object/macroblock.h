@@ -18,6 +18,7 @@ class Slice;
 struct EncoderContext;
 class BytesData;
 class IntraLumaFlowBase;
+class ChromaFlow;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -82,6 +83,8 @@ private:
 
 	void DecideLumaMode();
 
+	void DecideChromaMode();
+
 	void PostEncode();
 
 private:
@@ -109,6 +112,7 @@ private:
 	BlockData<8, 8> m_cr_data;
 
 	std::unique_ptr<IntraLumaFlowBase> m_intra_luma_flow;
+	std::unique_ptr<ChromaFlow> m_chroma_flow;
 
 	std::shared_ptr<BytesData> m_bytes_data;
 };

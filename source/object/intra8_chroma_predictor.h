@@ -21,7 +21,9 @@ public:
 	Intra8ChromaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
 	~Intra8ChromaPredictor();
 
-	IntraChromaPredictionType Decide();
+	void Decide();
+
+	IntraChromaPredictionType GetPredictionType() const;
 
 	int GetCost() const;
 
