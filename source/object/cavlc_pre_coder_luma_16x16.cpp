@@ -1,10 +1,10 @@
-#include "cavlc_coder_luma_16x16.h"
+#include "cavlc_pre_coder_luma_16x16.h"
 
 #include "cavlc_constant_values.h"
 
 __codec_begin
 
-void CavlcCoderLuma16x16::Code(const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>> ac_blocks)
+void CavlcPreCoderLuma16x16::Code(const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>> ac_blocks)
 {
 	CodeDCBlock(dc_block);
 	
@@ -13,22 +13,22 @@ void CavlcCoderLuma16x16::Code(const BlockData<4, 4, int32_t>& dc_block, const s
 		CodeACBlock(block_index, ac_blocks[block_index]);
 }
 
-uint8_t CavlcCoderLuma16x16::GetCodedBlockPattern() const
+uint8_t CavlcPreCoderLuma16x16::GetCodedBlockPattern() const
 {
 	return m_coded_block_pattern;
 }
 
-LevelAndRuns CavlcCoderLuma16x16::GetDCLevelAndRuns() const
+LevelAndRuns CavlcPreCoderLuma16x16::GetDCLevelAndRuns() const
 {
 	return m_dc_level_runs;
 }
 
-std::vector<LevelAndRuns> CavlcCoderLuma16x16::GetACLevelAndRuns() const
+std::vector<LevelAndRuns> CavlcPreCoderLuma16x16::GetACLevelAndRuns() const
 {
 	return m_ac_level_runs;
 }
 
-void CavlcCoderLuma16x16::CodeDCBlock(const BlockData<4, 4, int32_t>& dc_block)
+void CavlcPreCoderLuma16x16::CodeDCBlock(const BlockData<4, 4, int32_t>& dc_block)
 {
 	int run = -1;
 	for (uint32_t index = 0; index < 16; ++index)
@@ -45,7 +45,7 @@ void CavlcCoderLuma16x16::CodeDCBlock(const BlockData<4, 4, int32_t>& dc_block)
 	}
 }
 
-void CavlcCoderLuma16x16::CodeACBlock(uint32_t block_index, const BlockData<4, 4, int32_t>& ac_block)
+void CavlcPreCoderLuma16x16::CodeACBlock(uint32_t block_index, const BlockData<4, 4, int32_t>& ac_block)
 {
 	int run = -1;
 	auto& level_runs = m_ac_level_runs[block_index];

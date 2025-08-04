@@ -1,10 +1,10 @@
-#include "cavlc_coder_luma_4x4.h"
+#include "cavlc_pre_coder_luma_4x4.h"
 
 #include "cavlc_constant_values.h"
 
 __codec_begin
 
-void CavlcCoderLuma4x4::Code(const BlockData<4, 4, int32_t>& block)
+void CavlcPreCoderLuma4x4::Code(const BlockData<4, 4, int32_t>& block)
 {
 	int run = -1;
 	for (uint32_t index = 0; index < 16; ++index)
@@ -21,7 +21,7 @@ void CavlcCoderLuma4x4::Code(const BlockData<4, 4, int32_t>& block)
 	}
 }
 
-LevelAndRuns CavlcCoderLuma4x4::GetLevelAndRuns() const
+LevelAndRuns CavlcPreCoderLuma4x4::GetLevelAndRuns() const
 {
 	return m_level_runs;
 }

@@ -61,14 +61,15 @@ void Intra4LumaPredictor::CalculateMostProbablePredictionType()
 	Intra4LumaPredictionType pred_mode_a, pred_mode_b;
 	if (dc_pred_mode_predicted_flag == 1 || m_block_neighbors->GetLeftMBType() != MBType::I4)
 		pred_mode_a = Intra4LumaPredictionType::DC;
+
 	if (dc_pred_mode_predicted_flag == 1 || m_block_neighbors->GetUpMBType() != MBType::I4)
 		pred_mode_b = Intra4LumaPredictionType::DC;
 
-	if (dc_pred_mode_predicted_flag == 0)
-	{
+	if (dc_pred_mode_predicted_flag == 0 && m_block_neighbors->GetLeftMBType() == MBType::I4)
 		pred_mode_a = m_block_neighbors->GetLeftPredictionType();
+		
+	if (dc_pred_mode_predicted_flag == 0 && m_block_neighbors->GetUpMBType() == MBType::I4)
 		pred_mode_b = m_block_neighbors->GetUpPredictionType();
-	}
 
 	m_most_probable_prediction_type = std::min(pred_mode_a, pred_mode_b);
 }

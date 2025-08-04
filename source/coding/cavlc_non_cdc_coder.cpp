@@ -35,6 +35,12 @@ void CavlcNonCdcCoder::CodeLumaACs(const std::vector<LevelAndRuns>& inputs)
 	}
 }
 
+void CavlcNonCdcCoder::CodeNormalLuma(uint8_t block_index, const LevelAndRuns& input)
+{
+	m_block_index = block_index;
+	DoCode(input, CavlcDataType::NormalLuma);
+}
+
 void CavlcNonCdcCoder::CodeChromaACs(CavlcDataType data_type, const std::vector<LevelAndRuns>& inputs)
 {
 	for (uint32_t index = 0; index < inputs.size(); ++index)

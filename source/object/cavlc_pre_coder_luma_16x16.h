@@ -5,7 +5,7 @@
 
 __codec_begin
 
-class CavlcCoderLuma16x16
+class CavlcPreCoderLuma16x16
 {
 public:
 	void Code(const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>> ac_blocks);

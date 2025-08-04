@@ -1,10 +1,10 @@
-#include "cavlc_coder_chroma_8x8.h"
+#include "cavlc_pre_coder_chroma_8x8.h"
 
 #include "cavlc_constant_values.h"
 
 __codec_begin
 
-void CavlcCoderChroma8x8::Code(const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>> ac_blocks)
+void CavlcPreCoderChroma8x8::Code(const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>> ac_blocks)
 {
 	CodeDCBlock(dc_block);
 	
@@ -19,27 +19,27 @@ void CavlcCoderChroma8x8::Code(const BlockData<2, 2, int32_t>& dc_block, const s
 		m_coded_block_pattern = 2;
 }
 
-uint8_t CavlcCoderChroma8x8::GetCodedBlockPattern() const
+uint8_t CavlcPreCoderChroma8x8::GetCodedBlockPattern() const
 {
 	return m_coded_block_pattern;
 }
 
-bool CavlcCoderChroma8x8::HasResetCofficients() const
+bool CavlcPreCoderChroma8x8::HasResetCofficients() const
 {
 	return m_has_reset_coefficients;
 }
 
-LevelAndRuns CavlcCoderChroma8x8::GetDCLevelAndRuns() const
+LevelAndRuns CavlcPreCoderChroma8x8::GetDCLevelAndRuns() const
 {
     return m_dc_level_runs;
 }
 
-std::vector<LevelAndRuns> CavlcCoderChroma8x8::GetACLevelAndRuns() const
+std::vector<LevelAndRuns> CavlcPreCoderChroma8x8::GetACLevelAndRuns() const
 {
 	return m_ac_level_runs;
 }
 
-void CavlcCoderChroma8x8::CodeDCBlock(const BlockData<2, 2, int32_t>& dc_block)
+void CavlcPreCoderChroma8x8::CodeDCBlock(const BlockData<2, 2, int32_t>& dc_block)
 {
 	int run = -1;
 	for (uint32_t index = 0; index < 4; ++index)
@@ -56,7 +56,7 @@ void CavlcCoderChroma8x8::CodeDCBlock(const BlockData<2, 2, int32_t>& dc_block)
 	}
 }
 
-void CavlcCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4, 4, int32_t>& ac_block)
+void CavlcPreCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4, 4, int32_t>& ac_block)
 {
 	int run = -1;
 	auto& level_runs = m_ac_level_runs[block_index];
@@ -81,7 +81,7 @@ void CavlcCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4, 4
 	}
 }
 
-void CavlcCoderChroma8x8::CheckACCoefficients()
+void CavlcPreCoderChroma8x8::CheckACCoefficients()
 {
 	m_has_reset_coefficients = false;
 	if (m_coeff_cost < CavlcConstantValues::s_chroma_coeff_cost_threshold)

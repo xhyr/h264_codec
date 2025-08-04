@@ -60,6 +60,7 @@ void Intra4LumaFlow::OutputPredictionTypes(std::shared_ptr<BytesData> bytes_data
 
 uint32_t Intra4LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
+	uint32_t bit_count = 0;
 	for (uint8_t index_in_block8x8 = 0; index_in_block8x8 < 4; ++index_in_block8x8)
 	{
 		if ((m_cbp & (1 << index_in_block8x8)) == 0)
@@ -68,9 +69,10 @@ uint32_t Intra4LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_dat
 		for (uint8_t index_in_block4x4 = 0; index_in_block4x4 < 4; ++index_in_block4x4)
 		{
 			auto node = m_nodes[index_in_block8x8 * 4 + index_in_block4x4];
-			node->OutputCoefficients(bytes_data);
+			bit_count += node->OutputCoefficients(bytes_data);
 		}
 	}
+	return bit_count;
 }
 
 std::vector<Intra4LumaPredictionType> Intra4LumaFlow::GetPredictionTypes() const

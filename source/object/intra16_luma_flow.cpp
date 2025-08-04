@@ -7,6 +7,10 @@
 #include "inverse_intra16_luma_quantizer.h"
 #include "transform_util.h"
 #include "reconstruct_util.h"
+#include "cavlc_pre_coder_luma_16x16.h"
+#include "cavlc_non_cdc_coder.h"
+#include "encoder_context.h"
+#include "bytes_data.h"
 
 __codec_begin
 
@@ -29,8 +33,18 @@ void Intra16LumaFlow::Frontend()
 
 uint32_t Intra16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
+	CavlcPreCoderLuma16x16 pre_coder;
+	pre_coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
 
-	return 0;
+	auto start_bits_count = bytes_data->GetBitsCount();
+
+	CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+	coder.CodeLumaDC(pre_coder.GetDCLevelAndRuns());
+	if (m_cbp & 15)
+		coder.CodeLumaACs(pre_coder.GetACLevelAndRuns());
+
+	auto finish_bits_count = bytes_data->GetBitsCount();
+	return finish_bits_count - start_bits_count;
 }
 
 Intra16LumaPredictionType Intra16LumaFlow::GetPredictionType() const

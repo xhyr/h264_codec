@@ -21,6 +21,8 @@ public:
 
 	void CodeLumaACs(const std::vector<LevelAndRuns>& inputs);
 
+	void CodeNormalLuma(uint8_t block_index, const LevelAndRuns& input);
+
 	void CodeChromaACs(CavlcDataType data_type, const std::vector<LevelAndRuns>& inputs);
 
 private:

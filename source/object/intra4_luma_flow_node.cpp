@@ -6,7 +6,10 @@
 #include "quantize_util.h"
 #include "math_util.h"
 #include "reconstruct_util.h"
-#include "cavlc_coder_luma_4x4.h"
+#include "cavlc_pre_coder_luma_4x4.h"
+#include "cavlc_non_cdc_coder.h"
+#include "encoder_context.h"
+#include "bytes_data.h"
 
 __codec_begin
 
@@ -53,11 +56,17 @@ Intra4LumaPredictionType Intra4LumaFlowNode::GetPredictionType() const
 
 uint32_t Intra4LumaFlowNode::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
-	CavlcCoderLuma4x4 coder;
-	coder.Code(m_diff_data);
-	auto level_and_runs = coder.GetLevelAndRuns();
+	CavlcPreCoderLuma4x4 pre_coder;
+	pre_coder.Code(m_residual_data);
+	auto level_and_runs = pre_coder.GetLevelAndRuns();
 
-	return 0;
+	auto start_bits_count = bytes_data->GetBitsCount();
+
+	CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+	coder.CodeNormalLuma(m_x_in_block + 4 * m_y_in_block, level_and_runs);
+
+	auto finish_bits_count = bytes_data->GetBitsCount();
+	return finish_bits_count - start_bits_count;
 }
 
 void Intra4LumaFlowNode::Predict()
@@ -78,6 +87,7 @@ void Intra4LumaFlowNode::Quantize()
 {
 	auto qp = m_mb->GetQP();
 	m_diff_data = QuantizeUtil::QuantizeNormal(qp, m_diff_data);
+	m_residual_data = m_diff_data;
 	m_is_all_zero &= m_diff_data.AllEqual(0);
 }
 

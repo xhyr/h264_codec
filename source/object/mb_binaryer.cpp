@@ -56,35 +56,4 @@ void MBBinaryer::OutputQPDelta(int qp_delta)
 	CodingUtil::SE_V(qp_delta, m_bytes_data);
 }
 
-void MBBinaryer::OutputLumaCoeffs(const CavlcDataSource& data_source)
-{
-	auto slice = m_slice.lock();
-
-	CavlcNonCdcCoder non_cdc_coder(m_mb_addr, slice->GetCavlcContext(), m_bytes_data);
-	non_cdc_coder.CodeLumaDC(data_source.luma_dc);
-	if (m_cbp & 15)
-		non_cdc_coder.CodeLumaACs(data_source.luma_acs);
-}
-
-void MBBinaryer::OutputChromaCoeffs(const CavlcDataSource& data_source)
-{
-	auto slice = m_slice.lock();
-
-	//chroma dc
-	if (m_cbp > 15)
-	{
-		CavlcCdcCoder cdc_coder(m_mb_addr, slice->GetCavlcContext(), m_bytes_data);
-		cdc_coder.CodeChromaDC(CavlcDataType::CbDC, data_source.cb_dc);
-		cdc_coder.CodeChromaDC(CavlcDataType::CrDC, data_source.cr_dc);
-	}
-
-	//chroma ac
-	if ((m_cbp >> 4) == 2)
-	{
-		CavlcNonCdcCoder non_cdc_coder(m_mb_addr, slice->GetCavlcContext(), m_bytes_data);
-		non_cdc_coder.CodeChromaACs(CavlcDataType::CbAC, data_source.cb_acs);
-		non_cdc_coder.CodeChromaACs(CavlcDataType::CrAC, data_source.cr_acs);
-	}
-}
-
 __codec_end

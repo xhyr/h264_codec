@@ -54,6 +54,7 @@ private:
 
 	std::unique_ptr<Intra4LumaPredictor> m_predictor;
 	BlockData<4, 4, int32_t> m_diff_data;
+	BlockData<4, 4, int32_t> m_residual_data;
 	bool m_is_all_zero{ true };
 };
 

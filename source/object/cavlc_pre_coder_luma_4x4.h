@@ -5,7 +5,7 @@
 
 __codec_begin
 
-class CavlcCoderLuma4x4
+class CavlcPreCoderLuma4x4
 {
 public:
 	void Code(const BlockData<4, 4, int32_t>& block);

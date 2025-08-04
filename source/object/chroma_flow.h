@@ -7,6 +7,7 @@
 #include "block_data.h"
 #include "prediction_type.h"
 #include "common_types.h"
+#include "cavlc_types.h"
 
 __codec_begin
 
@@ -14,6 +15,7 @@ class Macroblock;
 struct EncoderContext;
 class Intra8ChromaPredictor;
 class Intra8ChromaQuantizer;
+class BytesData;
 
 class ChromaFlow
 {
@@ -23,15 +25,13 @@ public:
 
 	void Frontend();
 
-	void Backend();
-
 	IntraChromaPredictionType GetPredictionType() const;
 
 	BlockData<8, 8> GetReconstructedData(PlaneType plane_type);
 
 	uint8_t GetCBP() const;
 
-	uint32_t OutputCoefficients(std::shared_ptr<BinaryBlock>& binary_block);
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> binary_block);
 
 private:
 	void Predict();
@@ -52,6 +52,8 @@ protected:
 	std::unordered_map<PlaneType, BlockData<8, 8>> m_reconstructed_data_map;
 	uint8_t m_cbp{ 0 };
 	std::vector<BlockData<4, 4, int32_t>> m_diff_blocks;
+
+	CavlcDataSource m_cavlc_data_source;
 };
 
 __codec_end

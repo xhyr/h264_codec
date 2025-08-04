@@ -30,7 +30,7 @@ void Slice::Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> 
 
 bool Slice::Encode()
 {
-	m_cavlc_context = std::make_shared<CavlcContext>(m_encoder_context->width_in_mb, m_encoder_context->height_in_mb);
+	m_encoder_context->cavlc_context = std::make_shared<CavlcContext>(m_encoder_context->width_in_mb, m_encoder_context->height_in_mb);
 	m_frame_data = std::make_shared<YUVFrame>(m_encoder_context->width, m_encoder_context->height);
 
 	m_bytes_data = m_header.Convert2BytesData();
@@ -68,11 +68,6 @@ void Slice::Serial(std::shared_ptr<OStream> ostream)
 std::shared_ptr<Macroblock> Slice::GetMacroblock(uint32_t mb_addr)
 {
 	return m_macroblocks[mb_addr];
-}
-
-std::shared_ptr<CavlcContext> Slice::GetCavlcContext()
-{
-    return m_cavlc_context;
 }
 
 int Slice::GetQP() const

@@ -27,10 +27,6 @@ public:
 
 	void OutputQPDelta(int qp_delta);
 
-	void OutputLumaCoeffs(const CavlcDataSource& data_source);
-
-	void OutputChromaCoeffs(const CavlcDataSource& data_source);
-
 private:
 	std::weak_ptr<Slice> m_slice;
 	uint32_t m_mb_addr;

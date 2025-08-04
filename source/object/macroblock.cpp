@@ -170,6 +170,9 @@ void Macroblock::DoEncode()
 
 void Macroblock::DecideLumaMode()
 {
+	if (m_addr == 16)
+		int sb = 1;
+
 	auto intra4_luma_flow = std::make_unique<Intra4LumaFlow>(shared_from_this(), m_encoder_context);
 	intra4_luma_flow->Frontend();
 	int intra4_cost = intra4_luma_flow->GetCost();
@@ -206,8 +209,6 @@ void Macroblock::DecideChromaMode()
 
 void Macroblock::PostEncode()
 {
-	m_bytes_data = std::make_shared<BytesData>();
-
 	MBBinaryer mb_binaryer(m_slice, m_addr, m_bytes_data);
 	if (m_type == MBType::I16)
 	{
@@ -223,6 +224,7 @@ void Macroblock::PostEncode()
 	mb_binaryer.OutputQPDelta(0);
 	
 	m_intra_luma_flow->OutputCoefficients(m_bytes_data);
+	m_chroma_flow->OutputCoefficients(m_bytes_data);
 }
 
 uint32_t Macroblock::GetAddress() const

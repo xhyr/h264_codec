@@ -30,8 +30,6 @@ public:
 
 	std::shared_ptr<Macroblock> GetMacroblock(uint32_t mb_addr);
 
-	std::shared_ptr<CavlcContext> GetCavlcContext();
-
 	int GetQP() const;
 
 	std::shared_ptr<YUVFrame> GetFrameData();
@@ -52,7 +50,6 @@ private:
 	SliceHeader m_header;
 	std::vector<std::shared_ptr<Macroblock>> m_macroblocks;
 	int m_cost{ 0 };
-	std::shared_ptr<CavlcContext> m_cavlc_context;
 	int m_qp;
 	std::shared_ptr<BytesData> m_bytes_data;
 	std::shared_ptr<YUVFrame> m_frame_data;

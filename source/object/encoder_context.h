@@ -9,6 +9,7 @@ __codec_begin
 
 struct YUVFrame;
 class OStream;
+class CavlcContext;
 struct EncoderConfig;
 
 struct EncoderContext
@@ -22,6 +23,7 @@ struct EncoderContext
 	std::shared_ptr<OStream> out_stream;
 
 	double lambda;
+	std::shared_ptr<CavlcContext> cavlc_context;
 
 	std::shared_ptr<EncoderConfig> config;
 };

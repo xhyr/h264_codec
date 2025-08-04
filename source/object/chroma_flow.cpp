@@ -7,9 +7,13 @@
 #include "intra8_chroma_quantizer.h"
 #include "inverse_intra8_chroma_quantizer.h"
 #include "macroblock.h"
-#include "cavlc_coder_chroma_8x8.h"
+#include "cavlc_pre_coder_chroma_8x8.h"
 #include "transform_util.h"
 #include "reconstruct_util.h"
+#include "cavlc_cdc_coder.h"
+#include "cavlc_non_cdc_coder.h"
+#include "encoder_context.h"
+#include "bytes_data.h"
 
 __codec_begin
 
@@ -33,11 +37,6 @@ void ChromaFlow::Frontend()
 	}
 }
 
-void ChromaFlow::Backend()
-{
-
-}
-
 IntraChromaPredictionType ChromaFlow::GetPredictionType() const
 {
 	return m_predictor->GetPredictionType();
@@ -51,6 +50,31 @@ BlockData<8, 8> ChromaFlow::GetReconstructedData(PlaneType plane_type)
 uint8_t ChromaFlow::GetCBP() const
 {
 	return m_cbp;
+}
+
+uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
+{
+	CavlcPreCoderChroma8x8 pre_coder;
+	pre_coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
+
+	auto start_bits_count = bytes_data->GetBitsCount();
+
+	if (m_cbp > 0)
+	{
+		CavlcCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+		coder.CodeChromaDC(CavlcDataType::CbDC, m_cavlc_data_source.cb_dc);
+		coder.CodeChromaDC(CavlcDataType::CrDC, m_cavlc_data_source.cr_dc);
+	}
+
+	if (m_cbp > 1)
+	{
+		CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+		coder.CodeChromaACs(CavlcDataType::CbAC, m_cavlc_data_source.cb_acs);
+		coder.CodeChromaACs(CavlcDataType::CrAC, m_cavlc_data_source.cr_acs);
+	}
+
+	auto finish_bits_count = bytes_data->GetBitsCount();
+	return finish_bits_count - start_bits_count;
 }
 
 void ChromaFlow::Predict()
@@ -69,13 +93,25 @@ void ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	m_quantizer = std::make_unique<Intra8ChromaQuantizer>(qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
-	CavlcCoderChroma8x8 coder;
+	CavlcPreCoderChroma8x8 coder;
 	coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
 
 	m_cbp = std::max(m_cbp, coder.GetCodedBlockPattern());
 
 	if (coder.HasResetCofficients())
 		m_quantizer->ResetACToZeros();
+
+	coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
+	if (plane_type == PlaneType::Cb)
+	{
+		m_cavlc_data_source.cb_dc = coder.GetDCLevelAndRuns();
+		m_cavlc_data_source.cb_acs = coder.GetACLevelAndRuns();
+	}
+	else
+	{
+		m_cavlc_data_source.cr_dc = coder.GetDCLevelAndRuns();
+		m_cavlc_data_source.cr_acs = coder.GetACLevelAndRuns();
+	}
 }
 
 void ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)

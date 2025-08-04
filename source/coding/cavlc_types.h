@@ -34,9 +34,6 @@ struct LevelAndRuns
 
 struct CavlcDataSource
 {
-	LevelAndRuns luma_dc;
-	std::vector<LevelAndRuns> luma_acs;
-
 	LevelAndRuns cb_dc;
 	std::vector<LevelAndRuns> cb_acs;
 
