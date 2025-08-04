@@ -223,6 +223,9 @@ void Macroblock::PostEncode()
 	mb_binaryer.OutputCBP(m_cbp);
 	mb_binaryer.OutputQPDelta(0);
 	
+	if (m_addr == 1)
+		int sb = 1;
+
 	m_intra_luma_flow->OutputCoefficients(m_bytes_data);
 	m_chroma_flow->OutputCoefficients(m_bytes_data);
 }

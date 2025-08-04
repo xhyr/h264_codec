@@ -93,24 +93,23 @@ void ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	m_quantizer = std::make_unique<Intra8ChromaQuantizer>(qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
-	CavlcPreCoderChroma8x8 coder;
-	coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
+	CavlcPreCoderChroma8x8 pre_coder;
+	pre_coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
 
-	m_cbp = std::max(m_cbp, coder.GetCodedBlockPattern());
+	m_cbp = std::max(m_cbp, pre_coder.GetCodedBlockPattern());
 
-	if (coder.HasResetCofficients())
+	if (pre_coder.HasResetCofficients())
 		m_quantizer->ResetACToZeros();
 
-	coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
 	if (plane_type == PlaneType::Cb)
 	{
-		m_cavlc_data_source.cb_dc = coder.GetDCLevelAndRuns();
-		m_cavlc_data_source.cb_acs = coder.GetACLevelAndRuns();
+		m_cavlc_data_source.cb_dc = pre_coder.GetDCLevelAndRuns();
+		m_cavlc_data_source.cb_acs = pre_coder.GetACLevelAndRuns();
 	}
 	else
 	{
-		m_cavlc_data_source.cr_dc = coder.GetDCLevelAndRuns();
-		m_cavlc_data_source.cr_acs = coder.GetACLevelAndRuns();
+		m_cavlc_data_source.cr_dc = pre_coder.GetDCLevelAndRuns();
+		m_cavlc_data_source.cr_acs = pre_coder.GetACLevelAndRuns();
 	}
 }
 
