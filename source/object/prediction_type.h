@@ -27,9 +27,9 @@ enum class Intra4LumaPredictionType : uint8_t
 	DC,
 	DownLeft,
 	DownRight,
-	VerticalLeft,
-	HorizontalDown,
 	VerticalRight,
+	HorizontalDown,
+	VerticalLeft,
 	HorizontalUp
 };
 
