@@ -43,6 +43,11 @@ std::shared_ptr<BytesData> SliceHeader::Convert2BytesData() const
 
 	CodingUtil::SE_V(slice_qp_delta, bytes_data);
 	CodingUtil::UE_V(disable_deblocking_filter_idc, bytes_data);
+	if (disable_deblocking_filter_idc != 1)
+	{
+		CodingUtil::SE_V(alpha_c0_offset_div2, bytes_data);
+		CodingUtil::SE_V(beta_offset_div2, bytes_data);
+	}
 	return bytes_data;
 }
 

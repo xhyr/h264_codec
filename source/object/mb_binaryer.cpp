@@ -44,11 +44,7 @@ void MBBinaryer::OutputCBP(uint8_t cbp)
 		return;
 	
 	auto ue = BinaryConstantValues::s_cbp_me_map[cbp][0];
-	int nn = (ue + 1) / 2;
-	int i = 0;
-	for (; i < 16 && nn != 0; ++i)
-		nn /= 2;
-	CodingUtil::U_V(2 * i + 1, ue + 1 - pow(2, i), m_bytes_data);
+	CodingUtil::UE_V(ue, m_bytes_data);
 }
 
 void MBBinaryer::OutputQPDelta(int qp_delta)
