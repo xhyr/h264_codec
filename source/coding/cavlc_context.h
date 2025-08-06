@@ -27,13 +27,13 @@ private:
 
 	std::pair<bool, uint32_t> GetUpBlockIndex(CavlcDataType data_type, uint32_t mb_addr, uint32_t block_index) const;
 
-	CavlcDataType MapDataType(CavlcDataType data_type) const;
+	CavlcContextType MapDataType(CavlcDataType data_type) const;
 
 private:
 	uint32_t m_width_in_mb;
 	uint32_t m_height_in_mb;
 
-	std::unordered_map<CavlcDataType, std::vector<uint8_t>> m_coeff_num_map;
+	std::unordered_map<CavlcContextType, std::vector<uint8_t>> m_coeff_num_map;
 };
 
 __codec_end

@@ -43,6 +43,8 @@ bool Slice::Encode()
 		mb->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
+		LOGINFO("mb_addr = %d, used_bits = %d.", mb_addr, used_bit_count);
+
 		m_macroblocks.push_back(mb);
 
 		CollectFrameData(mb);

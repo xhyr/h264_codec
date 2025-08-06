@@ -209,7 +209,7 @@ void Macroblock::PostEncode()
 	MBBinaryer mb_binaryer(m_slice, m_addr, m_bytes_data);
 	if (m_type == MBType::I16)
 	{
-		auto offset = MBUtil::CalculateIntra16Offset(m_luma_cbp, m_intra16_prediction_type);
+		auto offset = MBUtil::CalculateIntra16Offset(m_cbp, m_intra16_prediction_type);
 		mb_binaryer.OutputMBType(m_type, offset);
 	}
 	else mb_binaryer.OutputMBType(m_type);
@@ -218,7 +218,9 @@ void Macroblock::PostEncode()
 	
 	mb_binaryer.OutputChromaPredMode(m_chroma_flow->GetPredictionType());
 	mb_binaryer.OutputCBP(m_cbp);
-	mb_binaryer.OutputQPDelta(0);
+
+	if(m_cbp > 0 || m_type == MBType::I16)
+		mb_binaryer.OutputQPDelta(0);
 	
 	m_intra_luma_flow->OutputCoefficients(m_bytes_data);
 	m_chroma_flow->OutputCoefficients(m_bytes_data);

@@ -18,6 +18,13 @@ enum class CavlcDataType
 	CrAC
 };
 
+enum class CavlcContextType
+{
+	Luma = 0,
+	Cb,
+	Cr,
+};
+
 struct LevelAndRuns
 {
 	std::vector<int32_t> levels;
