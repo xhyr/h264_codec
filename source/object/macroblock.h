@@ -87,6 +87,8 @@ private:
 
 	void PostEncode();
 
+	void ClearUselessResources();
+
 private:
 	uint32_t m_addr;
 	std::weak_ptr<Slice> m_slice;

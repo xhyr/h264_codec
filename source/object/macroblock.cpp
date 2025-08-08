@@ -182,13 +182,13 @@ void Macroblock::DecideLumaMode()
 	{
 		m_type = MBType::I4;
 		m_intra4_luma_prediction_types = intra4_luma_flow->GetPredictionTypes();
-		m_intra_luma_flow.reset(intra4_luma_flow.release());
+		m_intra_luma_flow = std::move(intra4_luma_flow);
 	}
 	else
 	{
 		m_type = MBType::I16;
 		m_intra16_prediction_type = intra16_luma_flow->GetPredictionType();
-		m_intra_luma_flow.reset(intra16_luma_flow.release());
+		m_intra_luma_flow = std::move(intra16_luma_flow);
 	}
 
 	m_reconstructed_luma_data = m_intra_luma_flow->GetReconstructedData();
@@ -224,6 +224,8 @@ void Macroblock::PostEncode()
 	
 	m_intra_luma_flow->OutputCoefficients(m_bytes_data);
 	m_chroma_flow->OutputCoefficients(m_bytes_data);
+
+	ClearUselessResources();
 }
 
 uint32_t Macroblock::GetAddress() const
@@ -261,4 +263,15 @@ Intra4LumaPredictionType Macroblock::GetIntra4LumaPredicionType(uint32_t x_in_bl
 	return m_intra4_luma_prediction_types[x_in_block + 4 * y_in_block];
 }
 
+void Macroblock::ClearUselessResources()
+{
+	m_luma_data.Clear();
+	m_cb_data.Clear();
+	m_cr_data.Clear();
+
+	m_intra_luma_flow.reset();
+	m_chroma_flow.reset();
+
+	m_bytes_data.reset();
+}
 __codec_end

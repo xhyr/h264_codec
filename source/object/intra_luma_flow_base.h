@@ -16,7 +16,7 @@ class IntraLumaFlowBase
 {
 public:
 	IntraLumaFlowBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
-	~IntraLumaFlowBase();
+	virtual ~IntraLumaFlowBase();
 
 	virtual void Frontend() = 0;
 

@@ -123,6 +123,11 @@ public:
 		return std::all_of(m_data.begin(), m_data.end(), [value](Ty input) {return input == value; });
 	}
 
+	void Clear()
+	{
+		m_data.clear();
+	}
+
 private:
 	
 	std::vector<Ty> m_data;
