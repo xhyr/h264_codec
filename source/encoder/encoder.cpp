@@ -36,29 +36,37 @@ bool Encoder::Encode()
 
 	FILE* out_handle = fopen("output.yuv", "wb");
 
+	uint32_t encoded_frame_count = 0;
 	while (auto next_yuv_frame = GetNextFrame())
 	{
-		m_context->yuv_frame = next_yuv_frame;
+		if (m_tick >= m_config->start_frame)
+		{
+			m_context->yuv_frame = next_yuv_frame;
 
-		auto slice = std::make_shared<Slice>();
-		slice->Construct(m_tick, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
-		slice->Encode();
+			auto slice = std::make_shared<Slice>();
+			slice->Construct(encoded_frame_count, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
+			slice->Encode();
 
-		slice->Serial(m_context->out_stream);
+			slice->Serial(m_context->out_stream);
 
-		auto frame_data = slice->GetFrameData();
+			/*auto frame_data = slice->GetFrameData();
+			fwrite(frame_data->y_data.get(), 1, frame_data->width * frame_data->height, out_handle);
+			fwrite(frame_data->u_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);
+			fwrite(frame_data->v_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);*/
 
-		fwrite(frame_data->y_data.get(), 1, frame_data->width * frame_data->height, out_handle);
-		fwrite(frame_data->u_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);
-		fwrite(frame_data->v_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);
+			LOGINFO("encoding done slice tick = %d.", m_tick);
+
+			++encoded_frame_count;
+		}
 
 		++m_tick;
 
-		if (m_tick == m_config->frames_to_encode)
+		if (encoded_frame_count == m_config->frames_to_encode)
 			break;
 	}
 
-	fclose(out_handle);
+	if(out_handle)
+		fclose(out_handle);
 
 	return true;
 }

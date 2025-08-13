@@ -99,7 +99,8 @@ void BlockNeighbors::Init()
 
 	if (m_is_up_available)
 	{
-		if (!(m_x_in_block == 3 && m_y_in_block > 0) && !(m_x_in_block == 1 && m_y_in_block == 1) && !(m_x_in_block == 1 && m_y_in_block == 3))
+		m_slice_width = m_slice_frame->width;
+		if (!(m_x_in_block == 3 && m_y_in_block > 0) && !(m_x_in_block == 1 && m_y_in_block == 1) && !(m_x_in_block == 1 && m_y_in_block == 3) && (x + 4 < m_slice_width))
 		{
 			m_edge_data->e = GetPixelValue(x + 4, y -1);
 			m_edge_data->f = GetPixelValue(x + 5, y -1);

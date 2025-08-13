@@ -87,9 +87,6 @@ void LoopFilter::FilterVerticalEdgesLuma(std::shared_ptr<Macroblock> mb, int edg
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto mb_p_data = mb_p->GetReconstructedLumaBlockData();
-	auto mb_q_data = mb_q->GetReconstructedLumaBlockData();
-
 	auto strengths = FilterUtil::GetVerticalStrengths(mb, edge);
 	for (uint32_t y_in_block = 0; y_in_block < 4; ++y_in_block)
 	{
@@ -121,9 +118,6 @@ void LoopFilter::FilterHorizontalEdgesLuma(std::shared_ptr<Macroblock> mb, int e
 
 	if (alpha == 0 && beta == 0)
 		return;
-
-	auto mb_p_data = mb_p->GetReconstructedLumaBlockData();
-	auto mb_q_data = mb_q->GetReconstructedLumaBlockData();
 
 	auto strengths = FilterUtil::GetHorizontalStrengths(mb, edge);
 	for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)
@@ -157,9 +151,6 @@ void LoopFilter::FilterVerticalEdgesChroma(std::shared_ptr<Macroblock> mb, int e
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto mb_p_data = mb_p->GetReconstructedChromaBlockData(plane_type);
-	auto mb_q_data = mb_q->GetReconstructedChromaBlockData(plane_type);
-
 	auto strengths = FilterUtil::GetVerticalStrengths(mb, edge);
 	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
 	{
@@ -191,9 +182,6 @@ void LoopFilter::FilterHorizontalEdgesChroma(std::shared_ptr<Macroblock> mb, int
 
 	if (alpha == 0 && beta == 0)
 		return;
-
-	auto mb_p_data = mb_p->GetReconstructedChromaBlockData(plane_type);
-	auto mb_q_data = mb_q->GetReconstructedChromaBlockData(plane_type);
 
 	auto strengths = FilterUtil::GetVerticalStrengths(mb, edge);
 	for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)

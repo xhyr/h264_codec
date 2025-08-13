@@ -71,6 +71,9 @@ uint32_t Intra4LumaFlowNode::OutputCoefficients(std::shared_ptr<BytesData> bytes
 
 void Intra4LumaFlowNode::Predict()
 {
+	if (m_mb->GetAddress() == 98 && m_x_in_block == 3 && m_y_in_block == 0)
+		int sb = 1;
+
 	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
 	m_predictor->Decide();
 	auto prediction_type = m_predictor->GetPredictionType();

@@ -28,6 +28,9 @@ ChromaFlow::~ChromaFlow()
 
 void ChromaFlow::Frontend()
 {
+	if (m_mb->GetAddress() == 47)
+		int sb = 1;
+
 	Predict();
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
 	{
@@ -54,9 +57,6 @@ uint8_t ChromaFlow::GetCBP() const
 
 uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
-	CavlcPreCoderChroma8x8 pre_coder;
-	pre_coder.Code(m_quantizer->GetDCBlock(), m_quantizer->GetACBlocks());
-
 	auto start_bits_count = bytes_data->GetBitsCount();
 
 	if (m_cbp > 0)

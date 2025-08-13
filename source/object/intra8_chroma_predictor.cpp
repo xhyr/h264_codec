@@ -20,6 +20,9 @@ Intra8ChromaPredictor::~Intra8ChromaPredictor()
 
 void Intra8ChromaPredictor::Decide()
 {
+	if (m_mb.lock()->GetAddress() == 47)
+		int sb = 1;
+
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
 	for (auto plane_type : plane_types)
 	{

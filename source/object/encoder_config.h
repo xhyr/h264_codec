@@ -15,6 +15,7 @@ struct EncoderConfig
 	uint32_t width;
 	uint32_t height;
 
+	uint32_t start_frame{ 0 };
 	uint32_t frames_to_encode;
 
 	uint32_t profile_idc;

@@ -1,5 +1,7 @@
 #include "cavlc_pre_coder_chroma_8x8.h"
 
+#include <algorithm>
+
 #include "cavlc_constant_values.h"
 
 __codec_begin
@@ -71,7 +73,7 @@ void CavlcPreCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4
 			level_runs.runs.push_back(run);
 			m_ac_cbp = 2;
 
-			if (level > 1)
+			if (std::abs(level) > 1)
 				m_coeff_cost += CavlcConstantValues::s_max_coeff_cost;
 			else
 				m_coeff_cost += CavlcConstantValues::s_coeff_run_cost[run];
