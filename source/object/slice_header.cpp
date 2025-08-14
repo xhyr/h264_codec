@@ -9,11 +9,14 @@ __codec_begin
 void SliceHeader::Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data, uint8_t qp)
 {
 	frame_num = tick;
-	pic_order_cnt_lsb = tick * 2;
+	uint32_t top_poc = tick * 2;
 
 	log2_max_frame_num_minus4 = sps_data->log2_max_frame_num_minus4;
 	idr_pic_flag = _idr_pic_flag;
 	log2_max_pic_order_cnt_lsb_minus4 = sps_data->log2_max_pic_order_cnt_lsb_minus4;
+
+	uint32_t poc_lsb_mask = ~((((uint32_t)(-1)) << (log2_max_pic_order_cnt_lsb_minus4 + 4)));
+	pic_order_cnt_lsb = top_poc & poc_lsb_mask;
 
 	slice_qp_delta = static_cast<int32_t>(qp) - 26;
 	

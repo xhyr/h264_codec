@@ -7,6 +7,7 @@
 #include "encoder_config.h"
 #include "nalu.h"
 #include "ostream.h"
+#include "math_util.h"
 
 __codec_begin
 
@@ -32,6 +33,9 @@ void ParameterSetContainer::ConstructSPS()
 	sps_data->max_num_ref_frames = m_config->ref_frame_number;
 	sps_data->pic_width_in_mbs_minus1 = m_config->width / 16 - 1;
 	sps_data->pic_height_in_map_units_minus1 = m_config->height / 16 - 1;
+	sps_data->log2_max_frame_num_minus4 = std::max<int>(MathUtil::CeilLog2(1 + m_config->frames_to_encode) - 4, 0);
+	sps_data->log2_max_pic_order_cnt_lsb_minus4 = std::max<int>(MathUtil::CeilLog2(1 + 2 * m_config->frames_to_encode) - 4, 0);
+
 }
 
 void ParameterSetContainer::ConstructPPS()

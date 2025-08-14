@@ -35,6 +35,9 @@ bool Slice::Encode()
 
 	m_bytes_data = m_header.Convert2BytesData();
 
+	auto header_bit_count = m_bytes_data->GetBitsCount();
+
+	uint32_t total_used_bit_count = 0;
 	for (uint32_t mb_addr = 0; mb_addr < m_encoder_context->mb_num; ++mb_addr)
 	{
 		auto mb = std::make_shared<Macroblock>(mb_addr, weak_from_this(), m_encoder_context);
@@ -43,12 +46,15 @@ bool Slice::Encode()
 		mb->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
-		LOGINFO("mb_addr = %d, used_bits = %d.", mb_addr, used_bit_count);
+		total_used_bit_count += used_bit_count;
+		//LOGINFO("mb_addr = %d, used_bits = %d.", mb_addr, used_bit_count);
 
 		m_macroblocks.push_back(mb);
 
 		CollectFrameData(mb);
 	}
+
+	LOGINFO("tick = %d, header_bit_count = %d.", m_tick, header_bit_count);
 
 	DeblockFilter();
 

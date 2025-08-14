@@ -7,9 +7,9 @@ width = 176
 
 height = 144
 
-start_frame = 10
+start_frame = 0
 
-frames_to_encode = 8
+frames_to_encode = 300
 
 profile_idc = 66
 

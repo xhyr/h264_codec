@@ -7,6 +7,7 @@
 #include "common_constant_values.h"
 #include "log.h"
 #include "stream_util.h"
+#include "math_util.h"
 
 __codec_begin
 
@@ -54,7 +55,7 @@ bool Encoder::Encode()
 			fwrite(frame_data->u_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);
 			fwrite(frame_data->v_data.get(), 1, frame_data->width * frame_data->height / 4, out_handle);*/
 
-			LOGINFO("encoding done slice tick = %d.", m_tick);
+			//LOGINFO("encoding done slice tick = %d.", m_tick);
 
 			++encoded_frame_count;
 		}

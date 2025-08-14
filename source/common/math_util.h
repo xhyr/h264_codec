@@ -31,6 +31,18 @@ struct MathUtil
 		return (value + (1 << (bits - 1))) >> bits;
 	}
 
+	template<typename Ty>
+	static int CeilLog2(Ty value)
+	{
+		--value;
+		int cnt = 0;
+		while (value != 0)
+		{
+			value >>= 1;
+			++cnt;
+		}
+		return cnt;
+	}
 };
 
 __codec_end
