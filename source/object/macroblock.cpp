@@ -170,15 +170,15 @@ void Macroblock::DoEncode()
 
 void Macroblock::DecideLumaMode()
 {
-	auto intra4_luma_flow = std::make_unique<Intra4LumaFlow>(shared_from_this(), m_encoder_context);
-	intra4_luma_flow->Frontend();
-	int intra4_cost = intra4_luma_flow->GetCost();
-
 	auto intra16_luma_flow = std::make_unique<Intra16LumaFlow>(shared_from_this(), m_encoder_context);
 	intra16_luma_flow->Frontend();
 	int intra16_cost = intra16_luma_flow->GetCost();
 
-	if (intra4_cost <= intra16_cost)
+	auto intra4_luma_flow = std::make_unique<Intra4LumaFlow>(shared_from_this(), m_encoder_context);
+	intra4_luma_flow->Frontend();
+	int intra4_cost = intra4_luma_flow->GetCost();
+
+	if (intra4_cost < intra16_cost)
 	{
 		m_type = MBType::I4;
 		m_intra4_luma_prediction_types = intra4_luma_flow->GetPredictionTypes();
@@ -197,9 +197,6 @@ void Macroblock::DecideLumaMode()
 
 void Macroblock::DecideChromaMode()
 {
-	if (m_addr == 97)
-		int sb = 1;
-
 	m_chroma_flow = std::make_unique<ChromaFlow>(shared_from_this(), m_encoder_context);
 	m_chroma_flow->Frontend();
 	m_reconstructed_cb_data = m_chroma_flow->GetReconstructedData(PlaneType::Cb);
@@ -209,9 +206,6 @@ void Macroblock::DecideChromaMode()
 
 void Macroblock::PostEncode()
 {
-	if (m_addr == 98)
-		int sb = 1;
-
 	MBBinaryer mb_binaryer(m_slice, m_addr, m_bytes_data);
 	if (m_type == MBType::I16)
 	{
