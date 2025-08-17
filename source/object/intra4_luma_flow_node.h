@@ -19,9 +19,9 @@ public:
 	Intra4LumaFlowNode(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, BlockData<16, 16>& reconstructed_data, std::vector<Intra4LumaPredictionType>& prediction_types, uint8_t index_in_block8x8, uint8_t index_in_block4x4);
 	~Intra4LumaFlowNode();
 
-	void Frontend();
+	void SetTargetPredictionType(Intra4LumaPredictionType prediction_type);
 
-	int GetCost() const;
+	void Frontend();
 
 	bool IsAllZero() const;
 
@@ -29,10 +29,12 @@ public:
 
 	Intra4LumaPredictionType GetPredictionType() const;
 
-	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data);
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) const;
 
 private:
-	void Predict();
+	bool DoFrontend();
+
+	bool Predict();
 
 	void Transform();
 
@@ -43,6 +45,10 @@ private:
 	void InverseTransform();
 
 	void Reconstruct();
+
+	int CalculateDistortion() const;
+
+	int CalculateRate() const;
 
 private:
 	std::shared_ptr<Macroblock> m_mb;
@@ -56,6 +62,9 @@ private:
 	BlockData<4, 4, int32_t> m_diff_data;
 	BlockData<4, 4, int32_t> m_residual_data;
 	bool m_is_all_zero{ true };
+
+	Intra4LumaPredictionType m_target_prediction_type{ Intra4LumaPredictionType::None };
+	Intra4LumaPredictionType m_best_prediction_type{ Intra4LumaPredictionType::None };
 };
 
 __codec_end

@@ -75,4 +75,11 @@ void BytesData::Reserve(uint32_t bits_count)
 	m_data.reserve((bits_count + 7) / 8);
 }
 
+void BytesData::Push(std::shared_ptr<BytesData> bytes_data)
+{
+	auto bit_count = bytes_data->GetBitsCount();
+	for (uint32_t i = 0; i < bit_count; ++i)
+		PushBit(bytes_data->GetBit(i));
+}
+
 __codec_end

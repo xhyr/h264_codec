@@ -18,10 +18,9 @@ Intra8ChromaPredictor::~Intra8ChromaPredictor()
 {
 }
 
-void Intra8ChromaPredictor::Decide()
+void Intra8ChromaPredictor::Decide(IntraChromaPredictionType target_prediction_type)
 {
-	if (m_mb.lock()->GetAddress() == 47)
-		int sb = 1;
+	GenerateAllowedPredictionTypes(target_prediction_type);
 
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
 	for (auto plane_type : plane_types)
@@ -71,6 +70,9 @@ void Intra8ChromaPredictor::CalculateAllPredictionData(PlaneType plane_type)
 
 void Intra8ChromaPredictor::CalculateDCMode(PlaneType plane_type)
 {
+	if (!m_allowed_prediction_type[IntraChromaPredictionType::DC])
+		return;
+
 	auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][IntraChromaPredictionType::DC];
 	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
 	{
@@ -160,6 +162,9 @@ void Intra8ChromaPredictor::CalculateDCMode(PlaneType plane_type)
 
 void Intra8ChromaPredictor::CalculateHorizontalMode(PlaneType plane_type)
 {
+	if (!m_allowed_prediction_type[IntraChromaPredictionType::Horizontal])
+		return;
+
 	if (!m_left_available)
 		return;
 
@@ -170,6 +175,9 @@ void Intra8ChromaPredictor::CalculateHorizontalMode(PlaneType plane_type)
 
 void Intra8ChromaPredictor::CalculateVerticalMode(PlaneType plane_type)
 {
+	if (!m_allowed_prediction_type[IntraChromaPredictionType::Vertical])
+		return;
+
 	if (!m_up_available)
 		return;
 
@@ -180,6 +188,9 @@ void Intra8ChromaPredictor::CalculateVerticalMode(PlaneType plane_type)
 
 void Intra8ChromaPredictor::CalculatePlaneMode(PlaneType plane_type)
 {
+	if (!m_allowed_prediction_type[IntraChromaPredictionType::Plane])
+		return;
+
 	if (!m_left_available || !m_up_available)
 		return;
 
@@ -250,6 +261,25 @@ void Intra8ChromaPredictor::DecideBySATD()
 	m_predicted_data[0] = m_predicted_data_map[0][best_prediction_type];
 	m_predicted_data[1] = m_predicted_data_map[1][best_prediction_type];
 	m_cost = min_satd;
+}
+
+void Intra8ChromaPredictor::GenerateAllowedPredictionTypes(IntraChromaPredictionType target_prediction_type)
+{
+	if (target_prediction_type != IntraChromaPredictionType::None)
+	{
+		m_allowed_prediction_type[IntraChromaPredictionType::DC] = false;
+		m_allowed_prediction_type[IntraChromaPredictionType::Horizontal] = false;
+		m_allowed_prediction_type[IntraChromaPredictionType::Vertical] = false;
+		m_allowed_prediction_type[IntraChromaPredictionType::Plane] = false;
+		m_allowed_prediction_type[target_prediction_type] = true;
+	}
+	else
+	{
+		m_allowed_prediction_type[IntraChromaPredictionType::DC] = true;
+		m_allowed_prediction_type[IntraChromaPredictionType::Horizontal] = true;
+		m_allowed_prediction_type[IntraChromaPredictionType::Vertical] = true;
+		m_allowed_prediction_type[IntraChromaPredictionType::Plane] = true;
+	}
 }
 
 __codec_end

@@ -17,8 +17,7 @@ __codec_begin
 class Slice;
 struct EncoderContext;
 class BytesData;
-class IntraLumaFlowBase;
-class ChromaFlow;
+class RDOptimizer;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -27,8 +26,6 @@ public:
 	~Macroblock();
 
 	bool Encode(std::shared_ptr<BytesData> bytes_data);
-
-	std::shared_ptr<BytesData> GetBytesData() const;
 
 	void ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element, PlaneType plane_type);
 
@@ -66,9 +63,13 @@ public:
 
 	std::shared_ptr<Slice> GetSlice();
 
+	void SetType(MBType mb_type);
+
 	MBType GetType() const;
 
 	Intra4LumaPredictionType GetIntra4LumaPredicionType(uint32_t x_in_block, uint32_t y_in_block) const;
+
+	void SetIntra4LumaPredictionTypes(const std::vector<Intra4LumaPredictionType>& prediction_types);
 
 private:
 	void Init();
@@ -81,13 +82,7 @@ private:
 
 	void DoEncode();
 
-	void DecideLumaMode();
-
-	void DecideChromaMode();
-
 	void PostEncode();
-
-	void ClearUselessResources();
 
 private:
 	uint32_t m_addr;
@@ -101,9 +96,6 @@ private:
 	MBType m_type;
 	std::vector<Intra4LumaPredictionType> m_intra4_luma_prediction_types;
 	Intra16LumaPredictionType m_intra16_prediction_type;
-	uint8_t m_luma_cbp{ 0 };
-	uint8_t m_chroma_cbp{ 0 };
-	uint8_t m_cbp{ 0 };
 
 	BlockData<16, 16> m_reconstructed_luma_data;
 	BlockData<8, 8> m_reconstructed_cb_data;
@@ -113,8 +105,7 @@ private:
 	BlockData<8, 8> m_cb_data;
 	BlockData<8, 8> m_cr_data;
 
-	std::unique_ptr<IntraLumaFlowBase> m_intra_luma_flow;
-	std::unique_ptr<ChromaFlow> m_chroma_flow;
+	std::unique_ptr<RDOptimizer> m_rd_optimizer;
 
 	std::shared_ptr<BytesData> m_bytes_data;
 };

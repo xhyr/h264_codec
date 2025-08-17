@@ -30,7 +30,8 @@ enum class Intra4LumaPredictionType : uint8_t
 	VerticalRight,
 	HorizontalDown,
 	VerticalLeft,
-	HorizontalUp
+	HorizontalUp,
+	None
 };
 
 enum class IntraChromaPredictionType : uint8_t
@@ -38,7 +39,8 @@ enum class IntraChromaPredictionType : uint8_t
 	DC = 0,
 	Horizontal,
 	Vertical,
-	Plane
+	Plane,
+	None
 };
 
 __codec_end

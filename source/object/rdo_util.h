@@ -8,8 +8,9 @@ __codec_begin
 
 struct RDOUtil
 {
-	static double GetLambda(int qp);
+	static double GetLambdaMode(int qp);
 
+	static double GetLambdaMotion(int qp);
 
 };
 

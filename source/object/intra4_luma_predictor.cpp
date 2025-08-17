@@ -34,14 +34,15 @@ Intra4LumaPredictionType Intra4LumaPredictor::GetPredictionType() const
 	return m_prediction_type;
 }
 
-void Intra4LumaPredictor::Decide()
+void Intra4LumaPredictor::Decide(Intra4LumaPredictionType target_prediction_type)
 {
 	m_block_neighbors = std::make_unique<BlockNeighbors>(m_mb, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
 	m_edge_data = m_block_neighbors->GetEdgeData();
 
+	GenerateAllowedPredictionTypes(target_prediction_type);
 	CalculateMostProbablePredictionType();
 	CalculateAllPredictionData();
-	DecideBySATD(m_x_in_block, m_y_in_block);
+	DecideByRDO(m_x_in_block, m_y_in_block);
 }
 
 BlockData<4, 4> Intra4LumaPredictor::GetPredictedData() const
@@ -89,6 +90,9 @@ void Intra4LumaPredictor::CalculateAllPredictionData()
 
 void Intra4LumaPredictor::CalculateVerticalMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::Vertical])
+		return;
+
 	if (!m_block_neighbors->IsUpAvailable())
 		return;
 
@@ -104,6 +108,9 @@ void Intra4LumaPredictor::CalculateVerticalMode()
 
 void Intra4LumaPredictor::CalculateHorizontalMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::Horizontal])
+		return;
+
 	if (!m_block_neighbors->IsLeftAvailable())
 		return;
 
@@ -119,6 +126,9 @@ void Intra4LumaPredictor::CalculateHorizontalMode()
 
 void Intra4LumaPredictor::CalculateDCMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::DC])
+		return;
+
 	auto& block_data = m_predicted_data_map[Intra4LumaPredictionType::DC];
 	if (m_block_neighbors->IsLeftAvailable() && m_block_neighbors->IsUpAvailable())
 	{
@@ -143,6 +153,9 @@ void Intra4LumaPredictor::CalculateDCMode()
 
 void Intra4LumaPredictor::CalculateDownLeftMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::DownLeft])
+		return;
+
 	if (!m_block_neighbors->IsUpAvailable())
 		return;
 
@@ -165,6 +178,9 @@ void Intra4LumaPredictor::CalculateDownLeftMode()
 
 void Intra4LumaPredictor::CalculateDownRightMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::DownRight])
+		return;
+
 	if (!m_block_neighbors->IsLeftAvailable() || !m_block_neighbors->IsUpAvailable())
 		return;
 
@@ -188,6 +204,9 @@ void Intra4LumaPredictor::CalculateDownRightMode()
 
 void Intra4LumaPredictor::CalculateVerticalRightMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::VerticalRight])
+		return;
+
 	if (!m_block_neighbors->IsLeftAvailable() || !m_block_neighbors->IsUpAvailable())
 		return;
 
@@ -214,6 +233,9 @@ void Intra4LumaPredictor::CalculateVerticalRightMode()
 
 void Intra4LumaPredictor::CalculateHorizontalDownMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::HorizontalDown])
+		return;
+
 	if (!m_block_neighbors->IsLeftAvailable() || !m_block_neighbors->IsUpAvailable())
 		return;
 
@@ -241,6 +263,9 @@ void Intra4LumaPredictor::CalculateHorizontalDownMode()
 
 void Intra4LumaPredictor::CalculateVerticalLeftMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::VerticalLeft])
+		return;
+
 	if (!m_block_neighbors->IsUpAvailable())
 		return;
 
@@ -262,6 +287,9 @@ void Intra4LumaPredictor::CalculateVerticalLeftMode()
 
 void Intra4LumaPredictor::CalculateHorizontalUpMode()
 {
+	if (!m_allowed_prediction_type[Intra4LumaPredictionType::HorizontalUp])
+		return;
+
 	if (!m_block_neighbors->IsLeftAvailable())
 		return;
 
@@ -285,8 +313,11 @@ void Intra4LumaPredictor::CalculateHorizontalUpMode()
 	}
 }
 
-void Intra4LumaPredictor::DecideBySATD(uint32_t x_in_block, uint32_t y_in_block)
+void Intra4LumaPredictor::DecideByRDO(uint32_t x_in_block, uint32_t y_in_block)
 {
+	if (m_predicted_data_map.empty())
+		return;
+
 	auto original_block_data = m_mb->GetOriginalLumaBlockData4x4(x_in_block, y_in_block);
 
 	int min_cost = -1;
@@ -307,7 +338,7 @@ void Intra4LumaPredictor::DecideBySATD(uint32_t x_in_block, uint32_t y_in_block)
 		if (m_predicted_data_map.find(prediction_type) == m_predicted_data_map.end())
 			continue;
 
-		int cost = prediction_type == m_most_probable_prediction_type ? 0 : 4 * m_encoder_context->lambda;
+		int cost = prediction_type == m_most_probable_prediction_type ? 0 : 4 * m_encoder_context->lambda_mode;
 		const auto& predicted_data = m_predicted_data_map[prediction_type];
 		auto diff_data = original_block_data - predicted_data;
 		cost += CostUtil::CalculateSATD(diff_data);
@@ -322,6 +353,35 @@ void Intra4LumaPredictor::DecideBySATD(uint32_t x_in_block, uint32_t y_in_block)
 
 	m_cost = min_cost;
 	m_prediction_type = best_prediction_type;
+}
+
+void Intra4LumaPredictor::GenerateAllowedPredictionTypes(Intra4LumaPredictionType target_prediction_type)
+{
+	if (target_prediction_type != Intra4LumaPredictionType::None)
+	{
+		m_allowed_prediction_type[Intra4LumaPredictionType::Vertical] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::Horizontal] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::DC] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::DownLeft] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::DownRight] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::VerticalRight] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::HorizontalDown] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::VerticalLeft] = false;
+		m_allowed_prediction_type[Intra4LumaPredictionType::HorizontalUp] = false;
+		m_allowed_prediction_type[target_prediction_type] = true;
+	}
+	else
+	{
+		m_allowed_prediction_type[Intra4LumaPredictionType::Vertical] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::Horizontal] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::DC] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::DownLeft] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::DownRight] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::VerticalRight] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::HorizontalDown] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::VerticalLeft] = true;
+		m_allowed_prediction_type[Intra4LumaPredictionType::HorizontalUp] = true;
+	}
 }
 
 __codec_end

@@ -14,6 +14,7 @@
 #include "cavlc_non_cdc_coder.h"
 #include "encoder_context.h"
 #include "bytes_data.h"
+#include "cost_util.h"
 
 __codec_begin
 
@@ -26,11 +27,13 @@ ChromaFlow::~ChromaFlow()
 {
 }
 
+void ChromaFlow::SetTargetPredictionType(IntraChromaPredictionType prediction_type)
+{
+	m_target_prediction_type = prediction_type;
+}
+
 void ChromaFlow::Frontend()
 {
-	if (m_mb->GetAddress() == 47)
-		int sb = 1;
-
 	Predict();
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
 	{
@@ -38,6 +41,7 @@ void ChromaFlow::Frontend()
 		InverseQuantizeAndTransform(plane_type);
 		Reconstruct(plane_type);
 	}
+	CalculateDistortion();
 }
 
 IntraChromaPredictionType ChromaFlow::GetPredictionType() const
@@ -77,10 +81,15 @@ uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 	return finish_bits_count - start_bits_count;
 }
 
+int ChromaFlow::GetDistortion()
+{
+	return m_distortion;
+}
+
 void ChromaFlow::Predict()
 {
 	m_predictor = std::make_unique<Intra8ChromaPredictor>(m_mb, m_encoder_context);
-	m_predictor->Decide();
+	m_predictor->Decide(m_target_prediction_type);
 }
 
 void ChromaFlow::TransformAndQuantize(PlaneType plane_type)
@@ -131,6 +140,18 @@ void ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 void ChromaFlow::Reconstruct(PlaneType plane_type)
 {
 	 m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_blocks, m_predictor->GetPredictedData(plane_type));
+}
+
+void ChromaFlow::CalculateDistortion()
+{
+	m_distortion = 0;
+	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
+	for (auto plane_type : plane_types)
+	{
+		auto original_block_data = m_mb->GetOriginalChromaBlockData(plane_type);
+		const auto& reconstructed_block_data = m_reconstructed_data_map[plane_type];
+		m_distortion += CostUtil::CalculateSAD(original_block_data, reconstructed_block_data);
+	}
 }
 
 __codec_end

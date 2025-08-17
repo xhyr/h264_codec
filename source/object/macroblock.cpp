@@ -4,8 +4,7 @@
 #include "yuv_frame.h"
 #include "data_util.h"
 #include "slice.h"
-#include "intra16_luma_flow.h"
-#include "intra4_luma_flow.h"
+#include "rd_optimizer.h"
 #include "bytes_data.h"
 #include "rdo_util.h"
 #include "chroma_flow.h"
@@ -32,11 +31,6 @@ bool Macroblock::Encode(std::shared_ptr<BytesData> bytes_data)
 	DoEncode();
 	PostEncode();
 	return true;
-}
-
-std::shared_ptr<BytesData> Macroblock::GetBytesData() const
-{
-	return m_bytes_data;
 }
 
 void Macroblock::ObtainLeftAndUpEdge(std::vector<uint8_t>& left_data, std::vector<uint8_t>& up_data, uint8_t& left_up_element, PlaneType plane_type)
@@ -157,75 +151,19 @@ void Macroblock::PreEncode()
 	auto slice = m_slice.lock();
 	m_qp = slice->GetQP();
 
-	m_encoder_context->lambda = RDOUtil::GetLambda(m_qp);
+	m_encoder_context->lambda_mode = RDOUtil::GetLambdaMode(m_qp);
+	m_encoder_context->lambda_motion = RDOUtil::GetLambdaMotion(m_qp);
 }
 
 void Macroblock::DoEncode()
 {
-	DecideLumaMode();
-	DecideChromaMode();
-
-	m_cbp = m_chroma_cbp << 4 | m_luma_cbp;
-}
-
-void Macroblock::DecideLumaMode()
-{
-	auto intra16_luma_flow = std::make_unique<Intra16LumaFlow>(shared_from_this(), m_encoder_context);
-	intra16_luma_flow->Frontend();
-	int intra16_cost = intra16_luma_flow->GetCost();
-
-	auto intra4_luma_flow = std::make_unique<Intra4LumaFlow>(shared_from_this(), m_encoder_context);
-	intra4_luma_flow->Frontend();
-	int intra4_cost = intra4_luma_flow->GetCost();
-
-	if (intra4_cost < intra16_cost)
-	{
-		m_type = MBType::I4;
-		m_intra4_luma_prediction_types = intra4_luma_flow->GetPredictionTypes();
-		m_intra_luma_flow = std::move(intra4_luma_flow);
-	}
-	else
-	{
-		m_type = MBType::I16;
-		m_intra16_prediction_type = intra16_luma_flow->GetPredictionType();
-		m_intra_luma_flow = std::move(intra16_luma_flow);
-	}
-
-	m_reconstructed_luma_data = m_intra_luma_flow->GetReconstructedData();
-	m_luma_cbp = m_intra_luma_flow->GetCBP();
-}
-
-void Macroblock::DecideChromaMode()
-{
-	m_chroma_flow = std::make_unique<ChromaFlow>(shared_from_this(), m_encoder_context);
-	m_chroma_flow->Frontend();
-	m_reconstructed_cb_data = m_chroma_flow->GetReconstructedData(PlaneType::Cb);
-	m_reconstructed_cr_data = m_chroma_flow->GetReconstructedData(PlaneType::Cr);
-	m_chroma_cbp = m_chroma_flow->GetCBP();
+	m_rd_optimizer = std::make_unique<RDOptimizer>(shared_from_this(), m_encoder_context, m_bytes_data);
+	m_rd_optimizer->Frontend();
 }
 
 void Macroblock::PostEncode()
 {
-	MBBinaryer mb_binaryer(m_slice, m_addr, m_bytes_data);
-	if (m_type == MBType::I16)
-	{
-		auto offset = MBUtil::CalculateIntra16Offset(m_cbp, m_intra16_prediction_type);
-		mb_binaryer.OutputMBType(m_type, offset);
-	}
-	else mb_binaryer.OutputMBType(m_type);
-
-	m_intra_luma_flow->OutputPredictionTypes(m_bytes_data);
-	
-	mb_binaryer.OutputChromaPredMode(m_chroma_flow->GetPredictionType());
-	mb_binaryer.OutputCBP(m_cbp);
-
-	if(m_cbp > 0 || m_type == MBType::I16)
-		mb_binaryer.OutputQPDelta(0);
-	
-	m_intra_luma_flow->OutputCoefficients(m_bytes_data);
-	m_chroma_flow->OutputCoefficients(m_bytes_data);
-
-	ClearUselessResources();
+	m_rd_optimizer->Backend();
 }
 
 uint32_t Macroblock::GetAddress() const
@@ -253,6 +191,11 @@ std::shared_ptr<Slice> Macroblock::GetSlice()
 	return m_slice.lock();
 }
 
+void Macroblock::SetType(MBType mb_type)
+{
+	m_type = mb_type;
+}
+
 MBType Macroblock::GetType() const
 {
 	return m_type;
@@ -263,15 +206,9 @@ Intra4LumaPredictionType Macroblock::GetIntra4LumaPredicionType(uint32_t x_in_bl
 	return m_intra4_luma_prediction_types[x_in_block + 4 * y_in_block];
 }
 
-void Macroblock::ClearUselessResources()
+void Macroblock::SetIntra4LumaPredictionTypes(const std::vector<Intra4LumaPredictionType>& prediction_types)
 {
-	m_luma_data.Clear();
-	m_cb_data.Clear();
-	m_cr_data.Clear();
-
-	m_intra_luma_flow.reset();
-	m_chroma_flow.reset();
-
-	m_bytes_data.reset();
+	m_intra4_luma_prediction_types = prediction_types;
 }
+
 __codec_end

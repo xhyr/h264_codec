@@ -23,6 +23,8 @@ public:
 	ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
 	~ChromaFlow();
 
+	void SetTargetPredictionType(IntraChromaPredictionType prediction_type);
+
 	void Frontend();
 
 	IntraChromaPredictionType GetPredictionType() const;
@@ -33,6 +35,8 @@ public:
 
 	uint32_t OutputCoefficients(std::shared_ptr<BytesData> binary_block);
 
+	int GetDistortion();
+
 private:
 	void Predict();
 
@@ -41,6 +45,8 @@ private:
 	void InverseQuantizeAndTransform(PlaneType plane_type);
 
 	void Reconstruct(PlaneType plane_type);
+
+	void CalculateDistortion();
 
 protected:
 	std::shared_ptr<Macroblock> m_mb;
@@ -54,6 +60,9 @@ protected:
 	std::vector<BlockData<4, 4, int32_t>> m_diff_blocks;
 
 	CavlcDataSource m_cavlc_data_source;
+
+	IntraChromaPredictionType m_target_prediction_type{ IntraChromaPredictionType::None };
+	int m_distortion{ 0 };
 };
 
 __codec_end

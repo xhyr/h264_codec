@@ -29,6 +29,8 @@ void Intra16LumaFlow::Frontend()
 	TransformAndQuantize();
 	InverseQuantizeAndTransform();
 	Reconstruct();
+
+	CalculateDistortion();
 }
 
 uint32_t Intra16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
@@ -56,7 +58,6 @@ void Intra16LumaFlow::Predict()
 {
 	m_predictor = std::make_unique<Intra16LumaPredictor>(m_mb, m_encoder_context);
 	m_predictor->Decide();
-	m_cost = m_predictor->GetCost();
 }
 
 void Intra16LumaFlow::TransformAndQuantize()

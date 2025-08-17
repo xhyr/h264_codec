@@ -26,16 +26,19 @@ public:
 
 	BlockData<16, 16> GetReconstructedData() const;
 
-	int GetCost() const;
+	int GetDistortion() const;
 
 	uint8_t GetCBP() const;
+
+protected:
+	void CalculateDistortion();
 
 protected:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
 	BlockData<16, 16> m_reconstructed_data;
 
-	int m_cost{ 0 };
+	int m_distortion{ 0 };
 	uint8_t m_cbp{ 0 };
 };
 

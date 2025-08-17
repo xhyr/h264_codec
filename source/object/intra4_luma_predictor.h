@@ -22,7 +22,7 @@ public:
 	Intra4LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t x_in_block, uint8_t y_in_block, const BlockData<16, 16>& reconstructed_data, const std::vector<Intra4LumaPredictionType>& prediction_tpyes);
 	~Intra4LumaPredictor();
 
-	void Decide();
+	void Decide(Intra4LumaPredictionType target_prediction_type);
 
 	BlockData<4, 4> GetPredictedData() const;
 
@@ -57,7 +57,9 @@ private:
 
 	void CalculateHorizontalUpMode();
 
-	void DecideBySATD(uint32_t x_in_block, uint32_t y_in_block);
+	void DecideByRDO(uint32_t x_in_block, uint32_t y_in_block);
+
+	void GenerateAllowedPredictionTypes(Intra4LumaPredictionType target_prediction_type);
 
 private:
 	std::shared_ptr<Macroblock> m_mb;
@@ -71,12 +73,13 @@ private:
 	std::unordered_map<Intra4LumaPredictionType, BlockData<4, 4>> m_predicted_data_map;
 
 	Intra4LumaPredictionType m_most_probable_prediction_type;
-	Intra4LumaPredictionType m_prediction_type;
+	Intra4LumaPredictionType m_prediction_type{ Intra4LumaPredictionType::None };
 	BlockData<4, 4> m_predicted_data;
 	BlockData<4, 4, int32_t> m_diff_data;
 	const BlockData<16, 16>& m_reconstructed_data;
 	const std::vector<Intra4LumaPredictionType> m_prediction_types;
 	int m_cost;
+	std::unordered_map<Intra4LumaPredictionType, bool> m_allowed_prediction_type;
 };
 
 __codec_end

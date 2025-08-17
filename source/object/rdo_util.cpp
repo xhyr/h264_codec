@@ -6,11 +6,14 @@
 
 __codec_begin
 
-double RDOUtil::GetLambda(int qp)
+double RDOUtil::GetLambdaMode(int qp)
 {
-	return RDOConstantValues::s_qp2quant[std::max(0, qp - RDOConstantValues::s_qp_shift)];
+	return 0.85 * pow(2, (qp - RDOConstantValues::s_qp_shift) / 3.0);
+}
+
+double RDOUtil::GetLambdaMotion(int qp)
+{
+	return sqrt(GetLambdaMode(qp));
 }
 
 __codec_end
-
-

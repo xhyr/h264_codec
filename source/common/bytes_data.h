@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include "global_defines.h"
@@ -33,6 +34,8 @@ public:
 	void FillLastByte(uint8_t value);
 
 	void Reserve(uint32_t bits_count);
+
+	void Push(std::shared_ptr<BytesData> bytes_data);
 
 private:
 	std::vector<uint8_t> m_data;

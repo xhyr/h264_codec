@@ -43,6 +43,13 @@ struct MathUtil
 		}
 		return cnt;
 	}
+
+	template<typename Ty>
+	static Ty Square(Ty value)
+	{
+		return value * value;
+	}
+
 };
 
 __codec_end

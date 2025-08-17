@@ -1,5 +1,8 @@
 #include "intra_luma_flow_base.h"
 
+#include "macroblock.h"
+#include "cost_util.h"
+
 __codec_begin
 
 IntraLumaFlowBase::IntraLumaFlowBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
@@ -20,14 +23,20 @@ BlockData<16, 16> IntraLumaFlowBase::GetReconstructedData() const
 	return m_reconstructed_data;
 }
 
-int IntraLumaFlowBase::GetCost() const
+int IntraLumaFlowBase::GetDistortion() const
 {
-	return m_cost;
+	return m_distortion;
 }
 
 uint8_t IntraLumaFlowBase::GetCBP() const
 {
 	return m_cbp;
+}
+
+void IntraLumaFlowBase::CalculateDistortion()
+{
+	auto original_block_data = m_mb->GetOriginalLumaBlockData16x16();
+	m_distortion = CostUtil::CalculateSAD(original_block_data, m_reconstructed_data);
 }
 
 __codec_end

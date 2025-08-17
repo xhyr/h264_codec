@@ -21,7 +21,7 @@ public:
 	Intra8ChromaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
 	~Intra8ChromaPredictor();
 
-	void Decide();
+	void Decide(IntraChromaPredictionType target_prediction_type);
 
 	IntraChromaPredictionType GetPredictionType() const;
 
@@ -46,6 +46,8 @@ private:
 
 	void DecideBySATD();
 
+	void GenerateAllowedPredictionTypes(IntraChromaPredictionType target_prediction_type);
+
 private:
 	std::weak_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
@@ -56,6 +58,7 @@ private:
 	std::vector<uint8_t> m_up_data;
 	uint8_t m_left_up_element;
 	std::unordered_map<IntraChromaPredictionType, BlockData<8, 8>> m_predicted_data_map[2];
+	std::unordered_map<IntraChromaPredictionType, bool> m_allowed_prediction_type;
 
 	IntraChromaPredictionType m_prediction_type;
 	int m_cost{ -1 };
