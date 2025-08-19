@@ -11,6 +11,8 @@
 #include "macroblock.h"
 #include "mb_binaryer.h"
 #include "mb_util.h"
+#include "log.h"
+#include "cavlc_context.h"
 
 __codec_begin
 
@@ -38,11 +40,15 @@ void RDOptimizer::Frontend()
 
 		for (auto mb_type : mb_types)
 		{
+			auto old_cavlc_context = *m_encoder_context->cavlc_context;
+
 			double rd_cost = CalculateRDCost(mb_type);
 			if (rd_cost < m_rd_cost)
 			{
+				LOGINFO("min_rd_cost = %lf, mb_type = %d.", rd_cost, mb_type);
+
 				m_rd_cost = rd_cost;
-				m_best_bytes_data = m_tmp_bytes_data;
+				m_best_chroma_prediction_type = prediction_type;
 				m_mb->SetType(mb_type);
 				if (mb_type == MBType::I4)
 				{
@@ -50,34 +56,59 @@ void RDOptimizer::Frontend()
 					m_mb->SetIntra4LumaPredictionTypes(intra4_prediction_types);
 				}
 			}
+
+			*m_encoder_context->cavlc_context = old_cavlc_context;
 		}
 	}
 }
 
 void RDOptimizer::Backend()
 {
-	m_bytes_data->Push(m_best_bytes_data);
+	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
+	m_chroma_flow->SetTargetPredictionType(m_best_chroma_prediction_type);
+	m_chroma_flow->Frontend();
+	m_chroma_cbp = m_chroma_flow->GetCBP();
+
+	auto mb_type = m_mb->GetType();
+	RunLumaFlow(mb_type);
+	OutputMB(mb_type, m_bytes_data);
+	
+	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
+	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
+	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
+
+	LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), m_bytes_data->GetBitsCount());
 }
 
 double RDOptimizer::CalculateRDCost(MBType mb_type)
 {
 	int distortion = m_chroma_flow->GetDistortion();
+	RunLumaFlow(mb_type);
+	distortion += m_luma_flow->GetDistortion();
+	int rate = CalculateRate(mb_type);
+	double rd_cost = distortion + m_encoder_context->lambda_mode * rate;
+	return rd_cost;
+}
+
+void RDOptimizer::RunLumaFlow(MBType mb_type)
+{
 	switch (mb_type)
 	{
 	case codec::MBType::I16:
 	{
 		m_luma_flow = std::make_shared<Intra16LumaFlow>(m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
-		distortion += m_luma_flow->GetDistortion();
 		m_luma_cbp = m_luma_flow->GetCBP();
 		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
 		break;
 	}
 	case codec::MBType::I4:
 	{
+		if (m_mb->GetAddress() == 7)
+			int sb = 1;
+
 		m_luma_flow = std::make_shared<Intra4LumaFlow>(m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
-		distortion += m_luma_flow->GetDistortion();
 		m_luma_cbp = m_luma_flow->GetCBP();
 		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
 		break;
@@ -85,17 +116,20 @@ double RDOptimizer::CalculateRDCost(MBType mb_type)
 	default:
 		break;
 	}
-
-	int rate = CalculateRate(mb_type);
-	double rd_cost = distortion + m_encoder_context->lambda_mode * rate;
-	return rd_cost;
 }
 
 int RDOptimizer::CalculateRate(MBType mb_type)
 {
+	auto bytes_data = std::make_shared<BytesData>();
+	return OutputMB(mb_type, bytes_data);
+}
+
+int RDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> bytes_data)
+{
+	auto start_bit_count = bytes_data->GetBitsCount();
+
 	auto slice = m_mb->GetSlice();
-	m_tmp_bytes_data = std::make_shared<BytesData>();
-	MBBinaryer mb_binaryer(slice, m_mb->GetAddress(), m_tmp_bytes_data);
+	MBBinaryer mb_binaryer(slice, m_mb->GetAddress(), bytes_data);
 
 	if (mb_type == MBType::I16)
 	{
@@ -105,7 +139,7 @@ int RDOptimizer::CalculateRate(MBType mb_type)
 	}
 	else mb_binaryer.OutputMBType(mb_type);
 
-	m_luma_flow->OutputPredictionTypes(m_tmp_bytes_data);
+	m_luma_flow->OutputPredictionTypes(bytes_data);
 
 	mb_binaryer.OutputChromaPredMode(m_chroma_flow->GetPredictionType());
 	mb_binaryer.OutputCBP(m_cbp);
@@ -113,10 +147,10 @@ int RDOptimizer::CalculateRate(MBType mb_type)
 	if (m_cbp > 0 || mb_type == MBType::I16)
 		mb_binaryer.OutputQPDelta(0);
 
-	m_luma_flow->OutputCoefficients(m_tmp_bytes_data);
-	m_chroma_flow->OutputCoefficients(m_tmp_bytes_data);
+	m_luma_flow->OutputCoefficients(bytes_data);
+	m_chroma_flow->OutputCoefficients(bytes_data);
 
-	return m_tmp_bytes_data->GetBitsCount();
+	return bytes_data->GetBitsCount() - start_bit_count;
 }
 
 __codec_end

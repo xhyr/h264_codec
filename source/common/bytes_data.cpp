@@ -4,8 +4,11 @@ __codec_begin
 
 void BytesData::PushByte(uint8_t value, uint32_t continous_count)
 {
-	for(uint32_t i = 0; i < continous_count; ++i)
+	for (uint32_t i = 0; i < continous_count; ++i)
+	{
 		m_data.push_back(value);
+		m_bits_count += 8;
+	}
 }
 
 uint8_t BytesData::GetByte(uint32_t index) const
@@ -78,8 +81,19 @@ void BytesData::Reserve(uint32_t bits_count)
 void BytesData::Push(std::shared_ptr<BytesData> bytes_data)
 {
 	auto bit_count = bytes_data->GetBitsCount();
-	for (uint32_t i = 0; i < bit_count; ++i)
-		PushBit(bytes_data->GetBit(i));
+	if (IsByteAlign())
+	{
+		auto byte_count = bit_count / 8;
+		for (uint32_t i = 0; i < byte_count; ++i)
+			PushByte(bytes_data->GetByte(i));
+		for (uint32_t i = byte_count * 8; i < bit_count; ++i)
+			PushBit(bytes_data->GetBit(i));
+	}
+	else
+	{
+		for (uint32_t i = 0; i < bit_count; ++i)
+			PushBit(bytes_data->GetBit(i));
+	}
 }
 
 __codec_end

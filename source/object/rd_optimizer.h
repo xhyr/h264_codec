@@ -27,7 +27,11 @@ public:
 private:
 	double CalculateRDCost(MBType mb_type);
 
+	void RunLumaFlow(MBType mb_type);
+
 	int CalculateRate(MBType mb_type);
+
+	int OutputMB(MBType mb_type, std::shared_ptr<BytesData> bytes_data);
 
 private:
 	std::shared_ptr<Macroblock> m_mb;
@@ -36,11 +40,11 @@ private:
 
 	std::shared_ptr<ChromaFlow> m_chroma_flow;
 	std::shared_ptr<IntraLumaFlowBase> m_luma_flow;
-	std::shared_ptr<BytesData> m_tmp_bytes_data;
+	IntraChromaPredictionType m_best_chroma_prediction_type;
+
 	int m_chroma_cbp{ 0 };
 	int m_luma_cbp{ 0 };
 	int m_cbp{ 0 };
-	std::shared_ptr<BytesData> m_best_bytes_data;
 	MBType m_mb_type;
 	double m_rd_cost{ 0 };
 };

@@ -11,6 +11,7 @@
 #include "encoder_context.h"
 #include "bytes_data.h"
 #include "cost_util.h"
+#include "log.h"
 
 __codec_begin
 
@@ -131,7 +132,7 @@ void Intra4LumaFlowNode::Quantize()
 	auto qp = m_mb->GetQP();
 	m_diff_data = QuantizeUtil::QuantizeNormal(qp, m_diff_data);
 	m_residual_data = m_diff_data;
-	m_is_all_zero &= m_diff_data.AllEqual(0);
+	m_is_all_zero = m_diff_data.AllEqual(0);
 }
 
 void Intra4LumaFlowNode::InverseQuantize()

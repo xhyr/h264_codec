@@ -4,6 +4,7 @@
 #include "encoder_context.h"
 #include "bytes_data.h"
 #include "coding_util.h"
+#include "macroblock.h"
 
 __codec_begin
 
@@ -19,6 +20,9 @@ Intra4LumaFlow::~Intra4LumaFlow()
 
 void Intra4LumaFlow::Frontend() 
 {
+	if (m_mb->GetAddress() == 7)
+		int sb = 1;
+
 	m_nodes.reserve(16);
 	m_prediction_types.resize(16);
 	for (uint8_t index_in_block8x8 = 0; index_in_block8x8 < 4; ++index_in_block8x8)
@@ -29,6 +33,8 @@ void Intra4LumaFlow::Frontend()
 			auto node = std::make_shared<Intra4LumaFlowNode>(m_mb, m_encoder_context, m_reconstructed_data, m_prediction_types, index_in_block8x8, index_in_block4x4);
 			node->Frontend();
 			m_nodes.push_back(node);
+			std::shared_ptr<BytesData> tmp_bytes_data = std::make_shared<BytesData>();
+			node->OutputCoefficients(tmp_bytes_data);
 
 			all_zero &= node->IsAllZero();
 		}
