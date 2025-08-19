@@ -19,7 +19,7 @@
 __codec_begin
 
 ChromaFlow::ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
-	m_mb(mb), m_encoder_context(encoder_context)
+	m_mb(mb), m_encoder_context(encoder_context), m_predictor(std::make_unique<Intra8ChromaPredictor>(mb, encoder_context))
 {
 }
 
@@ -88,7 +88,6 @@ int ChromaFlow::GetDistortion()
 
 void ChromaFlow::Predict()
 {
-	m_predictor = std::make_unique<Intra8ChromaPredictor>(m_mb, m_encoder_context);
 	m_predictor->Decide(m_target_prediction_type);
 }
 

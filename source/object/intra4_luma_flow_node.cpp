@@ -45,6 +45,8 @@ void Intra4LumaFlowNode::Frontend()
 		Intra4LumaPredictionType::HorizontalUp
 	};
 
+	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
+
 	double min_rdo_cost = std::numeric_limits<double>::max();
 	for (auto prediction_type : prediction_types)
 	{
@@ -111,7 +113,6 @@ bool Intra4LumaFlowNode::DoFrontend()
 
 bool Intra4LumaFlowNode::Predict()
 {
-	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
 	m_predictor->Decide(m_target_prediction_type);
 	auto prediction_type = m_predictor->GetPredictionType();
 	if (prediction_type == Intra4LumaPredictionType::None)

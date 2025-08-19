@@ -13,6 +13,7 @@ Intra4LumaPredictor::Intra4LumaPredictor(std::shared_ptr<Macroblock> mb, std::sh
 	m_mb(mb), m_encoder_context(encoder_context), m_x_in_block(x_in_block), m_y_in_block(y_in_block),
 	m_reconstructed_data(reconstructed_data), m_prediction_types(prediction_types)
 {
+	Init();
 }
 
 Intra4LumaPredictor::~Intra4LumaPredictor()
@@ -36,11 +37,7 @@ Intra4LumaPredictionType Intra4LumaPredictor::GetPredictionType() const
 
 void Intra4LumaPredictor::Decide(Intra4LumaPredictionType target_prediction_type)
 {
-	m_block_neighbors = std::make_unique<BlockNeighbors>(m_mb, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
-	m_edge_data = m_block_neighbors->GetEdgeData();
-
 	GenerateAllowedPredictionTypes(target_prediction_type);
-	CalculateMostProbablePredictionType();
 	CalculateAllPredictionData();
 	DecideByRDO(m_x_in_block, m_y_in_block);
 }
@@ -53,6 +50,14 @@ BlockData<4, 4> Intra4LumaPredictor::GetPredictedData() const
 BlockData<4, 4, int32_t> Intra4LumaPredictor::GetDiffData() const
 {
 	return m_diff_data;
+}
+
+void Intra4LumaPredictor::Init()
+{
+	m_block_neighbors = std::make_unique<BlockNeighbors>(m_mb, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
+	m_edge_data = m_block_neighbors->GetEdgeData();
+
+	CalculateMostProbablePredictionType();
 }
 
 void Intra4LumaPredictor::CalculateMostProbablePredictionType()

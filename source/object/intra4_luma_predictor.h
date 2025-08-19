@@ -35,6 +35,8 @@ public:
 	Intra4LumaPredictionType GetPredictionType() const;
 
 private:
+	void Init();
+
 	void CalculateMostProbablePredictionType();
 
 	void CalculateAllPredictionData();

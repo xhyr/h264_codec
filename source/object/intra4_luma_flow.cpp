@@ -20,9 +20,6 @@ Intra4LumaFlow::~Intra4LumaFlow()
 
 void Intra4LumaFlow::Frontend() 
 {
-	if (m_mb->GetAddress() == 7)
-		int sb = 1;
-
 	m_nodes.reserve(16);
 	m_prediction_types.resize(16);
 	for (uint8_t index_in_block8x8 = 0; index_in_block8x8 < 4; ++index_in_block8x8)

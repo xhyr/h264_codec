@@ -29,14 +29,14 @@ void RDOptimizer::Frontend()
 {
 	m_rd_cost = std::numeric_limits<double>::max();
 
+	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
+
 	std::vector<MBType> mb_types{ MBType::I16, MBType::I4 };
 	std::vector<IntraChromaPredictionType> prediction_types{ IntraChromaPredictionType::DC, IntraChromaPredictionType::Horizontal, IntraChromaPredictionType::Vertical, IntraChromaPredictionType::Plane };
 	for (auto prediction_type : prediction_types)
 	{
-		m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
 		m_chroma_flow->SetTargetPredictionType(prediction_type);
 		m_chroma_flow->Frontend();
-		m_chroma_cbp = m_chroma_flow->GetCBP();
 
 		for (auto mb_type : mb_types)
 		{
@@ -45,8 +45,6 @@ void RDOptimizer::Frontend()
 			double rd_cost = CalculateRDCost(mb_type);
 			if (rd_cost < m_rd_cost)
 			{
-				LOGINFO("min_rd_cost = %lf, mb_type = %d.", rd_cost, mb_type);
-
 				m_rd_cost = rd_cost;
 				m_best_chroma_prediction_type = prediction_type;
 				m_mb->SetType(mb_type);
@@ -64,13 +62,16 @@ void RDOptimizer::Frontend()
 
 void RDOptimizer::Backend()
 {
-	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
 	m_chroma_flow->SetTargetPredictionType(m_best_chroma_prediction_type);
 	m_chroma_flow->Frontend();
 	m_chroma_cbp = m_chroma_flow->GetCBP();
 
 	auto mb_type = m_mb->GetType();
 	RunLumaFlow(mb_type);
+
+	m_luma_cbp = m_luma_flow->GetCBP();
+	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+
 	OutputMB(mb_type, m_bytes_data);
 	
 	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
@@ -98,19 +99,12 @@ void RDOptimizer::RunLumaFlow(MBType mb_type)
 	{
 		m_luma_flow = std::make_shared<Intra16LumaFlow>(m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
-		m_luma_cbp = m_luma_flow->GetCBP();
-		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
 		break;
 	}
 	case codec::MBType::I4:
 	{
-		if (m_mb->GetAddress() == 7)
-			int sb = 1;
-
 		m_luma_flow = std::make_shared<Intra4LumaFlow>(m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
-		m_luma_cbp = m_luma_flow->GetCBP();
-		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
 		break;
 	}
 	default:
