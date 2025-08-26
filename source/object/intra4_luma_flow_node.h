@@ -32,6 +32,8 @@ public:
 	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) const;
 
 private:
+	void Init();
+
 	bool DoFrontend();
 
 	bool Predict();
@@ -62,10 +64,12 @@ private:
 	std::unique_ptr<Intra4LumaPredictor> m_predictor;
 	BlockData<4, 4, int32_t> m_diff_data;
 	BlockData<4, 4, int32_t> m_residual_data;
+	BlockData<4, 4> m_reconstructed_block_data;
 	bool m_is_all_zero{ true };
 
 	Intra4LumaPredictionType m_target_prediction_type{ Intra4LumaPredictionType::None };
 	Intra4LumaPredictionType m_best_prediction_type{ Intra4LumaPredictionType::None };
+	Intra4LumaPredictionType m_most_probable_prediction_type;
 };
 
 __codec_end

@@ -20,6 +20,7 @@ Intra4LumaFlowNode::Intra4LumaFlowNode(std::shared_ptr<Macroblock> mb, std::shar
 	m_x_in_block((index_in_block8x8 % 2) * 2 + (index_in_block4x4 % 2)),
 	m_y_in_block((index_in_block8x8 / 2) * 2 + (index_in_block4x4 / 2))
 {
+	Init();
 }
 
 Intra4LumaFlowNode::~Intra4LumaFlowNode()
@@ -45,11 +46,6 @@ void Intra4LumaFlowNode::Frontend()
 		Intra4LumaPredictionType::HorizontalUp
 	};
 
-	m_original_block_data = m_mb->GetOriginalLumaBlockData4x4(m_x_in_block, m_y_in_block);
-	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
-
-	if (m_mb->GetAddress() == 17 && m_x_in_block == 3 && m_y_in_block == 2)
-		int sb = 1;
 
 	int min_rdo_cost = std::numeric_limits<int>::max();
 	for (auto prediction_type : prediction_types)
@@ -59,9 +55,12 @@ void Intra4LumaFlowNode::Frontend()
 			continue;
 
 		int distortion = CalculateDistortion();
+		if (distortion > min_rdo_cost)
+			continue;
+
 		int rate = CalculateRate();
 		int rdo_cost = distortion + m_encoder_context->lambda_mode_fp * rate;
-		if (rdo_cost < min_rdo_cost || (rdo_cost == min_rdo_cost && prediction_type == m_predictor->GetMostProbablePredictionType()))
+		if (rdo_cost < min_rdo_cost || (rdo_cost == min_rdo_cost && prediction_type == m_most_probable_prediction_type))
 		{
 			min_rdo_cost = rdo_cost;
 			m_best_prediction_type = prediction_type;
@@ -72,6 +71,8 @@ void Intra4LumaFlowNode::Frontend()
 	m_prediction_types[m_x_in_block + m_y_in_block * 4] = m_best_prediction_type;
 
 	DoFrontend();
+
+	m_reconstructed_data.SetBlock4x4(m_x_in_block, m_y_in_block, m_reconstructed_block_data);
 }
 
 bool Intra4LumaFlowNode::IsAllZero() const
@@ -81,7 +82,7 @@ bool Intra4LumaFlowNode::IsAllZero() const
 
 Intra4LumaPredictionType Intra4LumaFlowNode::GetMostProbablePredictionType() const
 {
-	return m_predictor->GetMostProbablePredictionType();
+	return m_most_probable_prediction_type;
 }
 
 Intra4LumaPredictionType Intra4LumaFlowNode::GetPredictionType() const
@@ -102,6 +103,13 @@ uint32_t Intra4LumaFlowNode::OutputCoefficients(std::shared_ptr<BytesData> bytes
 
 	auto finish_bits_count = bytes_data->GetBitsCount();
 	return finish_bits_count - start_bits_count;
+}
+
+void Intra4LumaFlowNode::Init()
+{
+	m_original_block_data = m_mb->GetOriginalLumaBlockData4x4(m_x_in_block, m_y_in_block);
+	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
+	m_most_probable_prediction_type = m_predictor->GetMostProbablePredictionType();
 }
 
 bool Intra4LumaFlowNode::DoFrontend()
@@ -155,7 +163,6 @@ void Intra4LumaFlowNode::InverseTransform()
 void Intra4LumaFlowNode::Reconstruct()
 {
 	auto predicted_data = m_predictor->GetPredictedData();
-	BlockData<4, 4> reconstructed_data;
 	for (uint32_t y = 0; y < 4; ++y)
 	{
 		for (uint32_t x = 0; x < 4; ++x)
@@ -163,21 +170,19 @@ void Intra4LumaFlowNode::Reconstruct()
 			auto predicted_val = predicted_data.GetElement(x, y);
 			auto residual_val = m_diff_data.GetElement(x, y);
 			auto val = ReconstructUtil::Reconstruct(predicted_val, residual_val);
-			reconstructed_data.SetElement(x, y, val);
+			m_reconstructed_block_data.SetElement(x, y, val);
 		}
 	}
-	m_reconstructed_data.SetBlock4x4(m_x_in_block, m_y_in_block, reconstructed_data);
 }
 
 int Intra4LumaFlowNode::CalculateDistortion() const
 {
-	auto reconstructed_data = m_reconstructed_data.GetBlock4x4<uint8_t>(m_x_in_block, m_y_in_block);
-	return CostUtil::CalculateSADDistortion(reconstructed_data, m_original_block_data);
+	return CostUtil::CalculateSADDistortion(m_reconstructed_block_data, m_original_block_data);
 }
 
 int Intra4LumaFlowNode::CalculateRate() const
 {
-	int rate = GetMostProbablePredictionType() == GetPredictionType() ? 1 : 4;
+	int rate = (m_most_probable_prediction_type == GetPredictionType()) ? 1 : 4;
 	std::shared_ptr<BytesData> bytes_data = std::make_shared<BytesData>();
 	rate += OutputCoefficients(bytes_data);
 	return rate;

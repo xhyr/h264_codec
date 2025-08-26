@@ -35,7 +35,7 @@ bool Encoder::Encode()
 	parameter_set_container.ConstructPPS();
 	parameter_set_container.Serial(m_context->out_stream);
 
-	FILE* out_handle = fopen("output.yuv", "wb");
+	FILE* out_handle = fopen("reconstruct.yuv", "wb");
 
 	uint32_t encoded_frame_count = 0;
 	while (auto next_yuv_frame = GetNextFrame())

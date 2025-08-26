@@ -32,15 +32,11 @@ void RDOptimizer::Frontend()
 
 	m_mb_addr = m_mb->GetAddress();
 
-	if (m_mb_addr == 17)
-		int sb = 1;
-
 	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
 	m_chroma_flow->Frontend();
 	m_chroma_cbp = m_chroma_flow->GetCBP();
 
-	//std::vector<MBType> mb_types{ MBType::I16, MBType::I4 };
-	std::vector<MBType> mb_types{ MBType::I4 };
+	std::vector<MBType> mb_types{ MBType::I16, MBType::I4 };
 	for (auto mb_type : mb_types)
 	{
 		double rd_cost = CalculateRDCost(mb_type);
@@ -65,7 +61,6 @@ void RDOptimizer::Backend()
 {
 	auto mb_type = m_mb->GetType();
 	
-	//RunLumaFlow(mb_type);
 	m_luma_flow = m_best_luma_flow;
 
 	m_luma_cbp = m_luma_flow->GetCBP();
