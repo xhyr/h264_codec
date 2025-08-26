@@ -37,9 +37,11 @@ Intra4LumaPredictionType Intra4LumaPredictor::GetPredictionType() const
 
 void Intra4LumaPredictor::Decide(Intra4LumaPredictionType target_prediction_type)
 {
+	m_predicted_data_map.clear();
+
 	GenerateAllowedPredictionTypes(target_prediction_type);
 	CalculateAllPredictionData();
-	DecideByRDO(m_x_in_block, m_y_in_block);
+	Decide(m_x_in_block, m_y_in_block);
 }
 
 BlockData<4, 4> Intra4LumaPredictor::GetPredictedData() const
@@ -318,7 +320,7 @@ void Intra4LumaPredictor::CalculateHorizontalUpMode()
 	}
 }
 
-void Intra4LumaPredictor::DecideByRDO(uint32_t x_in_block, uint32_t y_in_block)
+void Intra4LumaPredictor::Decide(uint32_t x_in_block, uint32_t y_in_block)
 {
 	if (m_predicted_data_map.empty())
 		return;
@@ -343,20 +345,14 @@ void Intra4LumaPredictor::DecideByRDO(uint32_t x_in_block, uint32_t y_in_block)
 		if (m_predicted_data_map.find(prediction_type) == m_predicted_data_map.end())
 			continue;
 
-		int cost = prediction_type == m_most_probable_prediction_type ? 0 : 4 * m_encoder_context->lambda_mode;
 		const auto& predicted_data = m_predicted_data_map[prediction_type];
 		auto diff_data = original_block_data - predicted_data;
-		cost += CostUtil::CalculateSATD(diff_data);
-		if (min_cost == -1 || cost < min_cost)
-		{
-			min_cost = cost;
-			best_prediction_type = prediction_type;
-			m_predicted_data = predicted_data;
-			m_diff_data = diff_data;
-		}
+		
+		best_prediction_type = prediction_type;
+		m_predicted_data = predicted_data;
+		m_diff_data = diff_data;
 	}
 
-	m_cost = min_cost;
 	m_prediction_type = best_prediction_type;
 }
 

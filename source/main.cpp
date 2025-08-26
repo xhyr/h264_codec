@@ -8,6 +8,7 @@
 #include "ostream.h"
 #include "stream_util.h"
 #include "slice.h"
+#include "math_util.h"
 
 using namespace codec;
 

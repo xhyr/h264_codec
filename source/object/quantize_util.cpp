@@ -80,9 +80,9 @@ BlockData<4, 4, int32_t> QuantizeUtil::QuantizeAC(int qp, const BlockData<4, 4, 
 				continue;
 
 			auto val = ac_block.GetElement(x, y);
-			auto ac_factor = QuantizeConstants::s_quant_matrix[qp_rem][y][x];
+			auto scale_factor = QuantizeConstants::s_quant_matrix[qp_rem][y][x];
 			auto positive_val = abs(val);
-			positive_val = (positive_val * ac_factor + qp_offset) >> qp_bits;
+			positive_val = (positive_val * scale_factor + qp_offset) >> qp_bits;
 			val = val >= 0 ? positive_val : -positive_val;
 			output_block.SetElement(x, y, val);
 		}
@@ -104,8 +104,8 @@ BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeAC(int qp, const BlockData
 				continue;
 
 			auto val = ac_block.GetElement(x, y);
-			auto ac_factor = QuantizeConstants::s_dequant_matrix[qp_rem][y][x];
-			val = (val * ac_factor) << qp_per;
+			auto scale_factor = QuantizeConstants::s_dequant_matrix[qp_rem][y][x];
+			val = (val * scale_factor) << qp_per;
 			output_block.SetElement(x, y, val);
 		}
 	}
@@ -123,9 +123,9 @@ BlockData<4, 4, int32_t> QuantizeUtil::QuantizeNormal(int qp, const BlockData<4,
 		for (uint32_t x = 0; x < 4; ++x)
 		{
 			auto val = block.GetElement(x, y);
-			auto ac_factor = QuantizeConstants::s_quant_matrix[qp_rem][y][x];
+			auto scale_factor = QuantizeConstants::s_quant_matrix[qp_rem][y][x];
 			auto positive_val = abs(val);
-			positive_val = (positive_val * ac_factor + qp_offset) >> qp_bits;
+			positive_val = (positive_val * scale_factor + qp_offset) >> qp_bits;
 			val = val >= 0 ? positive_val : -positive_val;
 			output_block.SetElement(x, y, val);
 		}
@@ -144,8 +144,8 @@ BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeNormal(int qp, const Block
 		for (uint32_t x = 0; x < 4; ++x)
 		{
 			auto val = block.GetElement(x, y);
-			auto ac_factor = QuantizeConstants::s_dequant_matrix[qp_rem][y][x];
-			val = (val * ac_factor) << qp_per;
+			auto scale_factor = QuantizeConstants::s_dequant_matrix[qp_rem][y][x];
+			val = (val * scale_factor) << qp_per;
 			output_block.SetElement(x, y, val);
 		}
 	}
@@ -158,7 +158,7 @@ std::tuple<int, int, int> QuantizeUtil::GetQuantizeParameters(int qp, bool is_in
 	int qp_per = qp / 6;
 	int qp_rem = qp % 6;
 	int q_bits = QuantizeConstants::s_q_bits + qp_per;
-	int qp_offset = (1 << q_bits) / (is_intra ? 3 : 6);
+	int qp_offset = (is_intra ? QuantizeConstants::s_intra_offset : QuantizeConstants::s_inter_offset) << (q_bits - QuantizeConstants::s_offset_bits);
 	return std::make_tuple(qp_rem, qp_offset, q_bits);
 }
 

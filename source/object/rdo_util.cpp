@@ -16,4 +16,21 @@ double RDOUtil::GetLambdaMotion(int qp)
 	return sqrt(GetLambdaMode(qp));
 }
 
+int RDOUtil::GetLambdaModeFixedPoint(int qp)
+{
+	auto lambda = GetLambdaMode(qp);
+	return  static_cast<int>((1 << RDOConstantValues::s_lambda_accuracy_bits) * lambda + 0.5);
+}
+
+int RDOUtil::GetLambdaMotionFixedPoint(int qp)
+{
+	auto lambda = GetLambdaMotion(qp);
+	return  static_cast<int>((1 << RDOConstantValues::s_lambda_accuracy_bits) * lambda + 0.5);
+}
+
+int RDOUtil::CalculateRDCost(int distortion, int rate, int lambda)
+{
+	return distortion + (rate > 0 ? lambda * rate : lambda * 1 / 2);
+}
+
 __codec_end

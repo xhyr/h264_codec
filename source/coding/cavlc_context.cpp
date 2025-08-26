@@ -42,6 +42,27 @@ uint8_t CavlcContext::GetNC(CavlcDataType data_type, uint32_t mb_addr, uint32_t 
 	return nc;
 }
 
+std::vector<uint8_t> CavlcContext::GetMBLumaCoeffNums(uint32_t mb_addr) 
+{
+	std::vector<uint8_t> coeff_nums(16);
+	for (uint8_t i = 0; i < 16; ++i)
+	{
+		auto index = GetBlockIndex(CavlcDataType::NormalLuma, mb_addr, i);
+		coeff_nums[i] = m_coeff_num_map[CavlcContextType::Luma][index];
+	}
+
+	return coeff_nums;
+}
+
+void CavlcContext::SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_t>& coeff_nums)
+{
+	for (uint8_t i = 0; i < 16; ++i)
+	{
+		auto index = GetBlockIndex(CavlcDataType::NormalLuma, mb_addr, i);
+		m_coeff_num_map[CavlcContextType::Luma][index] = coeff_nums[i];
+	}
+}
+
 void CavlcContext::Init()
 {
 	std::vector<CavlcContextType> context_types{ CavlcContextType::Luma, CavlcContextType::Cb, CavlcContextType::Cr };

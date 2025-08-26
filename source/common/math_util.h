@@ -32,11 +32,11 @@ struct MathUtil
 	}
 
 	template<typename Ty>
-	static int CeilLog2(Ty value)
+	static int CeilLog2(Ty value, int delta = -1)
 	{
-		--value;
+		value += delta;
 		int cnt = 0;
-		while (value != 0)
+		while (value > 0)
 		{
 			value >>= 1;
 			++cnt;

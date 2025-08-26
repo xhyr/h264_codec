@@ -153,6 +153,8 @@ void Macroblock::PreEncode()
 
 	m_encoder_context->lambda_mode = RDOUtil::GetLambdaMode(m_qp);
 	m_encoder_context->lambda_motion = RDOUtil::GetLambdaMotion(m_qp);
+	m_encoder_context->lambda_mode_fp = RDOUtil::GetLambdaModeFixedPoint(m_qp);
+	m_encoder_context->lambda_motion_fp = RDOUtil::GetLambdaMotionFixedPoint(m_qp);
 }
 
 void Macroblock::DoEncode()

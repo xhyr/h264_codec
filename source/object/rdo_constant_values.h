@@ -8,7 +8,7 @@ __codec_begin
 
 struct RDOConstantValues
 {
-	constexpr static int s_qp_shift = 12;
+	constexpr static int s_qp_shift{ 12 };
 
 	constexpr static int s_qp2quant[]
 	{
@@ -19,6 +19,7 @@ struct RDOConstantValues
 		 40,45,51,57,64,72,81,91
 	};
 
+	constexpr static int s_lambda_accuracy_bits{ 5 };
 };
 
 

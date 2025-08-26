@@ -6,6 +6,7 @@
 #include "common_constant_values.h"
 #include "transform_util.h"
 #include "cost_util.h"
+#include "coding_util.h"
 
 __codec_begin
 
@@ -229,7 +230,7 @@ void Intra8ChromaPredictor::DecideBySATD()
 	for(auto plane_type : plane_types)
 		origial_block_data_map[plane_type] = mb->GetOriginalChromaBlockData(plane_type);
 
-	int min_satd = -1;
+	int min_cost = -1;
 	IntraChromaPredictionType best_prediction_type = IntraChromaPredictionType::DC;
 	std::vector<IntraChromaPredictionType> prediction_types{ IntraChromaPredictionType::DC, IntraChromaPredictionType::Horizontal, IntraChromaPredictionType::Vertical, IntraChromaPredictionType::Plane };
 	for (auto prediction_type : prediction_types)
@@ -237,7 +238,7 @@ void Intra8ChromaPredictor::DecideBySATD()
 		if (m_predicted_data_map[0].find(prediction_type) == m_predicted_data_map[0].end())
 			continue;
 
-		int satd = 0;
+		int cost = m_encoder_context->lambda_motion_fp * CodingUtil::GetSEBitCount(static_cast<int>(prediction_type));
 		BlockData<8, 8, int32_t> uv_diff_data[2];
 		for (auto plane_type : plane_types)
 		{
@@ -245,12 +246,12 @@ void Intra8ChromaPredictor::DecideBySATD()
 			const auto& predicted_data = m_predicted_data_map[plane_type == PlaneType::Cb ? 0 : 1][prediction_type];
 			auto diff_data = original_block_data - predicted_data;
 			uv_diff_data[plane_type == PlaneType::Cb ? 0 : 1] = diff_data;
-			satd += CostUtil::CalculateSATD(diff_data);
+			cost += CostUtil::CalculateSATDDistortion(diff_data);
 		}
 
-		if (min_satd == -1 || satd < min_satd)
+		if (min_cost == -1 || cost < min_cost)
 		{
-			min_satd = satd;
+			min_cost = cost;
 			best_prediction_type = prediction_type;
 			m_diff_data[0] = uv_diff_data[0];
 			m_diff_data[1] = uv_diff_data[1];
@@ -260,7 +261,7 @@ void Intra8ChromaPredictor::DecideBySATD()
 	m_prediction_type = best_prediction_type;
 	m_predicted_data[0] = m_predicted_data_map[0][best_prediction_type];
 	m_predicted_data[1] = m_predicted_data_map[1][best_prediction_type];
-	m_cost = min_satd;
+	m_cost = min_cost;
 }
 
 void Intra8ChromaPredictor::GenerateAllowedPredictionTypes(IntraChromaPredictionType target_prediction_type)

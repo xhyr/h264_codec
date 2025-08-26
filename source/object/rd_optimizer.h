@@ -40,8 +40,10 @@ private:
 
 	std::shared_ptr<ChromaFlow> m_chroma_flow;
 	std::shared_ptr<IntraLumaFlowBase> m_luma_flow;
-	IntraChromaPredictionType m_best_chroma_prediction_type;
 
+	std::shared_ptr<IntraLumaFlowBase> m_best_luma_flow;
+
+	uint32_t m_mb_addr;
 	int m_chroma_cbp{ 0 };
 	int m_luma_cbp{ 0 };
 	int m_cbp{ 0 };

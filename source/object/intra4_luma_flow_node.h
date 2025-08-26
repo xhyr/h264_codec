@@ -58,6 +58,7 @@ private:
 	uint32_t m_x_in_block;
 	uint32_t m_y_in_block;
 
+	BlockData<4, 4> m_original_block_data;
 	std::unique_ptr<Intra4LumaPredictor> m_predictor;
 	BlockData<4, 4, int32_t> m_diff_data;
 	BlockData<4, 4, int32_t> m_residual_data;

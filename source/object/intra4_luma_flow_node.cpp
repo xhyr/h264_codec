@@ -45,9 +45,13 @@ void Intra4LumaFlowNode::Frontend()
 		Intra4LumaPredictionType::HorizontalUp
 	};
 
+	m_original_block_data = m_mb->GetOriginalLumaBlockData4x4(m_x_in_block, m_y_in_block);
 	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
 
-	double min_rdo_cost = std::numeric_limits<double>::max();
+	if (m_mb->GetAddress() == 17 && m_x_in_block == 3 && m_y_in_block == 2)
+		int sb = 1;
+
+	int min_rdo_cost = std::numeric_limits<int>::max();
 	for (auto prediction_type : prediction_types)
 	{
 		m_target_prediction_type = prediction_type;
@@ -56,8 +60,8 @@ void Intra4LumaFlowNode::Frontend()
 
 		int distortion = CalculateDistortion();
 		int rate = CalculateRate();
-		double rdo_cost = distortion + m_encoder_context->lambda_mode * rate;
-		if (rdo_cost < min_rdo_cost)
+		int rdo_cost = distortion + m_encoder_context->lambda_mode_fp * rate;
+		if (rdo_cost < min_rdo_cost || (rdo_cost == min_rdo_cost && prediction_type == m_predictor->GetMostProbablePredictionType()))
 		{
 			min_rdo_cost = rdo_cost;
 			m_best_prediction_type = prediction_type;
@@ -65,6 +69,8 @@ void Intra4LumaFlowNode::Frontend()
 	}
 
 	m_target_prediction_type = m_best_prediction_type;
+	m_prediction_types[m_x_in_block + m_y_in_block * 4] = m_best_prediction_type;
+
 	DoFrontend();
 }
 
@@ -118,7 +124,6 @@ bool Intra4LumaFlowNode::Predict()
 	if (prediction_type == Intra4LumaPredictionType::None)
 		return false;
 
-	m_prediction_types[m_x_in_block + m_y_in_block * 4] = prediction_type;
 	m_diff_data = m_predictor->GetDiffData();
 	return true;
 }
@@ -166,9 +171,8 @@ void Intra4LumaFlowNode::Reconstruct()
 
 int Intra4LumaFlowNode::CalculateDistortion() const
 {
-	auto original_block_data = m_mb->GetOriginalLumaBlockData4x4(m_x_in_block, m_y_in_block);
 	auto reconstructed_data = m_reconstructed_data.GetBlock4x4<uint8_t>(m_x_in_block, m_y_in_block);
-	return CostUtil::CalculateSAD(original_block_data, reconstructed_data);
+	return CostUtil::CalculateSADDistortion(reconstructed_data, m_original_block_data);
 }
 
 int Intra4LumaFlowNode::CalculateRate() const

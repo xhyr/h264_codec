@@ -24,6 +24,8 @@ struct EncoderContext
 
 	double lambda_mode;
 	double lambda_motion;
+	int lambda_mode_fp;
+	int lambda_motion_fp;
 	std::shared_ptr<CavlcContext> cavlc_context;
 
 	std::shared_ptr<EncoderConfig> config;

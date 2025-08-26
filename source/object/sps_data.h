@@ -30,7 +30,7 @@ struct SPSData
 	uint32_t pic_width_in_mbs_minus1; //ue(v)
 	uint32_t pic_height_in_map_units_minus1; //ue(v)
 	uint8_t frame_mbs_only_flag{ 1 }; //u(1)
-	uint8_t direct_8x8_inference_flag{ 0 }; //u(0)
+	uint8_t direct_8x8_inference_flag{ 1 }; //u(0)
 	uint8_t frame_cropping_flag{ 0 }; //u(1)
 	uint8_t vui_parametres_present_flag{ 0 }; //u(1)
 

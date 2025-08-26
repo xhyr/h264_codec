@@ -13,6 +13,7 @@
 #include "mb_util.h"
 #include "log.h"
 #include "cavlc_context.h"
+#include "rdo_util.h"
 
 __codec_begin
 
@@ -29,48 +30,48 @@ void RDOptimizer::Frontend()
 {
 	m_rd_cost = std::numeric_limits<double>::max();
 
+	m_mb_addr = m_mb->GetAddress();
+
+	if (m_mb_addr == 17)
+		int sb = 1;
+
 	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
+	m_chroma_flow->Frontend();
+	m_chroma_cbp = m_chroma_flow->GetCBP();
 
-	std::vector<MBType> mb_types{ MBType::I16, MBType::I4 };
-	std::vector<IntraChromaPredictionType> prediction_types{ IntraChromaPredictionType::DC, IntraChromaPredictionType::Horizontal, IntraChromaPredictionType::Vertical, IntraChromaPredictionType::Plane };
-	for (auto prediction_type : prediction_types)
+	//std::vector<MBType> mb_types{ MBType::I16, MBType::I4 };
+	std::vector<MBType> mb_types{ MBType::I4 };
+	for (auto mb_type : mb_types)
 	{
-		m_chroma_flow->SetTargetPredictionType(prediction_type);
-		m_chroma_flow->Frontend();
-
-		for (auto mb_type : mb_types)
+		double rd_cost = CalculateRDCost(mb_type);
+		auto old_mb_luma_coeff_nums = m_encoder_context->cavlc_context->GetMBLumaCoeffNums(m_mb_addr);
+		if (rd_cost < m_rd_cost)
 		{
-			auto old_cavlc_context = *m_encoder_context->cavlc_context;
-
-			double rd_cost = CalculateRDCost(mb_type);
-			if (rd_cost < m_rd_cost)
+			m_rd_cost = rd_cost;
+			m_mb->SetType(mb_type);
+			if (mb_type == MBType::I4)
 			{
-				m_rd_cost = rd_cost;
-				m_best_chroma_prediction_type = prediction_type;
-				m_mb->SetType(mb_type);
-				if (mb_type == MBType::I4)
-				{
-					auto intra4_prediction_types = std::dynamic_pointer_cast<Intra4LumaFlow>(m_luma_flow)->GetPredictionTypes();
-					m_mb->SetIntra4LumaPredictionTypes(intra4_prediction_types);
-				}
+				auto intra4_prediction_types = std::dynamic_pointer_cast<Intra4LumaFlow>(m_luma_flow)->GetPredictionTypes();
+				m_mb->SetIntra4LumaPredictionTypes(intra4_prediction_types);
 			}
 
-			*m_encoder_context->cavlc_context = old_cavlc_context;
+			m_best_luma_flow = m_luma_flow;
 		}
+		else m_encoder_context->cavlc_context->SetMBLumaCoeffNums(m_mb_addr, old_mb_luma_coeff_nums);
 	}
 }
 
 void RDOptimizer::Backend()
 {
-	m_chroma_flow->SetTargetPredictionType(m_best_chroma_prediction_type);
-	m_chroma_flow->Frontend();
-	m_chroma_cbp = m_chroma_flow->GetCBP();
-
 	auto mb_type = m_mb->GetType();
-	RunLumaFlow(mb_type);
+	
+	//RunLumaFlow(mb_type);
+	m_luma_flow = m_best_luma_flow;
 
 	m_luma_cbp = m_luma_flow->GetCBP();
 	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+
+	auto start_bit_count = m_bytes_data->GetBitsCount();
 
 	OutputMB(mb_type, m_bytes_data);
 	
@@ -78,7 +79,7 @@ void RDOptimizer::Backend()
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
 
-	LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), m_bytes_data->GetBitsCount());
+	LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), m_bytes_data->GetBitsCount() - start_bit_count);
 }
 
 double RDOptimizer::CalculateRDCost(MBType mb_type)
@@ -86,8 +87,12 @@ double RDOptimizer::CalculateRDCost(MBType mb_type)
 	int distortion = m_chroma_flow->GetDistortion();
 	RunLumaFlow(mb_type);
 	distortion += m_luma_flow->GetDistortion();
+
+	if (distortion > m_rd_cost)
+		return std::numeric_limits<double>::max();
+
 	int rate = CalculateRate(mb_type);
-	double rd_cost = distortion + m_encoder_context->lambda_mode * rate;
+	double rd_cost = RDOUtil::CalculateRDCost(distortion, rate, m_encoder_context->lambda_mode_fp);
 	return rd_cost;
 }
 
@@ -99,17 +104,20 @@ void RDOptimizer::RunLumaFlow(MBType mb_type)
 	{
 		m_luma_flow = std::make_shared<Intra16LumaFlow>(m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
+		m_luma_cbp = m_luma_flow->GetCBP();
 		break;
 	}
 	case codec::MBType::I4:
 	{
 		m_luma_flow = std::make_shared<Intra4LumaFlow>(m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
+		m_luma_cbp = m_luma_flow->GetCBP();
 		break;
 	}
 	default:
 		break;
 	}
+	m_cbp = m_chroma_cbp << 4 | m_luma_cbp;
 }
 
 int RDOptimizer::CalculateRate(MBType mb_type)

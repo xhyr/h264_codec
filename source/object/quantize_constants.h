@@ -29,6 +29,10 @@ struct QuantizeConstants
 
    constexpr static int s_q_bits = 15;
    constexpr static int s_dq_bits = 6;
+   constexpr static int s_offset_bits = 11;
+
+   constexpr static int s_intra_offset = 682;
+   constexpr static int s_inter_offset = 342;
 };
 
 __codec_end

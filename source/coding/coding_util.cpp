@@ -2,6 +2,7 @@
 
 #include "bytes_data.h"
 #include "common_constant_values.h"
+#include "math_util.h"
 
 __codec_begin
 
@@ -49,6 +50,18 @@ std::shared_ptr<BytesData> CodingUtil::SODB2EBSP(std::shared_ptr<BytesData> byte
 	SODB2RBSP(bytes_data);
 	RBSP2EBSP(bytes_data);
 	return bytes_data;
+}
+
+int CodingUtil::GetUEBitCount(uint32_t value)
+{
+	int prefix_bit_count = MathUtil::CeilLog2(value, 1) - 1;
+	return prefix_bit_count * 2 + 1;
+}
+
+int CodingUtil::GetSEBitCount(int value)
+{
+	value = value <= 0 ? (-2 * value) : (2 * value - 1);
+	return GetUEBitCount(value);
 }
 
 void CodingUtil::SODB2RBSP(std::shared_ptr<BytesData> bytes_data)

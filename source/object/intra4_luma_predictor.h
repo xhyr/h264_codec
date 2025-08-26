@@ -59,7 +59,7 @@ private:
 
 	void CalculateHorizontalUpMode();
 
-	void DecideByRDO(uint32_t x_in_block, uint32_t y_in_block);
+	void Decide(uint32_t x_in_block, uint32_t y_in_block);
 
 	void GenerateAllowedPredictionTypes(Intra4LumaPredictionType target_prediction_type);
 

@@ -23,6 +23,10 @@ struct CodingUtil
 
 	static std::shared_ptr<BytesData> SODB2EBSP(std::shared_ptr<BytesData> bytes_data);
 
+	static int GetUEBitCount(uint32_t value);
+
+	static int GetSEBitCount(int value);
+
 private:
 
 	static void SODB2RBSP(std::shared_ptr<BytesData> bytes_data);

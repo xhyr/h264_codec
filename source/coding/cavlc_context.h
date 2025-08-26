@@ -18,6 +18,10 @@ public:
 
 	uint8_t GetNC(CavlcDataType data_type, uint32_t mb_addr, uint32_t block_index);
 
+	std::vector<uint8_t> GetMBLumaCoeffNums(uint32_t mb_addr);
+
+	void SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_t>& coeff_nums);
+
 private:
 	void Init();
 
