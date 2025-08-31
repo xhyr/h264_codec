@@ -17,7 +17,7 @@ __codec_begin
 class Slice;
 struct EncoderContext;
 class BytesData;
-class RDOptimizer;
+class MBFlowBase;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -59,6 +59,8 @@ public:
 
 	std::pair<uint32_t, uint32_t> GetPosition() const;
 
+	void SetQP(int qp);
+
 	int GetQP() const;
 
 	std::shared_ptr<Slice> GetSlice();
@@ -82,7 +84,11 @@ private:
 
 	void DoEncode();
 
+	void Binary();
+
 	void PostEncode();
+
+	void CreateMBFlow();
 
 private:
 	uint32_t m_addr;
@@ -105,7 +111,7 @@ private:
 	BlockData<8, 8> m_cb_data;
 	BlockData<8, 8> m_cr_data;
 
-	std::unique_ptr<RDOptimizer> m_rd_optimizer;
+	std::unique_ptr<MBFlowBase> m_mb_flow;
 
 	std::shared_ptr<BytesData> m_bytes_data;
 };

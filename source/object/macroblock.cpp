@@ -4,7 +4,7 @@
 #include "yuv_frame.h"
 #include "data_util.h"
 #include "slice.h"
-#include "rd_optimizer.h"
+#include "mb_flow_base.h"
 #include "bytes_data.h"
 #include "rdo_util.h"
 #include "chroma_flow.h"
@@ -29,6 +29,7 @@ bool Macroblock::Encode(std::shared_ptr<BytesData> bytes_data)
 
 	PreEncode();
 	DoEncode();
+	Binary();
 	PostEncode();
 	return true;
 }
@@ -147,25 +148,30 @@ void Macroblock::ObtainOriginalData()
 void Macroblock::PreEncode()
 {
 	m_neighbors = std::make_unique<MBNeighbors>(shared_from_this(), m_addr, m_encoder_context);
-	
-	auto slice = m_slice.lock();
-	m_qp = slice->GetQP();
 
-	m_encoder_context->lambda_mode = RDOUtil::GetLambdaMode(m_qp);
-	m_encoder_context->lambda_motion = RDOUtil::GetLambdaMotion(m_qp);
-	m_encoder_context->lambda_mode_fp = RDOUtil::GetLambdaModeFixedPoint(m_qp);
-	m_encoder_context->lambda_motion_fp = RDOUtil::GetLambdaMotionFixedPoint(m_qp);
+	CreateMBFlow();
+	m_mb_flow->PreEncode();
 }
 
 void Macroblock::DoEncode()
 {
-	m_rd_optimizer = std::make_unique<RDOptimizer>(shared_from_this(), m_encoder_context, m_bytes_data);
-	m_rd_optimizer->Frontend();
+	m_mb_flow->DoEncode();
+}
+
+void Macroblock::Binary()
+{
+	m_mb_flow->Binary(m_bytes_data);
 }
 
 void Macroblock::PostEncode()
 {
-	m_rd_optimizer->Backend();
+	m_mb_flow->PostEncode();
+}
+
+void Macroblock::CreateMBFlow()
+{
+	auto slice_type = m_slice.lock()->GetType();
+	m_mb_flow = MBFlowBase::CreateMBFlow(slice_type, shared_from_this(), m_encoder_context);
 }
 
 uint32_t Macroblock::GetAddress() const
@@ -181,6 +187,11 @@ std::pair<uint32_t, uint32_t> Macroblock::GetPositionInMb() const
 std::pair<uint32_t, uint32_t> Macroblock::GetPosition() const
 {
 	return std::make_pair(m_addr % m_encoder_context->width_in_mb * 16, m_addr / m_encoder_context->width_in_mb * 16);
+}
+
+void Macroblock::SetQP(int qp)
+{
+	m_qp = qp;
 }
 
 int Macroblock::GetQP() const

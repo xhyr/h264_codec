@@ -65,14 +65,14 @@ uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 
 	if (m_cbp > 0)
 	{
-		CavlcCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+		CavlcCdcCoder coder(m_encoder_context->mb_addr, m_encoder_context->cavlc_context, bytes_data);
 		coder.CodeChromaDC(CavlcDataType::CbDC, m_cavlc_data_source.cb_dc);
 		coder.CodeChromaDC(CavlcDataType::CrDC, m_cavlc_data_source.cr_dc);
 	}
 
 	if (m_cbp > 1)
 	{
-		CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+		CavlcNonCdcCoder coder(m_encoder_context->mb_addr, m_encoder_context->cavlc_context, bytes_data);
 		coder.CodeChromaACs(CavlcDataType::CbAC, m_cavlc_data_source.cb_acs);
 		coder.CodeChromaACs(CavlcDataType::CrAC, m_cavlc_data_source.cr_acs);
 	}
@@ -97,8 +97,7 @@ void ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	Intra8ChromaTransformer transformer(diff_data);
 	transformer.Transform();
 
-	auto qp = m_mb->GetQP();
-	m_quantizer = std::make_unique<Intra8ChromaQuantizer>(qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	m_quantizer = std::make_unique<Intra8ChromaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
 	CavlcPreCoderChroma8x8 pre_coder;
@@ -126,8 +125,7 @@ void ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 	auto dc_block = m_quantizer->GetDCBlock();
 	dc_block = TransformUtil::InverseHadamard(dc_block);
 
-	auto qp = m_mb->GetQP();
-	InverseIntra8ChromaQuantizer inverse_quantizer(qp, dc_block, m_quantizer->GetACBlocks());
+	InverseIntra8ChromaQuantizer inverse_quantizer(m_encoder_context->qp, dc_block, m_quantizer->GetACBlocks());
 	inverse_quantizer.InverseQuantize();
 
 	auto blocks = inverse_quantizer.GetBlocks();

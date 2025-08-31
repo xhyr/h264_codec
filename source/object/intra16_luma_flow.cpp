@@ -65,8 +65,7 @@ void Intra16LumaFlow::TransformAndQuantize()
 	Intra16LumaTransformer transformer(m_predictor->GetDiffData());
 	transformer.Transform();
 
-	auto qp = m_mb->GetQP();
-	m_quantizer = std::make_unique<Intra16LumaQuantizer>(qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	m_quantizer = std::make_unique<Intra16LumaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
 	m_cbp = m_quantizer->IsACAllZero() ? 0 : 15;
@@ -77,8 +76,7 @@ void Intra16LumaFlow::InverseQuantizeAndTransform()
 	auto dc_block = m_quantizer->GetDCBlock();
 	dc_block = TransformUtil::InverseHadamard(dc_block);
 
-	auto qp = m_mb->GetQP();
-	InverseIntra16LumaQuantizer inverse_quantizer(qp, dc_block, m_quantizer->GetACBlocks());
+	InverseIntra16LumaQuantizer inverse_quantizer(m_encoder_context->qp, dc_block, m_quantizer->GetACBlocks());
 	inverse_quantizer.InverseQuantize();
 
 	auto blocks = inverse_quantizer.GetBlocks();

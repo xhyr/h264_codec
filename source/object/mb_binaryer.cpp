@@ -30,6 +30,30 @@ void MBBinaryer::OutputMBType(MBType mb_type, uint8_t intra16_offset)
 		else if (mb_type == MBType::I4)
 			CodingUtil::UE_V(0, m_bytes_data);
 	}
+	else if (m_slice_type == SliceType::P)
+	{
+		switch (mb_type)
+		{
+		case codec::MBType::P16x16:
+			CodingUtil::UE_V(0, m_bytes_data);
+			break;
+		case codec::MBType::P16x8:
+			CodingUtil::UE_V(1, m_bytes_data);
+			break;
+		case codec::MBType::P8x16:
+			CodingUtil::UE_V(2, m_bytes_data);
+			break;
+		case codec::MBType::I4:
+			CodingUtil::UE_V(6, m_bytes_data);
+			break;
+		case codec::MBType::I16:
+			CodingUtil::UE_V(6 + intra16_offset, m_bytes_data);
+			break;
+		default:
+			break;
+		}
+	}
+
 }
 
 void MBBinaryer::OutputChromaPredMode(IntraChromaPredictionType prediction_type)

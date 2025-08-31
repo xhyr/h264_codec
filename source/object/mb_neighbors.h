@@ -11,7 +11,7 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 
-struct MBNeighbors
+class MBNeighbors
 {
 public:
 	MBNeighbors(std::weak_ptr<Macroblock> macroblock, uint32_t mb_addr, std::shared_ptr<EncoderContext> encoder_context);

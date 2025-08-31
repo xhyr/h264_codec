@@ -1,4 +1,4 @@
-#include "rd_optimizer.h"
+#include "mb_intra_rd_optimizer.h"
 
 #include <vector>
 
@@ -17,16 +17,16 @@
 
 __codec_begin
 
-RDOptimizer::RDOptimizer(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, std::shared_ptr<BytesData> bytes_data) :
-	m_mb(mb), m_encoder_context(encoder_context), m_bytes_data(bytes_data)
+MBIntraRDOptimizer::MBIntraRDOptimizer(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
+	m_mb(mb), m_encoder_context(encoder_context)
 {
 }
 
-RDOptimizer::~RDOptimizer()
+MBIntraRDOptimizer::~MBIntraRDOptimizer()
 {
 }
 
-void RDOptimizer::Frontend()
+void MBIntraRDOptimizer::Encode()
 {
 	m_rd_cost = std::numeric_limits<double>::max();
 
@@ -55,29 +55,25 @@ void RDOptimizer::Frontend()
 		}
 		else m_encoder_context->cavlc_context->SetMBLumaCoeffNums(m_mb_addr, old_mb_luma_coeff_nums);
 	}
-}
 
-void RDOptimizer::Backend()
-{
-	auto mb_type = m_mb->GetType();
-	
 	m_luma_flow = m_best_luma_flow;
-
 	m_luma_cbp = m_luma_flow->GetCBP();
 	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
 
-	auto start_bit_count = m_bytes_data->GetBitsCount();
-
-	OutputMB(mb_type, m_bytes_data);
-	
 	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
-
-	LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), m_bytes_data->GetBitsCount() - start_bit_count);
 }
 
-double RDOptimizer::CalculateRDCost(MBType mb_type)
+void MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
+{
+	auto start_bit_count = bytes_data->GetBitsCount();
+	auto mb_type = m_mb->GetType();
+	OutputMB(mb_type, bytes_data);
+	LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), bytes_data->GetBitsCount() - start_bit_count);
+}
+
+double MBIntraRDOptimizer::CalculateRDCost(MBType mb_type)
 {
 	int distortion = m_chroma_flow->GetDistortion();
 	RunLumaFlow(mb_type);
@@ -91,7 +87,7 @@ double RDOptimizer::CalculateRDCost(MBType mb_type)
 	return rd_cost;
 }
 
-void RDOptimizer::RunLumaFlow(MBType mb_type)
+void MBIntraRDOptimizer::RunLumaFlow(MBType mb_type)
 {
 	switch (mb_type)
 	{
@@ -115,13 +111,13 @@ void RDOptimizer::RunLumaFlow(MBType mb_type)
 	m_cbp = m_chroma_cbp << 4 | m_luma_cbp;
 }
 
-int RDOptimizer::CalculateRate(MBType mb_type)
+int MBIntraRDOptimizer::CalculateRate(MBType mb_type)
 {
 	auto bytes_data = std::make_shared<BytesData>();
 	return OutputMB(mb_type, bytes_data);
 }
 
-int RDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> bytes_data)
+int MBIntraRDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> bytes_data)
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 

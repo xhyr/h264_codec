@@ -14,15 +14,15 @@ class BytesData;
 class ChromaFlow;
 class IntraLumaFlowBase;
 
-class RDOptimizer
+class MBIntraRDOptimizer
 {
 public:
-	RDOptimizer(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, std::shared_ptr<BytesData> bytes_data);
-	~RDOptimizer();
+	MBIntraRDOptimizer(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
+	~MBIntraRDOptimizer();
 
-	void Frontend();
+	void Encode();
 
-	void Backend();
+	void Binary(std::shared_ptr<BytesData> bytes_data);
 
 private:
 	double CalculateRDCost(MBType mb_type);
@@ -36,11 +36,9 @@ private:
 private:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
-	std::shared_ptr<BytesData> m_bytes_data;
 
 	std::shared_ptr<ChromaFlow> m_chroma_flow;
 	std::shared_ptr<IntraLumaFlowBase> m_luma_flow;
-
 	std::shared_ptr<IntraLumaFlowBase> m_best_luma_flow;
 
 	uint32_t m_mb_addr;
