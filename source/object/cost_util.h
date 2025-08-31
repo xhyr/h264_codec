@@ -17,6 +17,8 @@ struct CostUtil
 
 	static int CalculateSATDDistortion(const BlockData<8, 8, int32_t>& block_data);
 
+	static int CalculateSATDDistortion(const BlockData<16, 16, int32_t>& block_data);
+
 	static int CalculateSSEDistortion(const BlockData<4, 4, int32_t>& block_data);
 
 	static int ScaleForAccuracy(int value);

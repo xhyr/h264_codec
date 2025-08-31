@@ -26,7 +26,7 @@ int CostUtil::CalculateSATD(const BlockData<16, 16, int32_t>& block_data)
 			satd += block_data_4x4.GetAbstractSum();
 			satd -= abs(dc_value);
 
-			dc_block_data.SetElement(x_in_block, y_in_block, dc_value / 2);
+			dc_block_data.SetElement(x_in_block, y_in_block, dc_value >> 1);
 		}
 	}
 
@@ -53,6 +53,12 @@ int CostUtil::CalculateSATDDistortion(const BlockData<8, 8, int32_t>& block_data
 		}
 	}
 	return satd;
+}
+
+int CostUtil::CalculateSATDDistortion(const BlockData<16, 16, int32_t>& block_data)
+{
+	auto satd = CalculateSATD(block_data);
+	return ScaleForAccuracy(satd);
 }
 
 int CostUtil::CalculateSSEDistortion(const BlockData<4, 4, int32_t>& block_data)

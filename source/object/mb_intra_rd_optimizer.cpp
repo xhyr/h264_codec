@@ -67,10 +67,13 @@ void MBIntraRDOptimizer::Encode()
 
 void MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 {
+	if (m_encoder_context->slice_addr == 7 && m_mb_addr == 17)
+		int sb = 1;
+
 	auto start_bit_count = bytes_data->GetBitsCount();
 	auto mb_type = m_mb->GetType();
 	OutputMB(mb_type, bytes_data);
-	LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), bytes_data->GetBitsCount() - start_bit_count);
+	//LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), bytes_data->GetBitsCount() - start_bit_count);
 }
 
 double MBIntraRDOptimizer::CalculateRDCost(MBType mb_type)
@@ -126,6 +129,9 @@ int MBIntraRDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> byte
 
 	if (mb_type == MBType::I16)
 	{
+		if (m_encoder_context->slice_addr == 7 && m_mb_addr == 17)
+			int sb = 1;
+
 		auto intra16_prediction_type = std::dynamic_pointer_cast<Intra16LumaFlow>(m_luma_flow)->GetPredictionType();
 		auto offset = MBUtil::CalculateIntra16Offset(m_cbp, intra16_prediction_type);
 		mb_binaryer.OutputMBType(mb_type, offset);

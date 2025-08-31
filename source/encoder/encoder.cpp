@@ -43,6 +43,7 @@ bool Encoder::Encode()
 		if (m_tick >= m_config->start_frame)
 		{
 			m_context->yuv_frame = next_yuv_frame;
+			m_context->slice_addr = encoded_frame_count;
 
 			auto slice = std::make_shared<Slice>();
 			slice->Construct(encoded_frame_count, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);

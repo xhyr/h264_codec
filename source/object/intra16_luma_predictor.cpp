@@ -153,7 +153,7 @@ void Intra16LumaPredictor::DecideBySATD()
 
 		const auto& predicted_data = m_predicted_data_map[prediction_type];
 		auto diff_data = original_block_data - predicted_data;
-		auto satd = CostUtil::CalculateSATD(diff_data);
+		auto satd = CostUtil::CalculateSATDDistortion(diff_data);
 		if (min_satd == -1 || satd < min_satd)
 		{
 			min_satd = satd;

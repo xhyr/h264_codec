@@ -37,6 +37,9 @@ bool Slice::Encode()
 
 	auto header_bit_count = m_bytes_data->GetBitsCount();
 
+	if (m_encoder_context->slice_addr == 7)
+		int sb = 1;
+
 	uint32_t total_used_bit_count = 0;
 	for (uint32_t mb_addr = 0; mb_addr < m_encoder_context->mb_num; ++mb_addr)
 	{
@@ -47,7 +50,9 @@ bool Slice::Encode()
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
 		total_used_bit_count += used_bit_count;
-		//LOGINFO("mb_addr = %d, used_bits = %d.", mb_addr, used_bit_count);
+
+		if (m_encoder_context->slice_addr == 7)
+			LOGINFO("mb_addr = %d, used_bits = %d.", mb_addr, used_bit_count);
 
 		m_macroblocks.push_back(mb);
 
@@ -69,6 +74,9 @@ void Slice::Serial(std::shared_ptr<OStream> ostream)
 {
 	Nalu nalu(m_tick == 0 ? NaluType::IDR : NaluType::Slice, m_tick == 0 ? NaluPriority::HIGHEST : NaluPriority::HIGH);
 	
+	if (m_encoder_context->slice_addr == 7)
+		int sb = 1;
+
 	nalu.SetData(m_bytes_data);
 
 	//write out

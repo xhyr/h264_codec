@@ -22,6 +22,7 @@ struct EncoderContext
 	std::shared_ptr<YUVFrame> yuv_frame;
 	std::shared_ptr<OStream> out_stream;
 
+	int slice_addr;
 	int mb_addr;
 	int qp;
 	double lambda_mode;

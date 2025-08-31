@@ -25,6 +25,9 @@ Intra16LumaFlow::~Intra16LumaFlow()
 
 void Intra16LumaFlow::Frontend()
 {
+	if (m_encoder_context->slice_addr == 7 && m_mb->GetAddress() == 17)
+		int sb = 1;
+
 	Predict();
 	TransformAndQuantize();
 	InverseQuantizeAndTransform();
