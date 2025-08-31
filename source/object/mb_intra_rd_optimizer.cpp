@@ -32,6 +32,9 @@ void MBIntraRDOptimizer::Encode()
 
 	m_mb_addr = m_mb->GetAddress();
 
+	if (m_encoder_context->slice_addr == 0 && m_mb_addr == 28)
+		int sb = 1;
+
 	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
 	m_chroma_flow->Frontend();
 	m_chroma_cbp = m_chroma_flow->GetCBP();
@@ -39,8 +42,9 @@ void MBIntraRDOptimizer::Encode()
 	std::vector<MBType> mb_types{ MBType::I16, MBType::I4 };
 	for (auto mb_type : mb_types)
 	{
-		double rd_cost = CalculateRDCost(mb_type);
 		auto old_mb_luma_coeff_nums = m_encoder_context->cavlc_context->GetMBLumaCoeffNums(m_mb_addr);
+
+		double rd_cost = CalculateRDCost(mb_type);
 		if (rd_cost < m_rd_cost)
 		{
 			m_rd_cost = rd_cost;
@@ -53,7 +57,8 @@ void MBIntraRDOptimizer::Encode()
 
 			m_best_luma_flow = m_luma_flow;
 		}
-		else m_encoder_context->cavlc_context->SetMBLumaCoeffNums(m_mb_addr, old_mb_luma_coeff_nums);
+
+		m_encoder_context->cavlc_context->SetMBLumaCoeffNums(m_mb_addr, old_mb_luma_coeff_nums);
 	}
 
 	m_luma_flow = m_best_luma_flow;
@@ -67,7 +72,7 @@ void MBIntraRDOptimizer::Encode()
 
 void MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 {
-	if (m_encoder_context->slice_addr == 7 && m_mb_addr == 17)
+	if (m_encoder_context->slice_addr == 0 && m_mb_addr == 29)
 		int sb = 1;
 
 	auto start_bit_count = bytes_data->GetBitsCount();
@@ -129,14 +134,14 @@ int MBIntraRDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> byte
 
 	if (mb_type == MBType::I16)
 	{
-		if (m_encoder_context->slice_addr == 7 && m_mb_addr == 17)
-			int sb = 1;
-
 		auto intra16_prediction_type = std::dynamic_pointer_cast<Intra16LumaFlow>(m_luma_flow)->GetPredictionType();
 		auto offset = MBUtil::CalculateIntra16Offset(m_cbp, intra16_prediction_type);
 		mb_binaryer.OutputMBType(mb_type, offset);
 	}
 	else mb_binaryer.OutputMBType(mb_type);
+
+	if (m_encoder_context->slice_addr == 0 && m_mb_addr == 29 && mb_type == MBType::I4)
+		int sb = 1;
 
 	m_luma_flow->OutputPredictionTypes(bytes_data);
 

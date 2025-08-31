@@ -33,12 +33,14 @@ bool Slice::Encode()
 	m_encoder_context->cavlc_context = std::make_shared<CavlcContext>(m_encoder_context->width_in_mb, m_encoder_context->height_in_mb);
 	m_frame_data = std::make_shared<YUVFrame>(m_encoder_context->width, m_encoder_context->height);
 
+	if (m_encoder_context->slice_addr == 6)
+		int sb = 1;
+
 	m_bytes_data = m_header.Convert2BytesData();
 
 	auto header_bit_count = m_bytes_data->GetBitsCount();
 
-	if (m_encoder_context->slice_addr == 7)
-		int sb = 1;
+	
 
 	uint32_t total_used_bit_count = 0;
 	for (uint32_t mb_addr = 0; mb_addr < m_encoder_context->mb_num; ++mb_addr)
@@ -46,13 +48,16 @@ bool Slice::Encode()
 		auto mb = std::make_shared<Macroblock>(mb_addr, weak_from_this(), m_encoder_context);
 		auto old_bit_count = m_bytes_data->GetBitsCount();
 
+		if (mb_addr == 29)
+			int sb = 1;
+
 		mb->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
 		total_used_bit_count += used_bit_count;
 
-		if (m_encoder_context->slice_addr == 7)
-			LOGINFO("mb_addr = %d, used_bits = %d.", mb_addr, used_bit_count);
+		if (m_encoder_context->slice_addr == 0)
+			LOGINFO("mb_addr = %d, used_bits = %d, total_used_byte_count = %d.", mb_addr, used_bit_count, total_used_bit_count / 8);
 
 		m_macroblocks.push_back(mb);
 

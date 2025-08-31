@@ -45,7 +45,8 @@ uint32_t Intra16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_da
 
 	CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
 	coder.CodeLumaDC(pre_coder.GetDCLevelAndRuns());
-	if (m_cbp & 15)
+
+	if(m_cbp & 15)
 		coder.CodeLumaACs(pre_coder.GetACLevelAndRuns());
 
 	auto finish_bits_count = bytes_data->GetBitsCount();

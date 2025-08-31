@@ -77,6 +77,7 @@ uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 		coder.CodeChromaACs(CavlcDataType::CrAC, m_cavlc_data_source.cr_acs);
 	}
 
+
 	auto finish_bits_count = bytes_data->GetBitsCount();
 	return finish_bits_count - start_bits_count;
 }
