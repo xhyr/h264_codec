@@ -1,0 +1,41 @@
+#include "luma16_quantizer.h"
+
+#include "quantize_util.h"
+
+__codec_begin
+
+Luma16Quantizer::Luma16Quantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks) :
+	m_qp(qp), m_dc_block(dc_block), m_ac_blocks(ac_blocks)
+{
+}
+
+Luma16Quantizer::~Luma16Quantizer()
+{
+}
+
+void Luma16Quantizer::Quantize()
+{
+	m_dc_block = QuantizeUtil::QuantizeDC(m_qp, m_dc_block);
+	for (auto& ac_block : m_ac_blocks)
+	{
+		ac_block = QuantizeUtil::QuantizeAC(m_qp, ac_block);
+		m_is_ac_all_zero = m_is_ac_all_zero && ac_block.AllEqual(0);
+	}
+}
+
+BlockData<4, 4, int32_t> Luma16Quantizer::GetDCBlock() const
+{
+	return m_dc_block;
+}
+
+std::vector<BlockData<4, 4, int32_t>> Luma16Quantizer::GetACBlocks() const
+{
+	return m_ac_blocks;
+}
+
+bool Luma16Quantizer::IsACAllZero() const
+{
+	return m_is_ac_all_zero;
+}
+
+__codec_end

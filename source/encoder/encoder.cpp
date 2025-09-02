@@ -15,6 +15,10 @@ Encoder::Encoder(std::shared_ptr<EncoderConfig> config) : m_config(config)
 {
 }
 
+Encoder::~Encoder()
+{
+}
+
 void Encoder::PrepareContext()
 {
 	m_context = std::make_shared<EncoderContext>();
@@ -35,7 +39,10 @@ bool Encoder::Encode()
 	parameter_set_container.ConstructPPS();
 	parameter_set_container.Serial(m_context->out_stream);
 
-	FILE* out_handle = fopen("reconstruct.yuv", "wb");
+	FILE* out_handle = nullptr;
+	fopen_s(&out_handle, "reconstruct.yuv", "wb");
+	if (!out_handle)
+		return false;
 
 	uint32_t encoded_frame_count = 0;
 	while (auto next_yuv_frame = GetNextFrame())
@@ -45,8 +52,9 @@ bool Encoder::Encode()
 			m_context->yuv_frame = next_yuv_frame;
 			m_context->slice_addr = encoded_frame_count;
 
+			auto slice_type = DecideSliceType(encoded_frame_count);
 			auto slice = std::make_shared<Slice>();
-			slice->Construct(encoded_frame_count, SliceType::I, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
+			slice->Construct(encoded_frame_count, slice_type, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
 			slice->Encode();
 
 			slice->Serial(m_context->out_stream);
@@ -76,6 +84,11 @@ bool Encoder::Encode()
 std::shared_ptr<YUVFrame> Encoder::GetNextFrame()
 {
 	return std::make_shared<YUVFrame>(m_config->width, m_config->height, m_config->input_file_path, m_tick);
+}
+
+SliceType Encoder::DecideSliceType(uint32_t frame_index) const
+{
+	return frame_index == 0 ? SliceType::I : SliceType::P;
 }
 
 __codec_end

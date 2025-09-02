@@ -8,7 +8,6 @@
 #include "bytes_data.h"
 #include "rdo_util.h"
 #include "chroma_flow.h"
-#include "mb_binaryer.h"
 #include "mb_util.h"
 
 __codec_begin

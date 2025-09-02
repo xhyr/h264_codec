@@ -28,8 +28,6 @@ public:
 
 	BlockData<4, 4, int32_t> GetDiffData() const;
 
-	int GetCost() const;
-
 	Intra4LumaPredictionType GetMostProbablePredictionType() const;
 
 	Intra4LumaPredictionType GetPredictionType() const;
@@ -80,7 +78,7 @@ private:
 	BlockData<4, 4, int32_t> m_diff_data;
 	const BlockData<16, 16>& m_reconstructed_data;
 	const std::vector<Intra4LumaPredictionType> m_prediction_types;
-	int m_cost;
+	
 	std::unordered_map<Intra4LumaPredictionType, bool> m_allowed_prediction_type;
 };
 

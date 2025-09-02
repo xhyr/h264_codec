@@ -9,7 +9,7 @@
 
 __codec_begin
 
-Intra16LumaPredictor::Intra16LumaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context):
+Intra16LumaPredictor::Intra16LumaPredictor(std::shared_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context):
 	m_mb(macroblock), m_encoder_context(encoder_context)
 {
 }
@@ -23,11 +23,6 @@ void Intra16LumaPredictor::Decide()
 	ObtainLeftAndUpInfo();
 	CalculateAllPredictionData();
 	DecideBySATD();
-}
-
-int Intra16LumaPredictor::GetCost() const
-{
-	return m_cost;
 }
 
 BlockData<16, 16> Intra16LumaPredictor::GetPredictedData() const
@@ -47,9 +42,7 @@ Intra16LumaPredictionType Intra16LumaPredictor::GetPredictionType() const
 
 void Intra16LumaPredictor::ObtainLeftAndUpInfo()
 {
-	auto mb = m_mb.lock();
-
-	mb->ObtainLeftAndUpEdge(m_left_data, m_up_data, m_left_up_element, PlaneType::Luma);
+	m_mb->ObtainLeftAndUpEdge(m_left_data, m_up_data, m_left_up_element, PlaneType::Luma);
 	m_left_available = !m_left_data.empty();
 	m_up_available = !m_up_data.empty();
 }
@@ -169,8 +162,7 @@ void Intra16LumaPredictor::DecideBySATD()
 
 void Intra16LumaPredictor::DecideBySAD()
 {
-	auto mb = m_mb.lock();
-	auto origin_block_data = mb->GetOriginalLumaBlockData16x16();
+	auto origin_block_data = m_mb->GetOriginalLumaBlockData16x16();
 
 	int min_sad = -1;
 	Intra16LumaPredictionType best_prediction_type = Intra16LumaPredictionType::DC;

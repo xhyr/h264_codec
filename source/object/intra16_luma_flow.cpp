@@ -2,8 +2,8 @@
 
 #include "macroblock.h"
 #include "intra16_luma_predictor.h"
-#include "intra16_luma_transformer.h"
-#include "intra16_luma_quantizer.h"
+#include "luma16_transformer.h"
+#include "luma16_quantizer.h"
 #include "inverse_intra16_luma_quantizer.h"
 #include "transform_util.h"
 #include "reconstruct_util.h"
@@ -25,9 +25,6 @@ Intra16LumaFlow::~Intra16LumaFlow()
 
 void Intra16LumaFlow::Frontend()
 {
-	if (m_encoder_context->slice_addr == 7 && m_mb->GetAddress() == 17)
-		int sb = 1;
-
 	Predict();
 	TransformAndQuantize();
 	InverseQuantizeAndTransform();
@@ -66,10 +63,10 @@ void Intra16LumaFlow::Predict()
 
 void Intra16LumaFlow::TransformAndQuantize()
 {
-	Intra16LumaTransformer transformer(m_predictor->GetDiffData());
+	Luma16Transformer transformer(m_predictor->GetDiffData());
 	transformer.Transform();
 
-	m_quantizer = std::make_unique<Intra16LumaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	m_quantizer = std::make_unique<Luma16Quantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
 	m_cbp = m_quantizer->IsACAllZero() ? 0 : 15;

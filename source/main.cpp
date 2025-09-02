@@ -15,8 +15,6 @@ using namespace codec;
 
 int main(int argc, char* argv[])
 {
-	LOGINFO("codec begin.");
-
 	auto start_time = std::chrono::steady_clock::now();
 
 	auto encoder_config = EncoderConfigReader::Read("config.txt");

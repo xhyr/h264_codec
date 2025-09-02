@@ -43,6 +43,8 @@ private:
 
 	void CollectAllFrameData();
 
+	void AddToDPB();
+
 private:
 	uint32_t m_tick;
 	SliceType m_type;

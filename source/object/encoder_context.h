@@ -30,6 +30,7 @@ struct EncoderContext
 	int lambda_mode_fp;
 	int lambda_motion_fp;
 	std::shared_ptr<CavlcContext> cavlc_context;
+	std::shared_ptr<YUVFrame> last_frame;
 
 	std::shared_ptr<EncoderConfig> config;
 };

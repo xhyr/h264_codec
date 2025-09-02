@@ -10,7 +10,7 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class Intra16LumaPredictor;
-class Intra16LumaQuantizer;
+class Luma16Quantizer;
 class BytesData;
 
 class Intra16LumaFlow : public IntraLumaFlowBase
@@ -36,7 +36,7 @@ private:
 
 private:
 	std::unique_ptr<Intra16LumaPredictor> m_predictor;
-	std::unique_ptr<Intra16LumaQuantizer> m_quantizer;
+	std::unique_ptr<Luma16Quantizer> m_quantizer;
 	std::vector<BlockData<4, 4, int32_t>> m_diff_datas;
 };
 

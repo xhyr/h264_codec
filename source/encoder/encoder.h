@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "parameter_set_container.h"
+#include "slice_type.h"
 
 __codec_begin
 
@@ -14,6 +15,7 @@ class Encoder
 {
 public:
 	explicit Encoder(std::shared_ptr<EncoderConfig> config);
+	~Encoder();
 
 	void PrepareContext();
 
@@ -21,6 +23,8 @@ public:
 
 private:
 	std::shared_ptr<YUVFrame> GetNextFrame();
+
+	SliceType DecideSliceType(uint32_t frame_index) const;
 
 private:
 	std::shared_ptr<EncoderConfig> m_config;

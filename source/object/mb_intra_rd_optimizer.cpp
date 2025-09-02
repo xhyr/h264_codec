@@ -9,7 +9,7 @@
 #include "encoder_context.h"
 #include "bytes_data.h"
 #include "macroblock.h"
-#include "mb_binaryer.h"
+#include "mb_intra_header_binaryer.h"
 #include "mb_util.h"
 #include "log.h"
 #include "cavlc_context.h"
@@ -31,9 +31,6 @@ void MBIntraRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<double>::max();
 
 	m_mb_addr = m_mb->GetAddress();
-
-	if (m_encoder_context->slice_addr == 0 && m_mb_addr == 28)
-		int sb = 1;
 
 	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
 	m_chroma_flow->Frontend();
@@ -72,9 +69,6 @@ void MBIntraRDOptimizer::Encode()
 
 void MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 {
-	if (m_encoder_context->slice_addr == 0 && m_mb_addr == 29)
-		int sb = 1;
-
 	auto start_bit_count = bytes_data->GetBitsCount();
 	auto mb_type = m_mb->GetType();
 	OutputMB(mb_type, bytes_data);
@@ -129,8 +123,7 @@ int MBIntraRDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> byte
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 
-	auto slice = m_mb->GetSlice();
-	MBBinaryer mb_binaryer(slice, m_mb->GetAddress(), bytes_data);
+	MBIntraHeaderBinaryer mb_binaryer(bytes_data);
 
 	if (mb_type == MBType::I16)
 	{
@@ -139,9 +132,6 @@ int MBIntraRDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> byte
 		mb_binaryer.OutputMBType(mb_type, offset);
 	}
 	else mb_binaryer.OutputMBType(mb_type);
-
-	if (m_encoder_context->slice_addr == 0 && m_mb_addr == 29 && mb_type == MBType::I4)
-		int sb = 1;
 
 	m_luma_flow->OutputPredictionTypes(bytes_data);
 

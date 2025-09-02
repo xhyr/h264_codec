@@ -20,11 +20,6 @@ Intra4LumaPredictor::~Intra4LumaPredictor()
 {
 }
 
-int Intra4LumaPredictor::GetCost() const
-{
-	return m_cost;
-}
-
 Intra4LumaPredictionType Intra4LumaPredictor::GetMostProbablePredictionType() const
 {
 	return m_most_probable_prediction_type;

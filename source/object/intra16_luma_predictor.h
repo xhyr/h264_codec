@@ -17,12 +17,10 @@ struct EncoderContext;
 class Intra16LumaPredictor
 {
 public:
-	Intra16LumaPredictor(std::weak_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
+	Intra16LumaPredictor(std::shared_ptr<Macroblock> macroblock, std::shared_ptr<EncoderContext> encoder_context);
 	~Intra16LumaPredictor();
 
 	void Decide();
-
-	int GetCost() const;
 
 	BlockData<16, 16> GetPredictedData() const;
 
@@ -48,7 +46,7 @@ private:
 	void DecideBySAD();
 
 private:
-	std::weak_ptr<Macroblock> m_mb;
+	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
 
 	bool m_left_available{ false };
