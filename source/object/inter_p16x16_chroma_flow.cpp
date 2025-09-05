@@ -1,38 +1,31 @@
-#include "chroma_flow.h"
+#include "inter_p16x16_chroma_flow.h"
 
-#include <algorithm>
-
-#include "intra8_chroma_predictor.h"
-#include "intra8_chroma_transformer.h"
-#include "intra8_chroma_quantizer.h"
-#include "inverse_intra8_chroma_quantizer.h"
-#include "macroblock.h"
+#include "inter_p16x16_chroma_predictor.h"
+#include "bytes_data.h"
+#include "encoder_context.h"
+#include "cavlc_cdc_coder.h"
+#include "cavlc_non_cdc_coder.h"
+#include "chroma_transformer.h"
+#include "chroma_quantizer.h"
+#include "inverse_chroma_quantizer.h"
 #include "cavlc_pre_coder_chroma_8x8.h"
 #include "transform_util.h"
 #include "reconstruct_util.h"
-#include "cavlc_cdc_coder.h"
-#include "cavlc_non_cdc_coder.h"
-#include "encoder_context.h"
-#include "bytes_data.h"
+#include "macroblock.h"
 #include "cost_util.h"
 
 __codec_begin
 
-ChromaFlow::ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
-	m_mb(mb), m_encoder_context(encoder_context), m_predictor(std::make_unique<Intra8ChromaPredictor>(mb, encoder_context))
+InterP16x16ChromaFlow::InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
+	m_mb(mb), m_encoder_context(encoder_context), m_predictor(std::make_unique<InterP16x16ChromaPredictor>(mb, encoder_context))
 {
 }
 
-ChromaFlow::~ChromaFlow()
+InterP16x16ChromaFlow::~InterP16x16ChromaFlow()
 {
 }
 
-void ChromaFlow::SetTargetPredictionType(IntraChromaPredictionType prediction_type)
-{
-	m_target_prediction_type = prediction_type;
-}
-
-void ChromaFlow::Frontend()
+void InterP16x16ChromaFlow::Frontend()
 {
 	Predict();
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
@@ -44,22 +37,17 @@ void ChromaFlow::Frontend()
 	CalculateDistortion();
 }
 
-IntraChromaPredictionType ChromaFlow::GetPredictionType() const
-{
-	return m_predictor->GetPredictionType();
-}
-
-BlockData<8, 8> ChromaFlow::GetReconstructedData(PlaneType plane_type) 
+BlockData<8, 8> InterP16x16ChromaFlow::GetReconstructedData(PlaneType plane_type)
 {
 	return m_reconstructed_data_map[plane_type];
 }
 
-uint8_t ChromaFlow::GetCBP() const
+uint8_t InterP16x16ChromaFlow::GetCBP() const
 {
 	return m_cbp;
 }
 
-uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
+uint32_t InterP16x16ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
 	auto start_bits_count = bytes_data->GetBitsCount();
 
@@ -82,23 +70,23 @@ uint32_t ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 	return finish_bits_count - start_bits_count;
 }
 
-int ChromaFlow::GetDistortion()
+int InterP16x16ChromaFlow::GetDistortion()
 {
 	return m_distortion;
 }
 
-void ChromaFlow::Predict()
+void InterP16x16ChromaFlow::Predict()
 {
-	m_predictor->Decide(m_target_prediction_type);
+	m_predictor->Decide();
 }
 
-void ChromaFlow::TransformAndQuantize(PlaneType plane_type)
+void InterP16x16ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 {
 	auto diff_data = m_predictor->GetDiffData(plane_type);
-	Intra8ChromaTransformer transformer(diff_data);
+	ChromaTransformer transformer(diff_data);
 	transformer.Transform();
 
-	m_quantizer = std::make_unique<Intra8ChromaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	m_quantizer = std::make_unique<ChromaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
 	CavlcPreCoderChroma8x8 pre_coder;
@@ -121,12 +109,12 @@ void ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	}
 }
 
-void ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
+void InterP16x16ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 {
 	auto dc_block = m_quantizer->GetDCBlock();
 	dc_block = TransformUtil::InverseHadamard(dc_block);
 
-	InverseIntra8ChromaQuantizer inverse_quantizer(m_encoder_context->qp, dc_block, m_quantizer->GetACBlocks());
+	InverseChromaQuantizer inverse_quantizer(m_encoder_context->qp, dc_block, m_quantizer->GetACBlocks());
 	inverse_quantizer.InverseQuantize();
 
 	auto blocks = inverse_quantizer.GetBlocks();
@@ -135,12 +123,12 @@ void ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 	m_diff_blocks = blocks;
 }
 
-void ChromaFlow::Reconstruct(PlaneType plane_type)
+void InterP16x16ChromaFlow::Reconstruct(PlaneType plane_type)
 {
-	 m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_blocks, m_predictor->GetPredictedData(plane_type));
+	m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_blocks, m_predictor->GetPredictedData(plane_type));
 }
 
-void ChromaFlow::CalculateDistortion()
+void InterP16x16ChromaFlow::CalculateDistortion()
 {
 	m_distortion = 0;
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
@@ -153,4 +141,3 @@ void ChromaFlow::CalculateDistortion()
 }
 
 __codec_end
-

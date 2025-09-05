@@ -96,6 +96,17 @@ public:
 				m_data[x + y * Width] = block_data.GetElement(x - 4 * x_in_block, y - 4 * y_in_block);
 	}
 
+	template<typename out_type = int32_t>
+	std::vector<BlockData<4, 4, out_type>> GetTotalBlock4x4s() const
+	{
+		std::vector<BlockData<4, 4, out_type>> total_blocks;
+		total_blocks.reserve(Width / 4 * Height / 4);
+		for (uint32_t y = 0; y < Height / 4; ++y)
+			for (uint32_t x = 0; x < Width / 4; ++x)
+				total_blocks.emplace_back(GetBlock4x4(x, y));
+		return total_blocks;
+	}
+
 	int GetSum() const
 	{
 		return std::accumulate(m_data.begin(), m_data.end(), 0);

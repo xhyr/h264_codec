@@ -34,6 +34,14 @@ std::shared_ptr<BytesData> SliceHeader::Convert2BytesData() const
 		CodingUtil::UE_V(idr_pic_id, bytes_data);
 	CodingUtil::U_V(log2_max_pic_order_cnt_lsb_minus4 + 4, pic_order_cnt_lsb, bytes_data);
 
+	if (slice_type == 5)
+	{
+		CodingUtil::U_1(1, bytes_data);
+		CodingUtil::UE_V(0, bytes_data);
+
+		CodingUtil::U_1(0, bytes_data);
+	}
+
 	if (idr_pic_flag)
 	{
 		CodingUtil::U_1(no_output_of_prior_pics_flag, bytes_data);

@@ -7,7 +7,7 @@
 #include "mb_flow_base.h"
 #include "bytes_data.h"
 #include "rdo_util.h"
-#include "chroma_flow.h"
+#include "intra_chroma_flow.h"
 #include "mb_util.h"
 
 __codec_begin

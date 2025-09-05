@@ -6,11 +6,11 @@
 
 __codec_begin
 
-class InverseIntra8ChromaQuantizer
+class InverseChromaQuantizer
 {
 public:
-	InverseIntra8ChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
-	~InverseIntra8ChromaQuantizer();
+	InverseChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
+	~InverseChromaQuantizer();
 
 	void InverseQuantize();
 

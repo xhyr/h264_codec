@@ -1,4 +1,4 @@
-#include "intra8_chroma_transformer.h"
+#include "chroma_transformer.h"
 
 #include <algorithm>
 
@@ -6,32 +6,32 @@
 
 __codec_begin
 
-Intra8ChromaTransformer::Intra8ChromaTransformer(const BlockData<8, 8, int32_t>& block_data) : m_block_data(block_data)
+ChromaTransformer::ChromaTransformer(const BlockData<8, 8, int32_t>& block_data) : m_block_data(block_data)
 {
 }
 
-Intra8ChromaTransformer::~Intra8ChromaTransformer()
+ChromaTransformer::~ChromaTransformer()
 {
 }
 
-void Intra8ChromaTransformer::Transform()
+void ChromaTransformer::Transform()
 {
 	PickBlocks();
 	TransformAll();
 	TransformDC();
 }
 
-std::vector<BlockData<4, 4, int32_t>> Intra8ChromaTransformer::GetBlocks() const
+std::vector<BlockData<4, 4, int32_t>> ChromaTransformer::GetBlocks() const
 {
 	return m_blocks;
 }
 
-BlockData<2, 2, int32_t> Intra8ChromaTransformer::GetDCBlock() const
+BlockData<2, 2, int32_t> ChromaTransformer::GetDCBlock() const
 {
 	return m_dc_block;
 }
 
-void Intra8ChromaTransformer::PickBlocks()
+void ChromaTransformer::PickBlocks()
 {
 	m_blocks.reserve(4);
 	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
@@ -39,12 +39,12 @@ void Intra8ChromaTransformer::PickBlocks()
 			m_blocks.emplace_back(m_block_data.GetBlock4x4(x_in_block, y_in_block));
 }
 
-void Intra8ChromaTransformer::TransformAll()
+void ChromaTransformer::TransformAll()
 {
 	std::transform(m_blocks.begin(), m_blocks.end(), m_blocks.begin(), &TransformUtil::DCT);
 }
 
-void Intra8ChromaTransformer::TransformDC()
+void ChromaTransformer::TransformDC()
 {
 	for (uint32_t y = 0; y < 2; ++y)
 		for (uint32_t x = 0; x < 2; ++x)

@@ -51,6 +51,7 @@ std::unique_ptr<MBFlowBase> MBFlowBase::CreateMBFlow(SliceType slice_type, std::
 	switch (slice_type)
 	{
 	case codec::SliceType::P:
+		mb_flow.reset(new MBInterFlow(mb, encoder_context));
 		break;
 	case codec::SliceType::I:
 		mb_flow.reset(new MBIntraFlow(mb, encoder_context));

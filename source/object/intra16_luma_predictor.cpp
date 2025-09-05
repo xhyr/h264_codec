@@ -132,8 +132,7 @@ void Intra16LumaPredictor::CalculatePlaneMode()
 
 void Intra16LumaPredictor::DecideBySATD()
 {
-	auto mb = m_mb.lock();
-	auto original_block_data = mb->GetOriginalLumaBlockData16x16();
+	auto original_block_data = m_mb->GetOriginalLumaBlockData16x16();
 
 	int min_satd = -1;
 	Intra16LumaPredictionType best_prediction_type = Intra16LumaPredictionType::DC;

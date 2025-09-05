@@ -8,12 +8,17 @@ __codec_begin
 
 struct CavlcConstantValues
 {
-	constexpr static Position s_zigzag_orders[16] = 
+	constexpr static Position s_zigzag_block_pos_orders[16] = 
 	{ 
 		{0,0},{1,0},{0,1},{0,2},
 		{1,1},{2,0},{3,0},{2,1},
 		{1,2},{0,3},{1,3},{2,2},
 		{3,1},{3,2},{2,3},{3,3} 
+	};
+
+	constexpr static uint32_t s_zigzag_block_index_orders[16] =
+	{
+		0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 12, 13, 10, 11, 14, 15
 	};
 
 	constexpr static uint32_t s_scan_block_orders[16] =

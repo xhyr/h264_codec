@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "prediction_type.h"
-#include "chroma_flow.h"
+#include "intra_chroma_flow.h"
 #include "intra16_luma_flow.h"
 #include "intra4_luma_flow.h"
 #include "encoder_context.h"
@@ -28,11 +28,10 @@ MBIntraRDOptimizer::~MBIntraRDOptimizer()
 
 void MBIntraRDOptimizer::Encode()
 {
-	m_rd_cost = std::numeric_limits<double>::max();
-
+	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
-	m_chroma_flow = std::make_shared<ChromaFlow>(m_mb, m_encoder_context);
+	m_chroma_flow = std::make_shared<IntraChromaFlow>(m_mb, m_encoder_context);
 	m_chroma_flow->Frontend();
 	m_chroma_cbp = m_chroma_flow->GetCBP();
 
@@ -41,7 +40,7 @@ void MBIntraRDOptimizer::Encode()
 	{
 		auto old_mb_luma_coeff_nums = m_encoder_context->cavlc_context->GetMBLumaCoeffNums(m_mb_addr);
 
-		double rd_cost = CalculateRDCost(mb_type);
+		int rd_cost = CalculateRDCost(mb_type);
 		if (rd_cost < m_rd_cost)
 		{
 			m_rd_cost = rd_cost;
@@ -67,25 +66,25 @@ void MBIntraRDOptimizer::Encode()
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
 }
 
-void MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
+uint32_t MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 	auto mb_type = m_mb->GetType();
 	OutputMB(mb_type, bytes_data);
-	//LOGINFO("mb_addr = %d, total_bit = %d.", m_mb->GetAddress(), bytes_data->GetBitsCount() - start_bit_count);
-}
+	uint32_t finish_bit_count = bytes_data->GetBitsCount();
+	return finish_bit_count - start_bit_count;}
 
-double MBIntraRDOptimizer::CalculateRDCost(MBType mb_type)
+int MBIntraRDOptimizer::CalculateRDCost(MBType mb_type)
 {
 	int distortion = m_chroma_flow->GetDistortion();
 	RunLumaFlow(mb_type);
 	distortion += m_luma_flow->GetDistortion();
 
 	if (distortion > m_rd_cost)
-		return std::numeric_limits<double>::max();
+		return std::numeric_limits<int>::max();
 
 	int rate = CalculateRate(mb_type);
-	double rd_cost = RDOUtil::CalculateRDCost(distortion, rate, m_encoder_context->lambda_mode_fp);
+	int rd_cost = RDOUtil::CalculateRDCost(distortion, rate, m_encoder_context->lambda_mode_fp);
 	return rd_cost;
 }
 
@@ -123,23 +122,23 @@ int MBIntraRDOptimizer::OutputMB(MBType mb_type, std::shared_ptr<BytesData> byte
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 
-	MBIntraHeaderBinaryer mb_binaryer(bytes_data);
+	MBIntraHeaderBinaryer header_binaryer(bytes_data);
 
 	if (mb_type == MBType::I16)
 	{
 		auto intra16_prediction_type = std::dynamic_pointer_cast<Intra16LumaFlow>(m_luma_flow)->GetPredictionType();
 		auto offset = MBUtil::CalculateIntra16Offset(m_cbp, intra16_prediction_type);
-		mb_binaryer.OutputMBType(mb_type, offset);
+		header_binaryer.OutputMBType(mb_type, offset);
 	}
-	else mb_binaryer.OutputMBType(mb_type);
+	else header_binaryer.OutputMBType(mb_type);
 
 	m_luma_flow->OutputPredictionTypes(bytes_data);
 
-	mb_binaryer.OutputChromaPredMode(m_chroma_flow->GetPredictionType());
-	mb_binaryer.OutputCBP(m_cbp);
+	header_binaryer.OutputChromaPredMode(m_chroma_flow->GetPredictionType());
+	header_binaryer.OutputCBP(m_cbp);
 
 	if (m_cbp > 0 || mb_type == MBType::I16)
-		mb_binaryer.OutputQPDelta(0);
+		header_binaryer.OutputQPDelta(0);
 
 	m_luma_flow->OutputCoefficients(bytes_data);
 	m_chroma_flow->OutputCoefficients(bytes_data);

@@ -9,7 +9,7 @@ void CavlcPreCoderLuma4x4::Code(const BlockData<4, 4, int32_t>& block)
 	int run = -1;
 	for (uint32_t index = 0; index < 16; ++index)
 	{
-		auto pos = CavlcConstantValues::s_zigzag_orders[index];
+		auto pos = CavlcConstantValues::s_zigzag_block_pos_orders[index];
 		auto level = block.GetElement(pos);
 		++run;
 		if (level != 0)

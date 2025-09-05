@@ -11,7 +11,7 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class BytesData;
-class ChromaFlow;
+class IntraChromaFlow;
 class IntraLumaFlowBase;
 
 class MBIntraRDOptimizer
@@ -22,10 +22,10 @@ public:
 
 	void Encode();
 
-	void Binary(std::shared_ptr<BytesData> bytes_data);
+	uint32_t Binary(std::shared_ptr<BytesData> bytes_data);
 
 private:
-	double CalculateRDCost(MBType mb_type);
+	int CalculateRDCost(MBType mb_type);
 
 	void RunLumaFlow(MBType mb_type);
 
@@ -37,7 +37,7 @@ private:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
 
-	std::shared_ptr<ChromaFlow> m_chroma_flow;
+	std::shared_ptr<IntraChromaFlow> m_chroma_flow;
 	std::shared_ptr<IntraLumaFlowBase> m_luma_flow;
 	std::shared_ptr<IntraLumaFlowBase> m_best_luma_flow;
 
@@ -46,7 +46,7 @@ private:
 	int m_luma_cbp{ 0 };
 	int m_cbp{ 0 };
 	MBType m_mb_type;
-	double m_rd_cost{ 0 };
+	int m_rd_cost{ 0 };
 };
 
 __codec_end

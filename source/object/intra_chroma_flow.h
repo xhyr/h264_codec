@@ -14,14 +14,14 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class Intra8ChromaPredictor;
-class Intra8ChromaQuantizer;
+class ChromaQuantizer;
 class BytesData;
 
-class ChromaFlow
+class IntraChromaFlow
 {
 public:
-	ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
-	~ChromaFlow();
+	IntraChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
+	~IntraChromaFlow();
 
 	void SetTargetPredictionType(IntraChromaPredictionType prediction_type);
 
@@ -53,7 +53,7 @@ protected:
 	std::shared_ptr<EncoderContext> m_encoder_context;
 
 	std::unique_ptr<Intra8ChromaPredictor> m_predictor;
-	std::unique_ptr<Intra8ChromaQuantizer> m_quantizer;
+	std::unique_ptr<ChromaQuantizer> m_quantizer;
 
 	std::unordered_map<PlaneType, BlockData<8, 8>> m_reconstructed_data_map;
 	uint8_t m_cbp{ 0 };

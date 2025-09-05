@@ -13,7 +13,7 @@ struct EncoderContext;
 class InterP16x16LumaPredictor
 {
 public:
-	InterP16x16LumaPredictor();
+	InterP16x16LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
 	~InterP16x16LumaPredictor();
 
 	void Decide();

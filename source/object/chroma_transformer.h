@@ -4,11 +4,11 @@
 
 __codec_begin
 
-class Intra8ChromaTransformer
+class ChromaTransformer
 {
 public:
-	explicit Intra8ChromaTransformer(const BlockData<8, 8, int32_t>& block_data);
-	~Intra8ChromaTransformer();
+	explicit ChromaTransformer(const BlockData<8, 8, int32_t>& block_data);
+	~ChromaTransformer();
 
 	void Transform();
 

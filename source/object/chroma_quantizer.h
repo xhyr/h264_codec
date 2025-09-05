@@ -6,11 +6,11 @@
 
 __codec_begin
 
-class Intra8ChromaQuantizer
+class ChromaQuantizer
 {
 public:
-	Intra8ChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
-	~Intra8ChromaQuantizer();
+	ChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
+	~ChromaQuantizer();
 
 	void Quantize();
 

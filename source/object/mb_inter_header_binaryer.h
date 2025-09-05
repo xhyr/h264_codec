@@ -21,21 +21,12 @@ public:
 
 	void OutputMBType(MBType mb_type);
 
-	void WriteReferenceFrame();
-
-	void WriteMotionVector();
-
 	void OutputCBP(uint8_t cbp);
 
 	void OutputQPDelta(int qp_delta);
 
 private:
-	std::weak_ptr<Slice> m_slice;
-	uint32_t m_mb_addr;
 	std::shared_ptr<BytesData> m_bytes_data;
-	SliceType m_slice_type;
-	MBType m_mb_type;
-	uint8_t m_cbp;
 };
 
 __codec_end

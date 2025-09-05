@@ -35,17 +35,6 @@ void MBInterHeaderBinaryer::OutputMBType(MBType mb_type)
 	}
 }
 
-void MBInterHeaderBinaryer::WriteReferenceFrame()
-{
-
-}
-
-void MBInterHeaderBinaryer::WriteMotionVector()
-{
-	CodingUtil::SE_V(0, m_bytes_data);
-	CodingUtil::SE_V(0, m_bytes_data);
-}
-
 void MBInterHeaderBinaryer::OutputCBP(uint8_t cbp)
 {
 	auto ue = BinaryConstantValues::s_cbp_me_map[cbp][1];

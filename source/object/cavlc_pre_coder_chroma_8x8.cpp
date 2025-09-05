@@ -64,7 +64,7 @@ void CavlcPreCoderChroma8x8::CodeACBlock(uint32_t block_index, const BlockData<4
 	auto& level_runs = m_ac_level_runs[block_index];
 	for (uint32_t index = 1; index < 16; ++index)
 	{
-		auto pos = CavlcConstantValues::s_zigzag_orders[index];
+		auto pos = CavlcConstantValues::s_zigzag_block_pos_orders[index];
 		auto level = ac_block.GetElement(pos);
 		++run;
 		if (level != 0)
