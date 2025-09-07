@@ -48,22 +48,30 @@ uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_
 uint32_t InterP16x16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
 	uint32_t total_bit_count = 0;
-	for (uint32_t i = 0; i < 16; ++i)
+
+	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)
 	{
-		auto block_index = CavlcConstantValues::s_zigzag_block_index_orders[i];
-		CavlcPreCoderLuma4x4 pre_coder;
-		pre_coder.Code(m_residual_datas[block_index]);
-		auto level_and_runs = pre_coder.GetLevelAndRuns();
+		if ((m_cbp & (1 << block_8x8)) == 0)
+			continue;
 
-		auto start_bits_count = bytes_data->GetBitsCount();
+		for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
+		{
+			uint32_t block_index = BlockUtil::CalculateBlockIndex(block_8x8, block_4x4);
+			CavlcPreCoderLuma4x4 pre_coder;
+			pre_coder.Code(m_residual_datas[block_index]);
+			auto level_and_runs = pre_coder.GetLevelAndRuns();
 
-		CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
-		coder.CodeNormalLuma(block_index, level_and_runs);
+			auto start_bits_count = bytes_data->GetBitsCount();
 
-		auto finish_bits_count = bytes_data->GetBitsCount();
-		auto block_used_bit_count = finish_bits_count - start_bits_count;
-		total_bit_count += block_used_bit_count;
+			CavlcNonCdcCoder coder(m_mb->GetAddress(), m_encoder_context->cavlc_context, bytes_data);
+			coder.CodeNormalLuma(block_index, level_and_runs);
+
+			auto finish_bits_count = bytes_data->GetBitsCount();
+			auto block_used_bit_count = finish_bits_count - start_bits_count;
+			total_bit_count += block_used_bit_count;
+		}
 	}
+
 	return total_bit_count;
 }
 
@@ -77,15 +85,25 @@ void InterP16x16LumaFlow::Predict()
 
 void InterP16x16LumaFlow::TransformAndQuantize()
 {
-	m_residual_datas.reserve(16);
-	for (auto& block_data : m_diff_datas)
+	m_residual_datas.resize(16);
+	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)
 	{
-		block_data = TransformUtil::DCT(block_data);
-		block_data = QuantizeUtil::QuantizeNormal(m_encoder_context->qp, block_data);
-		m_residual_datas.emplace_back(block_data);
+		bool all_zero = true;
+
+		for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
+		{
+			uint32_t block_index = BlockUtil::CalculateBlockIndex(block_8x8, block_4x4);
+			auto& block_data = m_diff_datas[block_index];
+			block_data = TransformUtil::DCT(block_data);
+			block_data = QuantizeUtil::QuantizeNormal(m_encoder_context->qp, block_data, false);
+			m_residual_datas[block_index] = block_data;
+		}
+
+		CheckCoefficientCost(block_8x8);
 	}
 
-	CalculateCBP();
+	if (m_coefficient_cost <= CavlcConstantValues::s_mb_luma_coeff_cost_threshold)
+		m_cbp = 0;
 }
 
 void InterP16x16LumaFlow::InverseQuantizeAndTransform()
@@ -94,7 +112,7 @@ void InterP16x16LumaFlow::InverseQuantizeAndTransform()
 	{
 		for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)
 		{
-			auto block_data = QuantizeUtil::InverseQuantizeNormal(m_encoder_context->qp, m_diff_datas[x_in_block + 4 * y_in_block]);
+			auto block_data = QuantizeUtil::InverseQuantizeNormal(m_encoder_context->qp, m_residual_datas[x_in_block + 4 * y_in_block]);
 			block_data = TransformUtil::InverseDCT(block_data);
 			m_diff_data.SetBlock4x4(x_in_block, y_in_block, block_data);
 		}
@@ -109,29 +127,40 @@ void InterP16x16LumaFlow::Reconstruct()
 		for (uint32_t x = 0; x < 4; ++x)
 		{
 			auto predicted_val = predicted_data.GetElement(x, y);
-			auto residual_val = m_diff_data.GetElement(x, y);
+			auto residual_val = m_cbp == 0 ? 0 : m_diff_data.GetElement(x, y);
 			auto val = ReconstructUtil::Reconstruct(predicted_val, residual_val);
 			m_reconstructed_data.SetElement(x, y, val);
 		}
 	}
 }
 
-void InterP16x16LumaFlow::CalculateCBP()
+void InterP16x16LumaFlow::CheckCoefficientCost(uint32_t block_8x8)
 {
-	m_cbp = 0;
-	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)
+	bool all_zero{ true };
+	uint32_t coefficent_cost{ 0 };
+	for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
 	{
-		bool all_zero = true;
+		uint32_t block_index = BlockUtil::CalculateBlockIndex(block_8x8, block_4x4);
+
+		CavlcPreCoderLuma4x4 pre_coder;
+		pre_coder.Code(m_residual_datas[block_index]);
+		coefficent_cost += pre_coder.GetCoefficientCost();
+		all_zero &= pre_coder.IsAllZero();
+	}
+
+	if (coefficent_cost <= CavlcConstantValues::s_luma_coeff_cost_threshold)
+	{
 		for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
 		{
 			uint32_t block_index = BlockUtil::CalculateBlockIndex(block_8x8, block_4x4);
-			all_zero &= m_residual_datas[block_index].AllEqual(0);
-			if (!all_zero)
-				break;
+			m_residual_datas[block_index].Reset(0);
 		}
-		if (!all_zero)
-			m_cbp |= 1 << block_8x8;
+		all_zero = true;
 	}
+	else m_coefficient_cost += coefficent_cost;
+
+	if (!all_zero)
+		m_cbp |= (1 << block_8x8);
 }
 
 __codec_end

@@ -29,6 +29,8 @@ struct CavlcConstantValues
 	constexpr static int s_max_coeff_cost{ 999999 };
 	constexpr static int s_coeff_run_cost[] = { 3,2,2,1,1,1,0,0,0,0,0,0,0,0,0,0 };
 	constexpr static int s_chroma_coeff_cost_threshold{ 4 };
+	constexpr static int s_luma_coeff_cost_threshold{ 4 };
+	constexpr static int s_mb_luma_coeff_cost_threshold{ 5 };
 
 	constexpr static uint8_t s_non_cdc_len_table[3][4][17] = 
 	{

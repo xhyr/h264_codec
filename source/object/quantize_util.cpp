@@ -25,9 +25,9 @@ BlockData<4, 4, int32_t> QuantizeUtil::QuantizeDC(int qp, const BlockData<4, 4, 
     return output_block;
 }
 
-BlockData<2, 2, int32_t> QuantizeUtil::QuantizeDC(int qp, const BlockData<2, 2, int32_t>& dc_block)
+BlockData<2, 2, int32_t> QuantizeUtil::QuantizeDC(int qp, const BlockData<2, 2, int32_t>& dc_block, bool is_intra)
 {
-	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
+	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp, is_intra);
 
 	auto dc_factor = QuantizeConstants::s_quant_matrix[qp_rem][0][0];
 	auto dc_data = dc_block.GetData();
@@ -67,9 +67,9 @@ BlockData<2, 2, int32_t> QuantizeUtil::InverseQuantizeDC(int qp, const BlockData
 	return output_block;
 }
 
-BlockData<4, 4, int32_t> QuantizeUtil::QuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block)
+BlockData<4, 4, int32_t> QuantizeUtil::QuantizeAC(int qp, const BlockData<4, 4, int32_t>& ac_block, bool is_intra)
 {
-	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
+	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp, is_intra);
 
 	BlockData<4, 4, int32_t> output_block;
 	for (uint32_t y = 0; y < 4; ++y)
@@ -113,9 +113,9 @@ BlockData<4, 4, int32_t> QuantizeUtil::InverseQuantizeAC(int qp, const BlockData
 	return output_block;
 }
 
-BlockData<4, 4, int32_t> QuantizeUtil::QuantizeNormal(int qp, const BlockData<4, 4, int32_t>& block)
+BlockData<4, 4, int32_t> QuantizeUtil::QuantizeNormal(int qp, const BlockData<4, 4, int32_t>& block, bool is_intra)
 {
-	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
+	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp, is_intra);
 
 	BlockData<4, 4, int32_t> output_block;
 	for (uint32_t y = 0; y < 4; ++y)
