@@ -20,4 +20,12 @@ enum class NaluPriority
 	HIGHEST = 3
 };
 
+enum class BlockNeighborType
+{
+	A = 0,
+	B,
+	C,
+	D
+};
+
 __codec_end
