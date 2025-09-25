@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 #include "global_defines.h"
 
@@ -11,6 +12,8 @@ struct YUVFrame;
 class OStream;
 class CavlcContext;
 struct EncoderConfig;
+class MotionInfoContext;
+struct MotionVector;
 
 struct EncoderContext
 {
@@ -30,7 +33,9 @@ struct EncoderContext
 	int lambda_mode_fp;
 	int lambda_motion_fp;
 	std::shared_ptr<CavlcContext> cavlc_context;
+	std::shared_ptr<MotionInfoContext> motion_info_context;
 	std::shared_ptr<YUVFrame> last_frame;
+	std::vector<MotionVector> search_motion_vectors;
 
 	std::shared_ptr<EncoderConfig> config;
 };

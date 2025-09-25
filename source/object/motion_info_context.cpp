@@ -23,7 +23,7 @@ void MotionInfoContext::SetMotionInfo(uint32_t mb_addr, uint32_t x_in_block, uin
 		m_motion_infos[block_index] = motion_info;
 }
 
-std::tuple<MotionInfo, MotionInfo, MotionInfo, MotionInfo> MotionInfoContext::GetNeighborMotionInfo(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block) const
+std::tuple<MotionInfo, MotionInfo, MotionInfo> MotionInfoContext::GetNeighborMotionInfo(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block) const
 {
 	uint32_t block_index;
 	//a
@@ -44,14 +44,7 @@ std::tuple<MotionInfo, MotionInfo, MotionInfo, MotionInfo> MotionInfoContext::Ge
 	if (got)
 		motion_info_c = m_motion_infos[block_index];
 
-	//d
-	got = BlockUtil::GetBlockNeighborIndex(x_in_block, y_in_block, width_in_block, m_frame_width_in_block, BlockNeighborType::D, block_index);
-	MotionInfo motion_info_d;
-	if (got)
-		motion_info_d = m_motion_infos[block_index];
-
-
-	return std::make_tuple(motion_info_a, motion_info_b, motion_info_c, motion_info_d);
+	return std::make_tuple(motion_info_a, motion_info_b, motion_info_c);
 }
 
 void MotionInfoContext::Init()

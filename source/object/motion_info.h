@@ -6,8 +6,11 @@ __codec_begin
 
 struct MotionVector
 {
-	int mv[2]{ 0 };
+	int x{ 0 };
+	int y{ 0 };
 };
+
+MotionVector operator+(const MotionVector& left, const MotionVector& right);
 
 struct MotionInfo
 {

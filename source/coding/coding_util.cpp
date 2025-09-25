@@ -8,7 +8,8 @@ __codec_begin
 
 uint32_t CodingUtil::U_1(uint8_t value, std::shared_ptr<BytesData> bytes_data)
 {
-	bytes_data->PushBit(value);
+	if(bytes_data)
+		bytes_data->PushBit(value);
 	return 1;
 }
 
@@ -17,7 +18,8 @@ uint32_t CodingUtil::U_V(uint32_t n, uint32_t value, std::shared_ptr<BytesData> 
 	for (int index = n - 1; index >= 0; --index)
 	{
 		uint32_t mask = 1 << index;
-		bytes_data->PushBit((mask & value) ? 1 : 0);
+		if(bytes_data)
+			bytes_data->PushBit((mask & value) ? 1 : 0);
 	}
 	return n;
 }
@@ -26,7 +28,8 @@ uint32_t CodingUtil::UE_V(uint32_t value, std::shared_ptr<BytesData> bytes_data)
 {
 	++value;
 	uint32_t prefix_length = GetBinaryLength(value) - 1;
-	bytes_data->PushBit(0, prefix_length);
+	if (bytes_data)
+		bytes_data->PushBit(0, prefix_length);
 	U_V(prefix_length + 1, value, bytes_data);
 	return prefix_length * 2 + 1;
 }

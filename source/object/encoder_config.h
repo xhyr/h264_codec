@@ -23,6 +23,8 @@ struct EncoderConfig
 	uint32_t ref_frame_number;
 	
 	uint8_t qp;
+
+	int search_range{ 32 };
 };
 
 __codec_end

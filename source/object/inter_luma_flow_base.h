@@ -19,6 +19,8 @@ public:
 
 	virtual void Frontend() = 0;
 
+	virtual void Backend() = 0;
+
 	virtual uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) = 0;
 
 	virtual uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) = 0;

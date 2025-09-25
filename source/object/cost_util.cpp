@@ -2,6 +2,8 @@
 
 #include "transform_util.h"
 #include "rdo_constant_values.h"
+#include "yuv_frame.h"
+#include "motion_info.h"
 
 __codec_begin
 
@@ -69,6 +71,22 @@ int CostUtil::CalculateSSEDistortion(const BlockData<4, 4, int32_t>& block_data)
 int CostUtil::ScaleForAccuracy(int value)
 {
 	return value << RDOConstantValues::s_lambda_accuracy_bits;
+}
+
+int CostUtil::CalculateLumaSAD(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, std::shared_ptr<YUVFrame> current_frame, std::shared_ptr<YUVFrame> ref_frame, const MotionVector& mv)
+{
+	int sad = 0;
+	for (int y = y_in_block * 4; y < y_in_block * 4 + height_in_block * 4; ++y)
+	{
+		for (int x = x_in_block * 4; x < x_in_block * 4 + width_in_block * 4; ++x)
+		{
+			int current_value = current_frame->GetLumaValue(x, y);
+			int ref_value = ref_frame->GetLumaValue(x + mv.x, y + mv.y);
+			sad += std::abs(current_value - ref_value);
+		}
+	}
+
+	return ScaleForAccuracy(sad);
 }
 
 __codec_end

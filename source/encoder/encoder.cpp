@@ -8,6 +8,10 @@
 #include "log.h"
 #include "stream_util.h"
 #include "math_util.h"
+#include "me_util.h"
+#include "motion_info.h"
+#include "motion_info_context.h"
+#include "cavlc_context.h"
 
 __codec_begin
 
@@ -29,6 +33,9 @@ void Encoder::PrepareContext()
 	m_context->height_in_mb = m_config->height / CommonConstantValues::s_mb_height;
 	m_context->mb_num = m_context->width_in_mb * m_context->height_in_mb;
 	m_context->out_stream = StreamUtil::CreateFileOStream(m_config->output_file_path);
+	m_context->cavlc_context = std::make_shared<CavlcContext>(m_context->width_in_mb, m_context->height_in_mb);
+	m_context->motion_info_context = std::make_shared<MotionInfoContext>(m_context->width_in_mb / 4, m_context->height_in_mb / 4);
+	m_context->search_motion_vectors = MEUtil::GenerateMotionVectors(m_config->search_range);
 }
 
 bool Encoder::Encode()

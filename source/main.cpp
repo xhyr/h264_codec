@@ -5,11 +5,6 @@
 #include "encoder_config.h"
 #include "encoder_config_reader.h"
 #include "encoder.h"
-#include "parameter_set_container.h"
-#include "ostream.h"
-#include "stream_util.h"
-#include "slice.h"
-#include "math_util.h"
 
 using namespace codec;
 

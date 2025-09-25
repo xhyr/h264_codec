@@ -18,3 +18,5 @@ level_idc = 30
 ref_frame_number = 10
 
 qp = 28
+
+search_range = 32

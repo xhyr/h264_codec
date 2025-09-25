@@ -1,5 +1,7 @@
 #include "data_util.h"
 
+#include "math_util.h"
+
 __codec_begin
 
 std::vector<uint8_t> DataUtil::ObtainDataInBlock(std::shared_ptr<uint8_t[]> source_data, uint32_t x, uint32_t y, uint32_t block_width, uint32_t block_height, uint32_t width)
@@ -10,6 +12,23 @@ std::vector<uint8_t> DataUtil::ObtainDataInBlock(std::shared_ptr<uint8_t[]> sour
 	for (uint32_t src_y = y; src_y < y + block_height; ++src_y)
 		for (uint32_t src_x = x; src_x < x + block_width; ++src_x)
 			target_data.push_back(source_data_ptr[src_y * width + src_x]);
+	return target_data;
+}
+
+std::vector<uint8_t> DataUtil::ObtainDataInBlock(std::shared_ptr<uint8_t[]> source_data, int x, int y, int block_width, int block_height, int width, int height)
+{
+	std::vector<uint8_t> target_data;
+	target_data.reserve(block_width * block_height);
+	auto source_data_ptr = source_data.get();
+	for (int src_y = y; src_y < y + block_height; ++src_y)
+	{
+		int new_y = MathUtil::Clamp(src_y, 0, height - 1);
+		for (int src_x = x; src_x < x + block_width; ++src_x)
+		{
+			int new_x = MathUtil::Clamp(src_x, 0, width - 1);
+			target_data.push_back(source_data_ptr[new_y * width + new_x]);
+		}
+	}
 	return target_data;
 }
 

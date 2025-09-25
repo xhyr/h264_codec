@@ -28,4 +28,12 @@ enum class BlockNeighborType
 	D
 };
 
+enum class MvPredType
+{
+	MEDIAN = 0,
+	L,
+	U,
+	UR
+};
+
 __codec_end

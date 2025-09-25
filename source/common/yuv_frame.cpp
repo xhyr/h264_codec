@@ -2,6 +2,7 @@
 
 #include "color_data.h"
 #include "yuv_util.h"
+#include "math_util.h"
 
 __codec_begin
 
@@ -38,6 +39,14 @@ bool YUVFrame::Serial(const std::string& file_path)
 bool YUVFrame::Unserial(uint32_t width, uint32_t height, const std::string& file_path, uint32_t tick)
 {
     return YUVUtil::Unserial(width, height, file_path, y_data, u_data, v_data, tick);
+}
+
+uint8_t YUVFrame::GetLumaValue(uint32_t x, uint32_t y) const
+{
+	x = MathUtil::Clamp<uint32_t>(x, 0, width - 1);
+	y = MathUtil::Clamp<uint32_t>(y, 0, height - 1);
+
+	return y_data.get()[x + y * width];
 }
 
 __codec_end

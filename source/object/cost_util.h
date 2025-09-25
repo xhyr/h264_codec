@@ -7,6 +7,9 @@
 
 __codec_begin
 
+struct YUVFrame;
+struct MotionVector;
+
 struct CostUtil
 {
 	static int CalculateSATD(const BlockData<4, 4, int32_t>& block_data);
@@ -32,6 +35,9 @@ struct CostUtil
 				distortion += MathUtil::Square(left_block_data.GetElement(x, y) - right_block_data.GetElement(x, y));
 		return ScaleForAccuracy(distortion);
 	}
+
+	static int CalculateLumaSAD(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, std::shared_ptr<YUVFrame> current_frame, std::shared_ptr<YUVFrame> ref_frame, const MotionVector& mv);
+
 };
 
 __codec_end

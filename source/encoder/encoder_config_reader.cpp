@@ -77,6 +77,11 @@ std::shared_ptr<EncoderConfig> EncoderConfigReader::ParseConfigMap(const std::un
 			break;
 		config->qp = std::stoi(iter->second);
 
+		iter = config_map.find("search_range");
+		if (iter == config_map.end())
+			break;
+		config->search_range = std::stoi(iter->second);
+
 		return config;
 	} while (0);
 

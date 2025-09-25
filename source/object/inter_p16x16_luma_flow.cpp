@@ -6,6 +6,7 @@
 #include "transform_util.h"
 #include "quantize_util.h"
 #include "encoder_context.h"
+#include "motion_info_context.h"
 #include "reconstruct_util.h"
 #include "cavlc_constant_values.h"
 #include "cavlc_pre_coder_luma_4x4.h"
@@ -32,6 +33,12 @@ void InterP16x16LumaFlow::Frontend()
 	Reconstruct();
 
 	CalculateDistortion();
+}
+
+void InterP16x16LumaFlow::Backend()
+{
+	auto motion_info = m_predictor->GetMotionInfo();
+	m_encoder_context->motion_info_context->SetMotionInfo(m_mb->GetAddress(), 0, 0, 4, 4, motion_info);
 }
 
 uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)

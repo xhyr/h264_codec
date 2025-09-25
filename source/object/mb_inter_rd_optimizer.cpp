@@ -24,12 +24,10 @@ void MBInterRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
-	if (m_mb_addr == 5)
-		int sb = 1;
-
 	m_luma_flow.reset(new InterP16x16LumaFlow(m_mb, m_encoder_context));
 	m_luma_flow->Frontend();
 	m_best_luma_flow = m_luma_flow;
+	m_best_luma_flow->Backend();
 	m_luma_cbp = m_luma_flow->GetCBP();
 
 	m_chroma_flow.reset(new InterP16x16ChromaFlow(m_mb, m_encoder_context));
