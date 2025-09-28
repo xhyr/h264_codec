@@ -13,5 +13,4 @@ enum class PlaneType : uint8_t
 	Cr
 };
 
-
 __codec_end

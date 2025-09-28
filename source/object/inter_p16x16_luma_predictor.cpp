@@ -39,10 +39,11 @@ void InterP16x16LumaPredictor::Decide()
 		}
 	}
 
+	best_mv = MEUtil::ClipMVRange(best_mv, m_encoder_context);
 	m_motion_info.ref_id = 0;
 	m_motion_info.mv = best_mv;
 
-	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x, m_y, 16, 16, m_encoder_context->width, m_encoder_context->height));
+	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x + best_mv.x, m_y + best_mv.y, 16, 16, m_encoder_context->width, m_encoder_context->height));
 	auto origin_block_data = m_mb->GetOriginalLumaBlockData16x16();
 	m_diff_data = origin_block_data - m_predicted_data;
 }

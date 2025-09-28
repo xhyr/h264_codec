@@ -10,6 +10,7 @@ __codec_begin
 
 struct MotionVector;
 class MotionInfoContext;
+struct EncoderContext;
 
 struct MEUtil
 {
@@ -18,6 +19,8 @@ struct MEUtil
 	static std::vector<MotionVector> GenerateMotionVectors(uint32_t search_range);
 
 	static int CalculateMVCost(const MotionVector& pred, const MotionVector& cand, int lambda);
+
+	static MotionVector ClipMVRange(const MotionVector& mv, std::shared_ptr<EncoderContext> encoder_context);
 
 };
 

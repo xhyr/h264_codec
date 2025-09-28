@@ -37,6 +37,9 @@ struct EncoderContext
 	std::shared_ptr<YUVFrame> last_frame;
 	std::vector<MotionVector> search_motion_vectors;
 
+	std::pair<int, int> mv_vertical_limit;
+	std::pair<int, int> mv_horizontal_limit;
+
 	std::shared_ptr<EncoderConfig> config;
 };
 

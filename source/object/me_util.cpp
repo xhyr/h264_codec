@@ -5,6 +5,7 @@
 #include "codec_types.h"
 #include "math_util.h"
 #include "coding_util.h"
+#include "encoder_context.h"
 
 __codec_begin
 
@@ -127,6 +128,13 @@ int MEUtil::CalculateMVCost(const MotionVector& pred, const MotionVector& cand, 
 {
 	int cost = CodingUtil::SE_V(pred.x - cand.x, nullptr) + CodingUtil::SE_V(pred.y - cand.y, nullptr);
 	return cost * lambda;
+}
+
+MotionVector MEUtil::ClipMVRange(const MotionVector& mv, std::shared_ptr<EncoderContext> encoder_context)
+{
+	int mv_x = MathUtil::Clamp(mv.x, encoder_context->mv_horizontal_limit.first, encoder_context->mv_horizontal_limit.second);
+	int mv_y = MathUtil::Clamp(mv.y, encoder_context->mv_vertical_limit.first, encoder_context->mv_vertical_limit.second);
+	return { mv_x, mv_y };
 }
 
 __codec_end

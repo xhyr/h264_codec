@@ -8,6 +8,7 @@
 #include "prediction_type.h"
 #include "common_types.h"
 #include "cavlc_types.h"
+#include "motion_info.h"
 
 __codec_begin
 
@@ -20,7 +21,7 @@ class BytesData;
 class InterP16x16ChromaFlow
 {
 public:
-	InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
+	InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, const MotionInfo& motion_info);
 	~InterP16x16ChromaFlow();
 
 	void Frontend();
@@ -55,6 +56,7 @@ protected:
 	std::vector<BlockData<4, 4, int32_t>> m_diff_blocks;
 	CavlcDataSource m_cavlc_data_source;
 	int m_distortion{ 0 };
+	MotionInfo m_motion_info;
 };
 
 __codec_end
