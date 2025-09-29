@@ -16,9 +16,8 @@
 
 __codec_begin
 
-InterP16x16ChromaFlow::InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, const MotionInfo& motion_info) :
-	m_mb(mb), m_encoder_context(encoder_context), m_predictor(std::make_unique<InterP16x16ChromaPredictor>(mb, encoder_context)),
-	m_motion_info(motion_info)
+InterP16x16ChromaFlow::InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
+	m_mb(mb), m_encoder_context(encoder_context), m_predictor(std::make_unique<InterP16x16ChromaPredictor>(mb, encoder_context))
 {
 }
 

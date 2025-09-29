@@ -1,5 +1,7 @@
 #include "cavlc_context.h"
 
+#include <algorithm>
+
 #include "cavlc_util.h"
 #include "math_util.h"
 
@@ -61,6 +63,12 @@ void CavlcContext::SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_
 		auto index = GetBlockIndex(CavlcDataType::NormalLuma, mb_addr, i);
 		m_coeff_num_map[CavlcContextType::Luma][index] = coeff_nums[i];
 	}
+}
+
+void CavlcContext::Reset()
+{
+	for (auto& item : m_coeff_num_map)
+		std::fill(item.second.begin(), item.second.end(), 0);
 }
 
 void CavlcContext::Init()

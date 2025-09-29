@@ -41,10 +41,10 @@ bool YUVFrame::Unserial(uint32_t width, uint32_t height, const std::string& file
     return YUVUtil::Unserial(width, height, file_path, y_data, u_data, v_data, tick);
 }
 
-uint8_t YUVFrame::GetLumaValue(uint32_t x, uint32_t y) const
+uint8_t YUVFrame::GetLumaValue(int x, int y) const
 {
-	x = MathUtil::Clamp<uint32_t>(x, 0, width - 1);
-	y = MathUtil::Clamp<uint32_t>(y, 0, height - 1);
+	x = MathUtil::Clamp<int>(x, 0, width - 1);
+	y = MathUtil::Clamp<int>(y, 0, height - 1);
 
 	return y_data.get()[x + y * width];
 }

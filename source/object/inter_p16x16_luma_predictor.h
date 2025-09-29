@@ -25,6 +25,8 @@ public:
 
 	MotionInfo GetMotionInfo() const;
 
+	MotionVector GetMVD() const;
+
 private:
 	void Init();
 
@@ -42,6 +44,7 @@ private:
 	MotionInfo m_motion_info;
 	BlockData<16, 16> m_predicted_data;
 	BlockData<16, 16, int32_t> m_diff_data;
+	MotionVector m_mvd;
 };
 
 __codec_end

@@ -79,6 +79,8 @@ bool Encoder::Encode()
 			LOGINFO("encoding done slice tick = %d.", m_tick);
 
 			++encoded_frame_count;
+
+			m_context->cavlc_context->Reset();
 		}
 
 		++m_tick;

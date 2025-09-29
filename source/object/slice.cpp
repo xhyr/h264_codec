@@ -104,6 +104,9 @@ void Slice::RefreshBlockData(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_i
 
 void Slice::DeblockFilter()
 {
+	if (m_header.disable_deblocking_filter_idc == 1)
+		return;
+
 	LoopFilter loop_filter;
 	for (auto mb : m_macroblocks)
 		loop_filter.Filter(mb);

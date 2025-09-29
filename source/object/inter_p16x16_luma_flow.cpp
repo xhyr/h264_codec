@@ -45,8 +45,10 @@ uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 	
-	CodingUtil::SE_V(0, bytes_data);
-	CodingUtil::SE_V(0, bytes_data);
+	auto mvd = m_predictor->GetMVD();
+
+	CodingUtil::SE_V(mvd.x, bytes_data);
+	CodingUtil::SE_V(mvd.y, bytes_data);
 
 	auto finish_bit_count = bytes_data->GetBitsCount();
 	return finish_bit_count - start_bit_count;
@@ -54,6 +56,9 @@ uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_
 
 uint32_t InterP16x16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
+	if (m_mb->GetAddress() == 8)
+		int sb = 1;
+
 	uint32_t total_bit_count = 0;
 
 	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)

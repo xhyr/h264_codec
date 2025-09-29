@@ -22,7 +22,7 @@ struct YUVFrame
 
 	bool Unserial(uint32_t width, uint32_t height, const std::string& file_path, uint32_t tick);
 
-	uint8_t GetLumaValue(uint32_t x, uint32_t y) const;
+	uint8_t GetLumaValue(int x, int y) const;
 
 	uint32_t width, height;
 	std::shared_ptr<uint8_t[]> y_data, u_data, v_data;

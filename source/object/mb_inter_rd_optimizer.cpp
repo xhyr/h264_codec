@@ -48,7 +48,7 @@ uint32_t MBInterRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 
 void MBInterRDOptimizer::OutputMB(std::shared_ptr<BytesData> bytes_data)
 {
-	if (m_mb_addr == 6)
+	if (m_mb_addr == 8)
 		int sb = 1;
 
 	MBInterHeaderBinaryer header_binaryer(bytes_data);

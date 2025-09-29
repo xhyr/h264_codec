@@ -12,6 +12,8 @@ struct MotionVector
 
 MotionVector operator+(const MotionVector& left, const MotionVector& right);
 
+MotionVector operator-(const MotionVector& left, const MotionVector& right);
+
 struct MotionInfo
 {
 	int ref_id{ -1 };

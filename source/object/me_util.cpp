@@ -110,14 +110,14 @@ std::vector<MotionVector> MEUtil::GenerateMotionVectors(uint32_t search_range)
 	{
 		for (int x = -d + 1; x < d; ++x)
 		{
-			mvs.emplace_back(x, d);
-			mvs.emplace_back(x, -d);
+			mvs.emplace_back(x * 4, -d * 4);
+			mvs.emplace_back(x * 4, d * 4);
 		}
 
 		for (int y = -d; y <= d; ++y)
 		{
-			mvs.emplace_back(-d, y);
-			mvs.emplace_back(d, y);
+			mvs.emplace_back(-d * 4, y * 4);
+			mvs.emplace_back(d * 4, y * 4);
 		}
 	}
 

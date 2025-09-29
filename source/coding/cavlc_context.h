@@ -22,6 +22,8 @@ public:
 
 	void SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_t>& coeff_nums);
 
+	void Reset();
+
 private:
 	void Init();
 
