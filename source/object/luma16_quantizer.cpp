@@ -19,7 +19,9 @@ void Luma16Quantizer::Quantize()
 	for (auto& ac_block : m_ac_blocks)
 	{
 		ac_block = QuantizeUtil::QuantizeAC(m_qp, ac_block);
-		m_is_ac_all_zero = m_is_ac_all_zero && ac_block.AllEqual(0);
+		bool all_zero = ac_block.AllEqual(0);
+		m_is_ac_all_zero = m_is_ac_all_zero && all_zero;
+		m_detailed_cbp = (m_detailed_cbp << 1) | !all_zero;
 	}
 }
 
@@ -36,6 +38,11 @@ std::vector<BlockData<4, 4, int32_t>> Luma16Quantizer::GetACBlocks() const
 bool Luma16Quantizer::IsACAllZero() const
 {
 	return m_is_ac_all_zero;
+}
+
+uint32_t Luma16Quantizer::GetDetailedCBP() const
+{
+	return m_detailed_cbp;
 }
 
 __codec_end

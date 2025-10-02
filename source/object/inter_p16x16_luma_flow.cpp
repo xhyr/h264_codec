@@ -13,6 +13,7 @@
 #include "cavlc_non_cdc_coder.h"
 #include "macroblock.h"
 #include "block_util.h"
+#include "mb_util.h"
 
 __codec_begin
 
@@ -56,7 +57,7 @@ uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_
 
 uint32_t InterP16x16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
-	if (m_mb->GetAddress() == 8)
+	if (m_mb->GetAddress() == 11)
 		int sb = 1;
 
 	uint32_t total_bit_count = 0;
@@ -115,7 +116,10 @@ void InterP16x16LumaFlow::TransformAndQuantize()
 	}
 
 	if (m_coefficient_cost <= CavlcConstantValues::s_mb_luma_coeff_cost_threshold)
+	{
 		m_cbp = 0;
+		m_detailed_cbp = 0;
+	}
 }
 
 void InterP16x16LumaFlow::InverseQuantizeAndTransform()
@@ -134,9 +138,9 @@ void InterP16x16LumaFlow::InverseQuantizeAndTransform()
 void InterP16x16LumaFlow::Reconstruct()
 {
 	auto predicted_data = m_predictor->GetPredictedData();
-	for (uint32_t y = 0; y < 4; ++y)
+	for (uint32_t y = 0; y < 16; ++y)
 	{
-		for (uint32_t x = 0; x < 4; ++x)
+		for (uint32_t x = 0; x < 16; ++x)
 		{
 			auto predicted_val = predicted_data.GetElement(x, y);
 			auto residual_val = m_cbp == 0 ? 0 : m_diff_data.GetElement(x, y);
@@ -157,7 +161,9 @@ void InterP16x16LumaFlow::CheckCoefficientCost(uint32_t block_8x8)
 		CavlcPreCoderLuma4x4 pre_coder;
 		pre_coder.Code(m_residual_datas[block_index]);
 		coefficent_cost += pre_coder.GetCoefficientCost();
-		all_zero &= pre_coder.IsAllZero();
+		bool block_all_zero = pre_coder.IsAllZero();
+		all_zero &= block_all_zero;
+		MBUtil::FillDetailedCBP(block_all_zero, block_8x8, block_4x4, m_detailed_cbp);
 	}
 
 	if (coefficent_cost <= CavlcConstantValues::s_luma_coeff_cost_threshold)
@@ -168,6 +174,7 @@ void InterP16x16LumaFlow::CheckCoefficientCost(uint32_t block_8x8)
 			m_residual_datas[block_index].Reset(0);
 		}
 		all_zero = true;
+		MBUtil::ResetDetailedCBP(block_8x8, m_detailed_cbp);
 	}
 	else m_coefficient_cost += coefficent_cost;
 

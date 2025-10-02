@@ -87,7 +87,7 @@ void LoopFilter::FilterVerticalEdgesLuma(std::shared_ptr<Macroblock> mb, int edg
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto strengths = FilterUtil::GetVerticalStrengths(mb, edge);
+	auto strengths = FilterUtil::GetVerticalStrengths(mb_p, mb_q, edge);
 	for (uint32_t y_in_block = 0; y_in_block < 4; ++y_in_block)
 	{
 		auto strength = strengths[y_in_block];
@@ -119,7 +119,7 @@ void LoopFilter::FilterHorizontalEdgesLuma(std::shared_ptr<Macroblock> mb, int e
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto strengths = FilterUtil::GetHorizontalStrengths(mb, edge);
+	auto strengths = FilterUtil::GetHorizontalStrengths(mb_p, mb_q, edge);
 	for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)
 	{
 		auto strength = strengths[x_in_block];
@@ -151,7 +151,7 @@ void LoopFilter::FilterVerticalEdgesChroma(std::shared_ptr<Macroblock> mb, int e
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto strengths = FilterUtil::GetVerticalStrengths(mb, edge);
+	auto strengths = FilterUtil::GetVerticalStrengths(mb_p, mb_q, edge);
 	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
 	{
 		auto strength = strengths[y_in_block * 2];
@@ -183,7 +183,7 @@ void LoopFilter::FilterHorizontalEdgesChroma(std::shared_ptr<Macroblock> mb, int
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto strengths = FilterUtil::GetVerticalStrengths(mb, edge);
+	auto strengths = FilterUtil::GetVerticalStrengths(mb_p, mb_q, edge);
 	for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)
 	{
 		auto strength = strengths[x_in_block * 2];

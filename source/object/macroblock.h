@@ -18,6 +18,7 @@ class Slice;
 struct EncoderContext;
 class BytesData;
 class MBFlowBase;
+struct MotionInfo;
 
 class Macroblock : public std::enable_shared_from_this<Macroblock>
 {
@@ -73,6 +74,12 @@ public:
 
 	void SetIntra4LumaPredictionTypes(const std::vector<Intra4LumaPredictionType>& prediction_types);
 
+	MotionInfo GetMotionInfo(uint32_t x_in_block, uint32_t y_in_block);
+
+	void SetLumaDetailedCBP(uint32_t value);
+
+	uint32_t GetLumaDetailedCBP() const;
+
 private:
 	void Init();
 
@@ -102,6 +109,7 @@ private:
 	MBType m_type;
 	std::vector<Intra4LumaPredictionType> m_intra4_luma_prediction_types;
 	Intra16LumaPredictionType m_intra16_prediction_type;
+	uint32_t m_luma_detailed_cbp;
 
 	BlockData<16, 16> m_reconstructed_luma_data;
 	BlockData<8, 8> m_reconstructed_cb_data;

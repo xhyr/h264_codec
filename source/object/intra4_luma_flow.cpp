@@ -32,8 +32,9 @@ void Intra4LumaFlow::Frontend()
 			m_nodes.push_back(node);
 			std::shared_ptr<BytesData> tmp_bytes_data = std::make_shared<BytesData>();
 			node->OutputCoefficients(tmp_bytes_data);
-
-			all_zero &= node->IsAllZero();
+			bool block_all_zero = node->IsAllZero();
+			all_zero &= block_all_zero;
+			m_detailed_cbp = (m_detailed_cbp << 1) | !block_all_zero;
 		}
 
 		if (!all_zero)

@@ -70,6 +70,7 @@ void Intra16LumaFlow::TransformAndQuantize()
 	m_quantizer->Quantize();
 
 	m_cbp = m_quantizer->IsACAllZero() ? 0 : 15;
+	m_detailed_cbp = m_quantizer->GetDetailedCBP();
 }
 
 void Intra16LumaFlow::InverseQuantizeAndTransform()

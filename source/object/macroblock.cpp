@@ -9,6 +9,8 @@
 #include "rdo_util.h"
 #include "intra_chroma_flow.h"
 #include "mb_util.h"
+#include "motion_info.h"
+#include "motion_info_context.h"
 
 __codec_begin
 
@@ -221,6 +223,21 @@ Intra4LumaPredictionType Macroblock::GetIntra4LumaPredicionType(uint32_t x_in_bl
 void Macroblock::SetIntra4LumaPredictionTypes(const std::vector<Intra4LumaPredictionType>& prediction_types)
 {
 	m_intra4_luma_prediction_types = prediction_types;
+}
+
+MotionInfo Macroblock::GetMotionInfo(uint32_t x_in_block, uint32_t y_in_block)
+{
+	return m_encoder_context->motion_info_context->GetMotionInfo(m_addr, x_in_block, y_in_block);
+}
+
+void Macroblock::SetLumaDetailedCBP(uint32_t value)
+{
+	m_luma_detailed_cbp = value;
+}
+
+uint32_t Macroblock::GetLumaDetailedCBP() const
+{
+	return m_luma_detailed_cbp;
 }
 
 __codec_end

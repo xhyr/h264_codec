@@ -137,5 +137,10 @@ MotionVector MEUtil::ClipMVRange(const MotionVector& mv, std::shared_ptr<Encoder
 	return { mv_x, mv_y };
 }
 
+bool MEUtil::IsMVDifferent(const MotionVector& left, const MotionVector& right, int threshold)
+{
+	return abs(left.x - right.x) >= threshold || abs(left.y - right.y) >= threshold;
+}
+
 __codec_end
 

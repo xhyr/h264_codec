@@ -24,11 +24,14 @@ void MBInterRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
+	m_mb->SetType(MBType::P16x16);
+
 	m_luma_flow.reset(new InterP16x16LumaFlow(m_mb, m_encoder_context));
 	m_luma_flow->Frontend();
 	m_best_luma_flow = m_luma_flow;
 	m_best_luma_flow->Backend();
 	m_luma_cbp = m_luma_flow->GetCBP();
+	m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
 
 	m_chroma_flow.reset(new InterP16x16ChromaFlow(m_mb, m_encoder_context));
 	m_chroma_flow->Frontend();
@@ -36,6 +39,9 @@ void MBInterRDOptimizer::Encode()
 	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
 
 	m_mb_type = MBType::P16x16;
+	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
+	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
+	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
 }
 
 uint32_t MBInterRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)

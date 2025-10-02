@@ -60,6 +60,7 @@ void MBIntraRDOptimizer::Encode()
 	m_luma_flow = m_best_luma_flow;
 	m_luma_cbp = m_luma_flow->GetCBP();
 	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+	m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
 
 	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);

@@ -29,6 +29,11 @@ uint8_t InterLumaFlowBase::GetCBP() const
 	return m_cbp;
 }
 
+uint32_t InterLumaFlowBase::GetDetailedCBP() const
+{
+    return m_detailed_cbp;
+}
+
 void InterLumaFlowBase::CalculateDistortion()
 {
 	auto original_block_data = m_mb->GetOriginalLumaBlockData16x16();

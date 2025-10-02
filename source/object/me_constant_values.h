@@ -38,6 +38,8 @@ struct MEConstantValues
 		{-32768, 32767}
 	};
 
+	constexpr static int mv_different_threshold{ 4 };
+
 };
 
 __codec_end

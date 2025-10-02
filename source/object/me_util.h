@@ -22,6 +22,8 @@ struct MEUtil
 
 	static MotionVector ClipMVRange(const MotionVector& mv, std::shared_ptr<EncoderContext> encoder_context);
 
+	static bool IsMVDifferent(const MotionVector& left, const MotionVector& right, int threshold);
+
 };
 
 __codec_end

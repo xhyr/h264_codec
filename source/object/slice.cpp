@@ -41,16 +41,12 @@ bool Slice::Encode()
 		auto mb = std::make_shared<Macroblock>(mb_addr, weak_from_this(), m_encoder_context);
 		auto old_bit_count = m_bytes_data->GetBitsCount();
 
-		if (m_encoder_context->slice_addr == 1)
-			int sb = 1;
-
 		mb->Encode(m_bytes_data);
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
 		total_used_bit_count += used_bit_count;
 
-		if (m_encoder_context->slice_addr == 1)
-			LOGINFO("mb_addr = %d, used_bits = %d, total_used_byte_count = %d.", mb_addr, used_bit_count, total_used_bit_count / 8);
+		LOGINFO("mb_addr = %d, used_bits = %d, total_used_byte_count = %d.", mb_addr, used_bit_count, total_used_bit_count / 8);
 
 		m_macroblocks.push_back(mb);
 
