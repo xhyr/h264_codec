@@ -30,10 +30,15 @@ void MBUtil::FillDetailedCBP(bool all_zero, uint32_t block_8x8, uint32_t block_4
 	BitUtil::SetValue(detailed_cbp, block_index, all_zero ? 0 : 1);
 }
 
+void MBUtil::FillDetailedCBP(bool all_zero, uint32_t block_index, uint32_t& detailed_cbp)
+{
+	BitUtil::SetValue(detailed_cbp, block_index, all_zero ? 0 : 1);
+}
+
 void MBUtil::ResetDetailedCBP(uint32_t block_8x8, uint32_t& detailed_cbp)
 {
 	for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
-		FillDetailedCBP(0, block_8x8, block_4x4, detailed_cbp);
+		FillDetailedCBP(true, block_8x8, block_4x4, detailed_cbp);
 }
 
 bool MBUtil::IsLumaAllZero(uint32_t detailed_cbp, uint32_t x_in_block, uint32_t y_in_block)

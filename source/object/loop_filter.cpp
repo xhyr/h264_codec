@@ -151,22 +151,22 @@ void LoopFilter::FilterVerticalEdgesChroma(std::shared_ptr<Macroblock> mb, int e
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto strengths = FilterUtil::GetVerticalStrengths(mb_p, mb_q, edge);
-	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
+	auto strengths = FilterUtil::GetVerticalStrengths(mb_p, mb_q, edge * 2);
+	for (uint32_t y_in_block = 0; y_in_block < 4; ++y_in_block)
 	{
-		auto strength = strengths[y_in_block * 2];
+		auto strength = strengths[y_in_block];
 		if (strength == 0)
 			continue;
 
-		for (uint32_t y = 0; y < 4; ++y)
+		for (uint32_t y = 0; y < 2; ++y)
 		{
-			auto p_data = GetLeftDataByVerticalEdge(mb_p, edge, y + 4 * y_in_block, plane_type);
-			auto q_data = GetRightDataByVerticalEdge(mb_q, edge, y + 4 * y_in_block, plane_type);
+			auto p_data = GetLeftDataByVerticalEdge(mb_p, edge, y + 2 * y_in_block, plane_type);
+			auto q_data = GetRightDataByVerticalEdge(mb_q, edge, y + 2 * y_in_block, plane_type);
 			bool changed = DoFilter(strength, p_data, q_data, alpha, beta, index_a, plane_type);
 			if (changed)
 			{
-				SetLeftDataByVerticalEdge(mb_p, edge, y + 4 * y_in_block, p_data, plane_type);
-				SetRightDataByVerticalEdge(mb_q, edge, y + 4 * y_in_block, q_data, plane_type);
+				SetLeftDataByVerticalEdge(mb_p, edge, y + 2 * y_in_block, p_data, plane_type);
+				SetRightDataByVerticalEdge(mb_q, edge, y + 2 * y_in_block, q_data, plane_type);
 			}
 		}
 	}
@@ -183,22 +183,22 @@ void LoopFilter::FilterHorizontalEdgesChroma(std::shared_ptr<Macroblock> mb, int
 	if (alpha == 0 && beta == 0)
 		return;
 
-	auto strengths = FilterUtil::GetVerticalStrengths(mb_p, mb_q, edge);
-	for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)
+	auto strengths = FilterUtil::GetHorizontalStrengths(mb_p, mb_q, edge * 2);
+	for (uint32_t x_in_block = 0; x_in_block < 4; ++x_in_block)
 	{
-		auto strength = strengths[x_in_block * 2];
+		auto strength = strengths[x_in_block];
 		if (strength == 0)
 			continue;
 
-		for (uint32_t x = 0; x < 4; ++x)
+		for (uint32_t x = 0; x < 2; ++x)
 		{
-			auto p_data = GetUpDataByHorizontalEdge(mb_p, edge, x + 4 * x_in_block, plane_type);
-			auto q_data = GetDownDataByHorizontalEdge(mb_q, edge, x + 4 * x_in_block, plane_type);
+			auto p_data = GetUpDataByHorizontalEdge(mb_p, edge, x + 2 * x_in_block, plane_type);
+			auto q_data = GetDownDataByHorizontalEdge(mb_q, edge, x + 2 * x_in_block, plane_type);
 			bool changed = DoFilter(strength, p_data, q_data, alpha, beta, index_a, plane_type);
 			if (changed)
 			{
-				SetUpDataByHorizontalEdge(mb_p, edge, x + 4 * x_in_block, p_data, plane_type);
-				SetDownDataByHorizontalEdge(mb_q, edge, x + 4 * x_in_block, q_data, plane_type);
+				SetUpDataByHorizontalEdge(mb_p, edge, x + 2 * x_in_block, p_data, plane_type);
+				SetDownDataByHorizontalEdge(mb_q, edge, x + 2 * x_in_block, q_data, plane_type);
 			}
 		}
 	}

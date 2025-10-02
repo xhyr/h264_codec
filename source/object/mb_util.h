@@ -20,6 +20,8 @@ struct MBUtil
 
 	static void FillDetailedCBP(bool all_zero, uint32_t block_8x8, uint32_t block_4x4, uint32_t& detailed_cbp);
 
+	static void FillDetailedCBP(bool all_zero, uint32_t block_index, uint32_t& detailed_cbp);
+
 	static void ResetDetailedCBP(uint32_t block_8x8, uint32_t& detailed_cbp);
 
 	static bool IsLumaAllZero(uint32_t detailed_cbp, uint32_t x_in_block, uint32_t y_in_block);

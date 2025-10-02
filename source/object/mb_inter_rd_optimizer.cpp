@@ -24,6 +24,9 @@ void MBInterRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
+	if (m_mb_addr == 6)
+		int sb = 1;
+
 	m_mb->SetType(MBType::P16x16);
 
 	m_luma_flow.reset(new InterP16x16LumaFlow(m_mb, m_encoder_context));

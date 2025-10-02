@@ -43,7 +43,7 @@ protected:
 
 	int m_distortion{ 0 };
 	uint8_t m_cbp{ 0 };
-	uint32_t m_detailed_cbp;
+	uint32_t m_detailed_cbp{ 0 };
 };
 
 __codec_end

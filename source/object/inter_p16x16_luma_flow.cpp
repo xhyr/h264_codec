@@ -163,7 +163,7 @@ void InterP16x16LumaFlow::CheckCoefficientCost(uint32_t block_8x8)
 		coefficent_cost += pre_coder.GetCoefficientCost();
 		bool block_all_zero = pre_coder.IsAllZero();
 		all_zero &= block_all_zero;
-		MBUtil::FillDetailedCBP(block_all_zero, block_8x8, block_4x4, m_detailed_cbp);
+		MBUtil::FillDetailedCBP(block_all_zero, block_index, m_detailed_cbp);
 	}
 
 	if (coefficent_cost <= CavlcConstantValues::s_luma_coeff_cost_threshold)
