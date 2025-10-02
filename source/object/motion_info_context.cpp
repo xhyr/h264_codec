@@ -48,7 +48,15 @@ std::tuple<MotionInfo, MotionInfo, MotionInfo> MotionInfoContext::GetNeighborMot
 	got = BlockUtil::GetBlockNeighborIndex(x_in_block, y_in_block, width_in_block, m_frame_width_in_block, BlockNeighborType::C, block_index);
 	MotionInfo motion_info_c;
 	if (got)
+	{
 		motion_info_c = m_motion_infos[block_index];
+	}
+	else
+	{
+		got = BlockUtil::GetBlockNeighborIndex(x_in_block, y_in_block, width_in_block, m_frame_width_in_block, BlockNeighborType::D, block_index);
+		if (got)
+			motion_info_c = m_motion_infos[block_index];
+	}
 
 	return std::make_tuple(motion_info_a, motion_info_b, motion_info_c);
 }

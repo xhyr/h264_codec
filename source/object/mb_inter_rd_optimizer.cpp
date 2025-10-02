@@ -33,6 +33,9 @@ void MBInterRDOptimizer::Encode()
 	m_luma_cbp = m_luma_flow->GetCBP();
 	m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
 
+	if (m_mb_addr == 27)
+		int sb = 1;
+
 	m_chroma_flow.reset(new InterP16x16ChromaFlow(m_mb, m_encoder_context));
 	m_chroma_flow->Frontend();
 	m_chroma_cbp = m_chroma_flow->GetCBP();

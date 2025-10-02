@@ -46,7 +46,8 @@ bool Slice::Encode()
 
 		total_used_bit_count += used_bit_count;
 
-		LOGINFO("mb_addr = %d, used_bits = %d, total_used_byte_count = %d.", mb_addr, used_bit_count, total_used_bit_count / 8);
+		if(m_tick == 1)
+			LOGINFO("mb_addr = %d, used_bits = %d, total_used_byte_count = %d.", mb_addr, used_bit_count, total_used_bit_count / 8);
 
 		m_macroblocks.push_back(mb);
 

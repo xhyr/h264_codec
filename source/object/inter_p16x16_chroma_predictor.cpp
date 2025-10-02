@@ -19,20 +19,19 @@ InterP16x16ChromaPredictor::~InterP16x16ChromaPredictor()
 
 void InterP16x16ChromaPredictor::Decide()
 {
+	if (m_mb->GetAddress() == 27)
+		int sb = 1;
+
 	auto motion_info =  m_encoder_context->motion_info_context->GetMotionInfo(m_mb->GetAddress(), 0, 0);
 	auto mv = motion_info.mv;
-	mv.x /= 2;
-	mv.y /= 2;
 
 	auto pos = m_mb->GetPosition();
-	pos.first /= 2;
-	pos.second /= 2;
 
-	m_predicted_data[0].SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->u_data, pos.first + mv.x / 4, pos.second + mv.y / 4, 8, 8, m_encoder_context->width / 2, m_encoder_context->height / 2));
+	m_predicted_data[0].SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->u_data, ((pos.first << 2) + mv.x) >> 3, ((pos.second << 2) + mv.y) >> 3, 8, 8, m_encoder_context->width / 2, m_encoder_context->height / 2));
 	auto origin_block_data = m_mb->GetOriginalChromaBlockData(PlaneType::Cb);
 	m_diff_data[0] = origin_block_data - m_predicted_data[0];
 
-	m_predicted_data[1].SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->v_data, pos.first + mv.x / 4, pos.second + mv.y / 4, 8, 8, m_encoder_context->width / 2, m_encoder_context->height / 2));
+	m_predicted_data[1].SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->v_data, ((pos.first << 2) + mv.x ) >> 3, ((pos.second << 2) + mv.y) >> 3, 8, 8, m_encoder_context->width / 2, m_encoder_context->height / 2));
 	origin_block_data = m_mb->GetOriginalChromaBlockData(PlaneType::Cr);
 	m_diff_data[1] = origin_block_data - m_predicted_data[1];
 }

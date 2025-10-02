@@ -77,11 +77,17 @@ int InterP16x16ChromaFlow::GetDistortion()
 
 void InterP16x16ChromaFlow::Predict()
 {
+	if (m_mb->GetAddress() == 27)
+		int sb = 1;
+
 	m_predictor->Decide();
 }
 
 void InterP16x16ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 {
+	if (m_mb->GetAddress() == 27)
+		int sb = 1;
+
 	auto diff_data = m_predictor->GetDiffData(plane_type);
 	ChromaTransformer transformer(diff_data);
 	transformer.Transform();
