@@ -6,6 +6,9 @@
 #include "encoder_config_reader.h"
 #include "encoder.h"
 
+#include <Windows.h>
+#include <thread>
+
 using namespace codec;
 
 int main(int argc, char* argv[])

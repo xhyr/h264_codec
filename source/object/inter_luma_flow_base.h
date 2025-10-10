@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "block_data.h"
+#include "mb_type.h"
 
 __codec_begin
 
@@ -44,6 +45,9 @@ protected:
 	int m_distortion{ 0 };
 	uint8_t m_cbp{ 0 };
 	uint32_t m_detailed_cbp{ 0 };
+
+public:
+	static std::shared_ptr<InterLumaFlowBase> CreateFlow(MBType mb_type, std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
 };
 
 __codec_end

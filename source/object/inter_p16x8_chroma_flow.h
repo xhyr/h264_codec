@@ -4,13 +4,13 @@
 
 __codec_begin
 
-class InterP16x16ChromaPredictor;
+class InterP16x8ChromaPredictor;
 
-class InterP16x16ChromaFlow : public InterChromaFlowBase
+class InterP16x8ChromaFlow : public InterChromaFlowBase
 {
 public:
-	InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
-	~InterP16x16ChromaFlow();
+	InterP16x8ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
+	~InterP16x8ChromaFlow();
 
 	void Frontend() override;
 
@@ -27,8 +27,14 @@ private:
 
 	void CalculateDistortion();
 
+	BlockData<8, 8, int32_t> GetDiffData(PlaneType plane_type) const;
+
+	BlockData<8, 8> GetPredictedData(PlaneType plane_type) const;
+
 protected:
-	std::unique_ptr<InterP16x16ChromaPredictor> m_predictor;
+	std::unique_ptr<InterP16x8ChromaPredictor> m_predictors[2];
 };
+
+
 
 __codec_end

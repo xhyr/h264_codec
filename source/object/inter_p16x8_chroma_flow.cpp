@@ -1,6 +1,6 @@
-#include "inter_p16x16_chroma_flow.h"
+#include "inter_p16x8_chroma_flow.h"
 
-#include "inter_p16x16_chroma_predictor.h"
+#include "inter_p16x8_chroma_predictor.h"
 #include "bytes_data.h"
 #include "encoder_context.h"
 #include "cavlc_cdc_coder.h"
@@ -16,16 +16,18 @@
 
 __codec_begin
 
-InterP16x16ChromaFlow::InterP16x16ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
-	InterChromaFlowBase(mb, encoder_context), m_predictor(std::make_unique<InterP16x16ChromaPredictor>(mb, encoder_context))
+InterP16x8ChromaFlow::InterP16x8ChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
+	InterChromaFlowBase(mb, encoder_context)
+{
+	for(uint8_t i = 0; i < 2; ++i)
+		m_predictors[i] = std::make_unique<InterP16x8ChromaPredictor>(mb, encoder_context, i);
+}
+
+InterP16x8ChromaFlow::~InterP16x8ChromaFlow()
 {
 }
 
-InterP16x16ChromaFlow::~InterP16x16ChromaFlow()
-{
-}
-
-void InterP16x16ChromaFlow::Frontend()
+void InterP16x8ChromaFlow::Frontend()
 {
 	Predict();
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
@@ -37,7 +39,7 @@ void InterP16x16ChromaFlow::Frontend()
 	CalculateDistortion();
 }
 
-uint32_t InterP16x16ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
+uint32_t InterP16x8ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
 	auto start_bits_count = bytes_data->GetBitsCount();
 
@@ -60,14 +62,15 @@ uint32_t InterP16x16ChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> by
 	return finish_bits_count - start_bits_count;
 }
 
-void InterP16x16ChromaFlow::Predict()
+void InterP16x8ChromaFlow::Predict()
 {
-	m_predictor->Decide();
+	for (uint8_t i = 0; i < 2; ++i)
+		m_predictors[i]->Decide();
 }
 
-void InterP16x16ChromaFlow::TransformAndQuantize(PlaneType plane_type)
+void InterP16x8ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 {
-	auto diff_data = m_predictor->GetDiffData(plane_type);
+	auto diff_data = GetDiffData(plane_type);
 	ChromaTransformer transformer(diff_data);
 	transformer.Transform();
 
@@ -94,7 +97,7 @@ void InterP16x16ChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	}
 }
 
-void InterP16x16ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
+void InterP16x8ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 {
 	auto dc_block = m_quantizer->GetDCBlock();
 	dc_block = TransformUtil::InverseHadamard(dc_block);
@@ -108,12 +111,12 @@ void InterP16x16ChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 	m_diff_blocks = blocks;
 }
 
-void InterP16x16ChromaFlow::Reconstruct(PlaneType plane_type)
+void InterP16x8ChromaFlow::Reconstruct(PlaneType plane_type)
 {
-	m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_blocks, m_predictor->GetPredictedData(plane_type));
+	m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_blocks, GetPredictedData(plane_type));
 }
 
-void InterP16x16ChromaFlow::CalculateDistortion()
+void InterP16x8ChromaFlow::CalculateDistortion()
 {
 	m_distortion = 0;
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
@@ -123,6 +126,30 @@ void InterP16x16ChromaFlow::CalculateDistortion()
 		const auto& reconstructed_block_data = m_reconstructed_data_map[plane_type];
 		m_distortion += CostUtil::CalculateSADDistortion(original_block_data, reconstructed_block_data);
 	}
+}
+
+BlockData<8, 8, int32_t> InterP16x8ChromaFlow::GetDiffData(PlaneType plane_type) const
+{
+	BlockData<8, 8, int32_t> ret;
+	for (uint8_t i = 0; i < 2; ++i)
+	{
+		auto diff_data_blocks = m_predictors[i]->GetDiffData(plane_type).GetTotalBlock4x4s();
+		ret.SetBlock4x4(0, i, diff_data_blocks[0]);
+		ret.SetBlock4x4(1, i, diff_data_blocks[1]);
+	}
+	return ret;
+}
+
+BlockData<8, 8> InterP16x8ChromaFlow::GetPredictedData(PlaneType plane_type) const
+{
+	BlockData<8, 8> ret;
+	for (uint8_t i = 0; i < 2; ++i)
+	{
+		auto predicted_data_blocks = m_predictors[i]->GetPredictedData(plane_type).GetTotalBlock4x4s<uint8_t>();
+		ret.SetBlock4x4(0, i, predicted_data_blocks[0]);
+		ret.SetBlock4x4(1, i, predicted_data_blocks[1]);
+	}
+	return ret;
 }
 
 __codec_end
