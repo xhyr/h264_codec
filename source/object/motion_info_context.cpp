@@ -16,17 +16,35 @@ MotionInfoContext::~MotionInfoContext()
 {
 }
 
-void MotionInfoContext::SetMotionInfo(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, const MotionInfo& motion_info)
+void MotionInfoContext::SetMotionInfos(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, const MotionInfo& motion_info)
 {
 	auto block_indices = BlockUtil::GetBlockIndices(mb_addr, x_in_block, y_in_block, width_in_block, height_in_block, m_frame_width_in_block);
 	for (auto block_index : block_indices)
 		m_motion_infos[block_index] = motion_info;
 }
 
+void MotionInfoContext::SetMotionInfos(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, const std::vector<MotionInfo>& motion_infos)
+{
+	auto block_indices = BlockUtil::GetBlockIndices(mb_addr, x_in_block, y_in_block, width_in_block, height_in_block, m_frame_width_in_block);
+	uint32_t index = 0;
+	for (auto block_index : block_indices)
+		m_motion_infos[block_index] = motion_infos[index++];
+}
+
 MotionInfo MotionInfoContext::GetMotionInfo(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block) const
 {
 	auto block_indices = BlockUtil::GetBlockIndices(mb_addr, x_in_block, y_in_block, 1, 1, m_frame_width_in_block);
 	return m_motion_infos[block_indices[0]];
+}
+
+std::vector<MotionInfo> MotionInfoContext::GetMotionInfos(uint32_t mb_addr, uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block) const
+{
+	auto block_indices = BlockUtil::GetBlockIndices(mb_addr, x_in_block, y_in_block, width_in_block, height_in_block, m_frame_width_in_block);
+	std::vector<MotionInfo> motion_infos;
+	motion_infos.reserve(block_indices.size());
+	for (auto block_index : block_indices)
+		motion_infos.push_back(m_motion_infos[block_index]);
+	return motion_infos;
 }
 
 std::tuple<MotionInfo, MotionInfo, MotionInfo> MotionInfoContext::GetNeighborMotionInfo(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block) const

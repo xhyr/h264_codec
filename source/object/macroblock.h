@@ -44,11 +44,15 @@ public:
 
 	BlockData<16, 8> GetOriginalLumaBlockData16x8(uint8_t segment_index) const;
 
+	BlockData<8, 16> GetOriginalLumaBlockData8x16(uint8_t segment_index) const;
+
 	BlockData<4, 4> GetOriginalLumaBlockData4x4(uint32_t x_in_block, uint32_t y_in_block) const;
 
 	BlockData<8, 8> GetOriginalChromaBlockData(PlaneType plane_type) const;
 
 	BlockData<8, 4> GetOriginalChromaBlockData8x4(PlaneType plane_type, uint8_t segment_index) const;
+
+	BlockData<4, 8> GetOriginalChromaBlockData4x8(PlaneType plane_type, uint8_t segment_index) const;
 
 	BlockData<16, 16> GetReconstructedLumaBlockData() const;
 

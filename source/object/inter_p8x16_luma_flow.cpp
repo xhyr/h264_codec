@@ -1,8 +1,8 @@
-#include "inter_p16x8_luma_flow.h"
+#include "inter_p8x16_luma_flow.h"
 
 #include "coding_util.h"
 #include "bytes_data.h"
-#include "inter_p16x8_luma_predictor.h"
+#include "inter_p8x16_luma_predictor.h"
 #include "transform_util.h"
 #include "quantize_util.h"
 #include "encoder_context.h"
@@ -17,16 +17,16 @@
 
 __codec_begin
 
-InterP16x8LumaFlow::InterP16x8LumaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
+InterP8x16LumaFlow::InterP8x16LumaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
 	InterLumaFlowBase(mb, encoder_context)
 {
 }
 
-InterP16x8LumaFlow::~InterP16x8LumaFlow()
+InterP8x16LumaFlow::~InterP8x16LumaFlow()
 {
 }
 
-void InterP16x8LumaFlow::Frontend()
+void InterP8x16LumaFlow::Frontend()
 {
 	Predict();
 	TransformAndQuantize();
@@ -36,16 +36,16 @@ void InterP16x8LumaFlow::Frontend()
 	CalculateDistortion();
 }
 
-void InterP16x8LumaFlow::Backend()
+void InterP8x16LumaFlow::Backend()
 {
 	for (uint8_t segment_index = 0; segment_index < 2; ++segment_index)
 	{
 		auto motion_info = m_predictors[segment_index]->GetMotionInfo();
-		m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 2 * segment_index, 4, 2, motion_info);
+		m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 2 * segment_index, 0, 2, 4, motion_info);
 	}
 }
 
-uint32_t InterP16x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)
+uint32_t InterP8x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 
@@ -61,7 +61,7 @@ uint32_t InterP16x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_d
 	return finish_bit_count - start_bit_count;
 }
 
-uint32_t InterP16x8LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
+uint32_t InterP8x16LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
 {
 	uint32_t total_bit_count = 0;
 
@@ -91,27 +91,33 @@ uint32_t InterP16x8LumaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes
 	return total_bit_count;
 }
 
-void InterP16x8LumaFlow::Predict()
+void InterP8x16LumaFlow::Predict()
 {
-	auto old_motion_infos = m_encoder_context->motion_info_context->GetMotionInfos(m_mb->GetAddress(), 0, 0, 4, 2);
+	m_diff_datas.resize(16);
+	auto old_motion_infos = m_encoder_context->motion_info_context->GetMotionInfos(m_mb->GetAddress(), 0, 0, 2, 4);
 	for (uint8_t segment_index = 0; segment_index < 2; ++segment_index)
 	{
-		m_predictors[segment_index] = std::make_unique<InterP16x8LumaPredictor>(m_mb, m_encoder_context, segment_index);
+		m_predictors[segment_index] = std::make_unique<InterP8x16LumaPredictor>(m_mb, m_encoder_context, segment_index);
 		m_predictors[segment_index]->Decide();
 		auto diff_data = m_predictors[segment_index]->GetDiffData();
 		auto diff_block_datas = diff_data.GetTotalBlock4x4s();
-		m_diff_datas.insert(m_diff_datas.end(), diff_block_datas.begin(), diff_block_datas.end());
+	
+		for (uint32_t i = 0; i < 8; ++i)
+		{
+			uint32_t index = (i / 2) * 4 + (i % 2) + segment_index * 2;
+			m_diff_datas[index] = diff_block_datas[i];
+		}
 
 		if (segment_index == 0)
 		{
 			auto motion_info = m_predictors[segment_index]->GetMotionInfo();
-			m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 0, 4, 2, motion_info);
+			m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 0, 2, 4, motion_info);
 		}
 	}
-	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 0, 4, 2, old_motion_infos);
+	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 0, 2, 4, old_motion_infos);
 }
 
-void InterP16x8LumaFlow::TransformAndQuantize()
+void InterP8x16LumaFlow::TransformAndQuantize()
 {
 	m_residual_datas.resize(16);
 	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)
@@ -137,7 +143,7 @@ void InterP16x8LumaFlow::TransformAndQuantize()
 	}
 }
 
-void InterP16x8LumaFlow::InverseQuantizeAndTransform()
+void InterP8x16LumaFlow::InverseQuantizeAndTransform()
 {
 	for (uint32_t y_in_block = 0; y_in_block < 4; ++y_in_block)
 	{
@@ -150,16 +156,16 @@ void InterP16x8LumaFlow::InverseQuantizeAndTransform()
 	}
 }
 
-void InterP16x8LumaFlow::Reconstruct()
+void InterP8x16LumaFlow::Reconstruct()
 {
 	for (uint8_t segment_index = 0; segment_index < 2; ++segment_index)
 	{
 		auto predicted_data = m_predictors[segment_index]->GetPredictedData();
-		for (uint32_t y = segment_index * 8; y < segment_index * 8 + 8; ++y)
+		for (uint32_t y = 0; y < 16; ++y)
 		{
-			for (uint32_t x = 0; x < 16; ++x)
+			for (uint32_t x = segment_index * 8; x < segment_index * 8 + 8; ++x)
 			{
-				auto predicted_val = predicted_data.GetElement(x, y - segment_index * 8);
+				auto predicted_val = predicted_data.GetElement(x - segment_index * 8, y);
 				auto residual_val = m_cbp == 0 ? 0 : m_diff_data.GetElement(x, y);
 				auto val = ReconstructUtil::Reconstruct(predicted_val, residual_val);
 				m_reconstructed_data.SetElement(x, y, val);
@@ -168,7 +174,7 @@ void InterP16x8LumaFlow::Reconstruct()
 	}
 }
 
-void InterP16x8LumaFlow::CheckCoefficientCost(uint32_t block_8x8)
+void InterP8x16LumaFlow::CheckCoefficientCost(uint32_t block_8x8)
 {
 	bool all_zero{ true };
 	uint32_t coefficent_cost{ 0 };

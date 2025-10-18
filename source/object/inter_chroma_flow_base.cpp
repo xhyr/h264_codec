@@ -3,6 +3,7 @@
 #include "chroma_quantizer.h"
 #include "inter_p16x16_chroma_flow.h"
 #include "inter_p16x8_chroma_flow.h"
+#include "inter_p8x16_chroma_flow.h"
 
 __codec_begin
 
@@ -44,6 +45,7 @@ std::shared_ptr<InterChromaFlowBase> InterChromaFlowBase::CreateFlow(MBType mb_t
 		flow.reset(new InterP16x8ChromaFlow(mb, encoder_context));
 		break;
 	case codec::MBType::P8x16:
+		flow.reset(new InterP8x16ChromaFlow(mb, encoder_context));
 		break;
 	case codec::MBType::I4:
 		break;

@@ -39,7 +39,7 @@ void InterP16x16LumaFlow::Frontend()
 void InterP16x16LumaFlow::Backend()
 {
 	auto motion_info = m_predictor->GetMotionInfo();
-	m_encoder_context->motion_info_context->SetMotionInfo(m_mb->GetAddress(), 0, 0, 4, 4, motion_info);
+	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 0, 4, 4, motion_info);
 }
 
 uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)

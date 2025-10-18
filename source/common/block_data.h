@@ -107,12 +107,32 @@ public:
 	}
 
 	template<typename OutType = int32_t>
+	BlockData<8, 16, OutType> GetBlock8x16(uint8_t segment_index) const
+	{
+		BlockData<8, 16, OutType> result;
+		for (uint32_t y = 0; y < 16; ++y)
+			for (uint32_t x = segment_index * 8; x < segment_index * 8 + 8; ++x)
+				result.SetElement(x - segment_index * 8, y, GetElement(x, y));
+		return result;
+	}
+
+	template<typename OutType = int32_t>
 	BlockData<8, 4, OutType> GetBlock8x4(uint8_t segment_index) const
 	{
 		BlockData<8, 4, OutType> result;
 		for (uint32_t y = segment_index * 4; y < segment_index * 4 + 4; ++y)
 			for (uint32_t x = 0; x < 8; ++x)
 				result.SetElement(x, y - segment_index * 4, GetElement(x, y));
+		return result;
+	}
+
+	template<typename OutType = int32_t>
+	BlockData<4, 8, OutType> GetBlock4x8(uint8_t segment_index) const
+	{
+		BlockData<4, 8, OutType> result;
+		for (uint32_t y = 0; y < 8; ++y)
+			for (uint32_t x = segment_index * 4; x < segment_index * 4 + 4; ++x)
+				result.SetElement(x - segment_index * 4, y, GetElement(x, y));
 		return result;
 	}
 

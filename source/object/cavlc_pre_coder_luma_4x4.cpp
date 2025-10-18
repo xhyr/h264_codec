@@ -14,7 +14,7 @@ void CavlcPreCoderLuma4x4::Code(const BlockData<4, 4, int32_t>& block)
 		++run;
 		if (level != 0)
 		{
-			m_coefficient_cost += (level > 1) ? CavlcConstantValues::s_max_coeff_cost : CavlcConstantValues::s_coeff_run_cost[run];
+			m_coefficient_cost += (abs(level) > 1) ? CavlcConstantValues::s_max_coeff_cost : CavlcConstantValues::s_coeff_run_cost[run];
 
 			m_level_runs.levels.push_back(level);
 			m_level_runs.runs.push_back(run);
