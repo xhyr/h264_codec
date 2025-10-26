@@ -82,41 +82,14 @@ std::shared_ptr<Macroblock> Macroblock::GetUpMacroblock()
 		return GetMacroblock(m_addr - m_encoder_context->width_in_mb);
 }
 
-BlockData<16, 16> Macroblock::GetOriginalLumaBlockData16x16() const
+BlockData<16, 16> Macroblock::GetOriginalLumaBlockData() const
 {
-    return m_luma_data;
-}
-
-BlockData<16, 8> Macroblock::GetOriginalLumaBlockData16x8(uint8_t segment_index) const
-{
-	return m_luma_data.GetBlock16x8<uint8_t>(segment_index);
-}
-
-BlockData<8, 16> Macroblock::GetOriginalLumaBlockData8x16(uint8_t segment_index) const
-{
-	return m_luma_data.GetBlock8x16<uint8_t>(segment_index);
-}
-
-BlockData<4, 4> Macroblock::GetOriginalLumaBlockData4x4(uint32_t x_in_block, uint32_t y_in_block) const
-{
-	return m_luma_data.GetBlock4x4<uint8_t>(x_in_block, y_in_block);
+	return m_luma_data;
 }
 
 BlockData<8, 8> Macroblock::GetOriginalChromaBlockData(PlaneType plane_type) const
 {
 	return plane_type == PlaneType::Cb ? m_cb_data : m_cr_data;
-}
-
-BlockData<8, 4> Macroblock::GetOriginalChromaBlockData8x4(PlaneType plane_type, uint8_t segment_index) const
-{
-	const auto& chroma_data = plane_type == PlaneType::Cb ? m_cb_data : m_cr_data;
-	return chroma_data.GetBlock8x4<uint8_t>(segment_index);
-}
-
-BlockData<4, 8> Macroblock::GetOriginalChromaBlockData4x8(PlaneType plane_type, uint8_t segment_index) const
-{
-	const auto& chroma_data = plane_type == PlaneType::Cb ? m_cb_data : m_cr_data;
-	return chroma_data.GetBlock4x8<uint8_t>(segment_index);
 }
 
 BlockData<16, 16> Macroblock::GetReconstructedLumaBlockData() const

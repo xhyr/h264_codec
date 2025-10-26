@@ -11,6 +11,7 @@
 #include "encoder_context.h"
 #include "bytes_data.h"
 #include "cost_util.h"
+#include "mb_util.h"
 #include "log.h"
 
 __codec_begin
@@ -107,7 +108,7 @@ uint32_t Intra4LumaFlowNode::OutputCoefficients(std::shared_ptr<BytesData> bytes
 
 void Intra4LumaFlowNode::Init()
 {
-	m_original_block_data = m_mb->GetOriginalLumaBlockData4x4(m_x_in_block, m_y_in_block);
+	m_original_block_data = MBUtil::GetOriginalLumaBlockData4x4(m_mb, m_x_in_block, m_y_in_block);
 	m_predictor = std::make_unique<Intra4LumaPredictor>(m_mb, m_encoder_context, m_x_in_block, m_y_in_block, m_reconstructed_data, m_prediction_types);
 	m_most_probable_prediction_type = m_predictor->GetMostProbablePredictionType();
 }

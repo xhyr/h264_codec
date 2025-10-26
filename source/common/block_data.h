@@ -96,43 +96,13 @@ public:
 				m_data[x + y * Width] = block_data.GetElement(x - 4 * x_in_block, y - 4 * y_in_block);
 	}
 
-	template<typename OutType = int32_t>
-	BlockData<16, 8, OutType> GetBlock16x8(uint8_t segment_index) const
+	template<size_t block_width, size_t block_height, typename OutType = Ty>
+	BlockData<block_width, block_height> GetBlock(uint32_t start_x, uint32_t start_y)
 	{
-		BlockData<16, 8, OutType> result;
-		for (uint32_t y = segment_index * 8; y < segment_index * 8 + 8; ++y)
-			for (uint32_t x = 0; x < 16; ++x)
-				result.SetElement(x, y - segment_index * 8, GetElement(x, y));
-		return result;
-	}
-
-	template<typename OutType = int32_t>
-	BlockData<8, 16, OutType> GetBlock8x16(uint8_t segment_index) const
-	{
-		BlockData<8, 16, OutType> result;
-		for (uint32_t y = 0; y < 16; ++y)
-			for (uint32_t x = segment_index * 8; x < segment_index * 8 + 8; ++x)
-				result.SetElement(x - segment_index * 8, y, GetElement(x, y));
-		return result;
-	}
-
-	template<typename OutType = int32_t>
-	BlockData<8, 4, OutType> GetBlock8x4(uint8_t segment_index) const
-	{
-		BlockData<8, 4, OutType> result;
-		for (uint32_t y = segment_index * 4; y < segment_index * 4 + 4; ++y)
-			for (uint32_t x = 0; x < 8; ++x)
-				result.SetElement(x, y - segment_index * 4, GetElement(x, y));
-		return result;
-	}
-
-	template<typename OutType = int32_t>
-	BlockData<4, 8, OutType> GetBlock4x8(uint8_t segment_index) const
-	{
-		BlockData<4, 8, OutType> result;
-		for (uint32_t y = 0; y < 8; ++y)
-			for (uint32_t x = segment_index * 4; x < segment_index * 4 + 4; ++x)
-				result.SetElement(x - segment_index * 4, y, GetElement(x, y));
+		BlockData<block_width, block_height, OutType> result;
+		for (uint32_t y = start_y; y < start_y + block_height; ++y)
+			for (uint32_t x = start_x; x < start_x + block_width; ++x)
+				result.SetElement(x - start_x, y - start_y, GetElement(x, y));
 		return result;
 	}
 
@@ -184,16 +154,16 @@ private:
 	std::vector<Ty> m_data;
 };
 
-template<size_t Width, size_t Height, typename Ty>
-BlockData<Width, Height, int> operator-(const BlockData<Width, Height, Ty>& left_block_data, const BlockData<Width, Height, Ty>& right_block_data)
+template<size_t Width, size_t Height, typename Ty1, typename Ty2>
+BlockData<Width, Height, int> operator-(const BlockData<Width, Height, Ty1>& left_block_data, const BlockData<Width, Height, Ty2>& right_block_data)
 {
-	BlockData<Width, Height, int> output;
+	BlockData<Width, Height, int32_t> output;
 	for (uint32_t y = 0; y < Height; ++y)
 	{
 		for (uint32_t x = 0; x < Width; ++x)
 		{
-			int left_value = left_block_data.GetElement(x, y);
-			int right_value = right_block_data.GetElement(x, y);
+			int32_t left_value = left_block_data.GetElement(x, y);
+			int32_t right_value = right_block_data.GetElement(x, y);
 			output.SetElement(x, y, left_value - right_value);
 		}
 	}

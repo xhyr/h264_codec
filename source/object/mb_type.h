@@ -12,6 +12,11 @@ enum class MBType : uint8_t
 	P16x16 = 1,
 	P16x8 = 2,
 	P8x16 = 3,
+	SMB8x8 = 4,
+	SMB8x4 = 5,
+	SMB48x8 = 6,
+	SMB4x4 = 7,
+	P8x8 = 9,
 	I4 = 9, 
 	I16 = 10
 };

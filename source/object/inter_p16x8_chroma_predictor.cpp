@@ -7,6 +7,7 @@
 #include "motion_info_context.h"
 #include "math_util.h"
 #include "interpolate_util.h"
+#include "mb_util.h"
 
 __codec_begin
 
@@ -30,11 +31,11 @@ void InterP16x8ChromaPredictor::Decide()
 	uint32_t new_y = MathUtil::Clamp<int>((pos.second << 2) + mv.y, 0, (m_encoder_context->height / 2 - 1) * 8);
 
 	m_predicted_data[0].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->last_frame->u_data, new_x, new_y, 8, 4, m_encoder_context->width / 2, m_encoder_context->height / 2));
-	auto origin_block_data = m_mb->GetOriginalChromaBlockData8x4(PlaneType::Cb, m_segment_index);
+	auto origin_block_data = MBUtil::GetOriginalChromaBlockData<8, 4>(m_mb, PlaneType::Cb, m_segment_index);  
 	m_diff_data[0] = origin_block_data - m_predicted_data[0];
 
 	m_predicted_data[1].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->last_frame->v_data, new_x, new_y, 8, 4, m_encoder_context->width / 2, m_encoder_context->height / 2));
-	origin_block_data = m_mb->GetOriginalChromaBlockData8x4(PlaneType::Cr, m_segment_index);
+	origin_block_data = MBUtil::GetOriginalChromaBlockData<8, 4>(m_mb, PlaneType::Cr, m_segment_index);
 	m_diff_data[1] = origin_block_data - m_predicted_data[1];
 }
 

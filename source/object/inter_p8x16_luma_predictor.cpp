@@ -7,6 +7,8 @@
 #include "me_util.h"
 #include "motion_info.h"
 #include "cost_util.h"
+#include "mb_util.h"
+#include "full_search_util.h"
 
 __codec_begin
 
@@ -22,31 +24,13 @@ InterP8x16LumaPredictor::~InterP8x16LumaPredictor()
 
 void InterP8x16LumaPredictor::Decide()
 {
-	auto pred_mv = MEUtil::GetPredictorMV(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, 0, m_encoder_context->motion_info_context);
-
-	int min_cost = std::numeric_limits<int>::max();
-	MotionVector best_mv;
-	for (auto mv : m_encoder_context->search_motion_vectors)
-	{
-		auto cand_mv = pred_mv + mv;
-		auto cost = MEUtil::CalculateMVCost(pred_mv, cand_mv, m_encoder_context->lambda_motion_fp);
-		auto full_pixel_mv = MotionVector{ cand_mv.x / 4, cand_mv.y / 4 };
-		cost += CostUtil::CalculateLumaSAD(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, m_encoder_context->yuv_frame, m_encoder_context->last_frame, full_pixel_mv);
-
-		if (cost < min_cost)
-		{
-			min_cost = cost;
-			best_mv = cand_mv;
-		}
-	}
-
-	best_mv = MEUtil::ClipMVRange(best_mv, m_encoder_context);
+	SearchInfo search_info{ m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, 0 };
+	auto best_mv = FullSearchUtil::FindBestMV(search_info, m_encoder_context, m_mvd);
 	m_motion_info.ref_id = 0;
 	m_motion_info.mv = best_mv;
-	m_mvd = best_mv - pred_mv;
 
 	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
-	auto origin_block_data = m_mb->GetOriginalLumaBlockData8x16(m_segment_index);
+	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<8, 16>(m_mb, m_segment_index);
 	m_diff_data = origin_block_data - m_predicted_data;
 }
 

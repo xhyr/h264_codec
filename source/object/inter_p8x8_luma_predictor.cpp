@@ -1,4 +1,4 @@
-#include "inter_p16x8_luma_predictor.h"
+#include "inter_p8x8_luma_predictor.h"
 
 #include "macroblock.h"
 #include "encoder_context.h"
@@ -12,17 +12,17 @@
 
 __codec_begin
 
-InterP16x8LumaPredictor::InterP16x8LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index) :
+InterP8x8LumaPredictor::InterP8x8LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index) :
 	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index)
 {
 	Init();
 }
 
-InterP16x8LumaPredictor::~InterP16x8LumaPredictor()
+InterP8x8LumaPredictor::~InterP8x8LumaPredictor()
 {
 }
 
-void InterP16x8LumaPredictor::Decide()
+void InterP8x8LumaPredictor::Decide()
 {
 	SearchInfo search_info{ m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, 0 };
 	auto best_mv = FullSearchUtil::FindBestMV(search_info, m_encoder_context, m_mvd);
@@ -30,38 +30,36 @@ void InterP16x8LumaPredictor::Decide()
 	m_motion_info.mv = best_mv;
 
 	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
-	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<16, 8>(m_mb, m_segment_index);  
+	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<8, 8>(m_mb, m_segment_index); 
 	m_diff_data = origin_block_data - m_predicted_data;
 }
 
-BlockData<16, 8> InterP16x8LumaPredictor::GetPredictedData() const
+BlockData<8, 8> InterP8x8LumaPredictor::GetPredictedData() const
 {
 	return m_predicted_data;
 }
 
-BlockData<16, 8, int32_t> InterP16x8LumaPredictor::GetDiffData() const
+BlockData<8, 8, int32_t> InterP8x8LumaPredictor::GetDiffData() const
 {
 	return m_diff_data;
 }
 
-MotionInfo InterP16x8LumaPredictor::GetMotionInfo() const
+MotionInfo InterP8x8LumaPredictor::GetMotionInfo() const
 {
 	return m_motion_info;
 }
 
-MotionVector InterP16x8LumaPredictor::GetMVD() const
+MotionVector InterP8x8LumaPredictor::GetMVD() const
 {
 	return m_mvd;
 }
 
-void InterP16x8LumaPredictor::Init()
+void InterP8x8LumaPredictor::Init()
 {
-	auto pos = m_mb->GetPosition();
-	m_x = pos.first;
-	m_y = pos.second + m_segment_index * 8;
-	m_x_in_block = pos.first / 4;
-	m_y_in_block = pos.second / 4 + m_segment_index * 2;
-	m_width_in_block = 4;
+	std::tie(m_x_in_block, m_y_in_block) = MBUtil::GetPositionInBlock(m_mb, m_segment_index);
+	m_x = m_x_in_block << 2;
+	m_y = m_y_in_block << 2;
+	m_width_in_block = 2;
 	m_height_in_block = 2;
 }
 

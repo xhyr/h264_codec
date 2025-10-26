@@ -6,6 +6,7 @@
 #include "macroblock.h"
 #include "cost_util.h"
 #include "encoder_context.h"
+#include "mb_util.h"
 
 __codec_begin
 
@@ -320,7 +321,7 @@ void Intra4LumaPredictor::Decide(uint32_t x_in_block, uint32_t y_in_block)
 	if (m_predicted_data_map.empty())
 		return;
 
-	auto original_block_data = m_mb->GetOriginalLumaBlockData4x4(x_in_block, y_in_block);
+	auto original_block_data = MBUtil::GetOriginalLumaBlockData4x4(m_mb, m_x_in_block, m_y_in_block);
 
 	int min_cost = -1;
 	Intra4LumaPredictionType best_prediction_type = Intra4LumaPredictionType::DC;
