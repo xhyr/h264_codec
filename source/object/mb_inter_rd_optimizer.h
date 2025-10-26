@@ -10,7 +10,7 @@ class Macroblock;
 struct EncoderContext;
 class BytesData;
 class InterLumaFlowBase;
-class InterChromaFlowBase;
+class InterChromaFlow;
 
 class MBInterRDOptimizer final
 {
@@ -31,7 +31,7 @@ private:
 
 	std::shared_ptr<InterLumaFlowBase> m_luma_flow;
 	std::shared_ptr<InterLumaFlowBase> m_best_luma_flow;
-	std::shared_ptr<InterChromaFlowBase> m_chroma_flow;
+	std::shared_ptr<InterChromaFlow> m_chroma_flow;
 
 	uint32_t m_mb_addr;
 	int m_chroma_cbp{ 0 };

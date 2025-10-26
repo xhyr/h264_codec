@@ -47,5 +47,6 @@ target_link_libraries(${PROJECT_NAME} log.lib)
 
 add_dependencies(${PROJECT_NAME} encoder decoder object stream coding common log)
 
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../resource")
 

@@ -6,7 +6,7 @@
 #include "bytes_data.h"
 #include "mb_inter_header_binaryer.h"
 #include "inter_luma_flow_base.h"
-#include "inter_chroma_flow_base.h"
+#include "inter_chroma_flow.h"
 
 __codec_begin
 
@@ -30,7 +30,7 @@ void MBInterRDOptimizer::Encode()
 		m_mb_type = mb_type;
 		m_mb->SetType(mb_type);
 		m_luma_flow = InterLumaFlowBase::CreateFlow(mb_type, m_mb, m_encoder_context);
-		m_chroma_flow = InterChromaFlowBase::CreateFlow(mb_type, m_mb, m_encoder_context);
+		m_chroma_flow = std::make_shared<InterChromaFlow>(m_mb, m_encoder_context);
 	}
 
 	m_luma_flow->Frontend();

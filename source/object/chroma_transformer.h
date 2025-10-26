@@ -8,6 +8,7 @@ class ChromaTransformer
 {
 public:
 	explicit ChromaTransformer(const BlockData<8, 8, int32_t>& block_data);
+	explicit ChromaTransformer(const std::vector<BlockData<4, 4, int32_t>>& block_datas);
 	~ChromaTransformer();
 
 	void Transform();
@@ -17,7 +18,7 @@ public:
 	BlockData<2, 2, int32_t> GetDCBlock() const;
 
 private:
-	void PickBlocks();
+	void PickBlocks(const BlockData<8, 8, int32_t>& block_data);
 
 	void TransformAll();
 

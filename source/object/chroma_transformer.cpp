@@ -6,7 +6,12 @@
 
 __codec_begin
 
-ChromaTransformer::ChromaTransformer(const BlockData<8, 8, int32_t>& block_data) : m_block_data(block_data)
+ChromaTransformer::ChromaTransformer(const BlockData<8, 8, int32_t>& block_data) 
+{
+	PickBlocks(block_data);
+}
+
+ChromaTransformer::ChromaTransformer(const std::vector<BlockData<4, 4, int32_t>>& block_datas) : m_blocks(block_datas)
 {
 }
 
@@ -16,7 +21,6 @@ ChromaTransformer::~ChromaTransformer()
 
 void ChromaTransformer::Transform()
 {
-	PickBlocks();
 	TransformAll();
 	TransformDC();
 }
@@ -31,12 +35,12 @@ BlockData<2, 2, int32_t> ChromaTransformer::GetDCBlock() const
 	return m_dc_block;
 }
 
-void ChromaTransformer::PickBlocks()
+void ChromaTransformer::PickBlocks(const BlockData<8, 8, int32_t>& block_data)
 {
 	m_blocks.reserve(4);
 	for (uint32_t y_in_block = 0; y_in_block < 2; ++y_in_block)
 		for (uint32_t x_in_block = 0; x_in_block < 2; ++x_in_block)
-			m_blocks.emplace_back(m_block_data.GetBlock4x4(x_in_block, y_in_block));
+			m_blocks.emplace_back(block_data.GetBlock4x4(x_in_block, y_in_block));
 }
 
 void ChromaTransformer::TransformAll()

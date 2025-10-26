@@ -14,17 +14,19 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class BytesData;
+class InterP4x4ChromaPredictor;
+
 class ChromaQuantizer;
 
-class InterChromaFlowBase
+class InterChromaFlow
 {
 public:
-	InterChromaFlowBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
-	virtual ~InterChromaFlowBase();
+	InterChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
+	virtual ~InterChromaFlow();
 
-	virtual void Frontend() = 0;
+	void Frontend();
 
-	virtual uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) = 0;
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data);
 
 	BlockData<8, 8> GetReconstructedData(PlaneType plane_type);
 
@@ -32,19 +34,29 @@ public:
 
 	int GetDistortion() const;
 
+private:
+	void Predict();
+
+	void TransformAndQuantize(PlaneType plane_type);
+
+	void InverseQuantizeAndTransform(PlaneType plane_type);
+
+	void Reconstruct(PlaneType plane_type);
+
+	void CalculateDistortion();
+
 protected:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
+	std::unique_ptr<InterP4x4ChromaPredictor> m_predictors[4];
 	std::unique_ptr<ChromaQuantizer> m_quantizer;
 
 	std::unordered_map<PlaneType, BlockData<8, 8>> m_reconstructed_data_map;
+	std::unordered_map<PlaneType, BlockData<8, 8>> m_predicted_data_map;
+	std::unordered_map<PlaneType, std::vector<BlockData<4, 4, int32_t>>> m_diff_datas_map;
 	uint8_t m_cbp{ 0 };
-	std::vector<BlockData<4, 4, int32_t>> m_diff_blocks;
 	CavlcDataSource m_cavlc_data_source;
 	int m_distortion{ 0 };
-
-public:
-	static std::shared_ptr<InterChromaFlowBase> CreateFlow(MBType mb_type, std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
 
 };
 
