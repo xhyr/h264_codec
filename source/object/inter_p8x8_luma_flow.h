@@ -7,7 +7,7 @@
 
 __codec_begin
 
-class InterSubP8x8LumaFlow;
+class InterP8x8LumaFlowNodeBase;
 
 class InterP8x8LumaFlow : public InterLumaFlowBase
 {
@@ -21,17 +21,13 @@ public:
 
 	uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) override;
 
-	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) override;
+private:
+	void Predict();
+
+	void Reconstruct();
 
 private:
-	
-
-private:
-	std::vector<std::shared_ptr<InterSubP8x8LumaFlow>> m_sub_flows;
-	std::vector<BlockData<4, 4, int32_t>> m_diff_datas;
-	BlockData<16, 16, int32_t> m_diff_data;
-	std::vector<BlockData<4, 4, int32_t>> m_residual_datas;
-	uint32_t m_coefficient_cost{ 0 };
+	std::vector<std::shared_ptr<InterP8x8LumaFlowNodeBase>> m_nodes;
 };
 
 __codec_end

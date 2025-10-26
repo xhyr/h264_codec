@@ -24,7 +24,7 @@ public:
 
 	virtual uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) = 0;
 
-	virtual uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data) = 0;
+	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data);
 
 	BlockData<16, 16> GetReconstructedData() const;
 
@@ -37,11 +37,20 @@ public:
 protected:
 	void CalculateDistortion();
 
+	void TransformAndQuantize();
+
+	void InverseQuantizeAndTransform();
+
+	void CheckCoefficientCost(uint32_t block_8x8);
+
 protected:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
 	BlockData<16, 16> m_reconstructed_data;
-
+	std::vector<BlockData<4, 4, int32_t>> m_diff_datas;
+	BlockData<16, 16, int32_t> m_diff_data;
+	std::vector<BlockData<4, 4, int32_t>> m_residual_datas;
+	uint32_t m_coefficient_cost{ 0 };
 	int m_distortion{ 0 };
 	uint8_t m_cbp{ 0 };
 	uint32_t m_detailed_cbp{ 0 };

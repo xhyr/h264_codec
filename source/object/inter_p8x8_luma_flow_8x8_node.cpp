@@ -1,6 +1,8 @@
 #include "inter_p8x8_luma_flow_8x8_node.h"
 
 #include "inter_p8x8_luma_predictor.h"
+#include "bytes_data.h"
+#include "coding_util.h"
 
 __codec_begin
 
@@ -17,16 +19,31 @@ InterP8x8LumaFlow8x8Node::~InterP8x8LumaFlow8x8Node()
 void InterP8x8LumaFlow8x8Node::Predict()
 {
 	m_predictor->Decide();
+	m_predictor->UpdateMotionInfo();
+	m_predicted_data = m_predictor->GetPredictedData();
 }
 
-std::vector<MotionInfo> InterP8x8LumaFlow8x8Node::GetMotionInfos() const
+void InterP8x8LumaFlow8x8Node::FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const
 {
-	return { m_predictor->GetMotionInfo() };
+	m_predictor->FillDiffData(diff_datas);
 }
 
-std::vector<MotionVector> InterP8x8LumaFlow8x8Node::GetMVDs() const
+void InterP8x8LumaFlow8x8Node::UpdateMotionInfo()
 {
-	return { m_predictor->GetMVD() };
+	m_predictor->UpdateMotionInfo();
+}
+
+uint32_t InterP8x8LumaFlow8x8Node::OutputMotionInfos(std::shared_ptr<BytesData> bytes_data) const
+{
+	auto start_bit_count = bytes_data->GetBitsCount();
+
+	auto mvd = m_predictor->GetMVD();
+
+	CodingUtil::SE_V(mvd.x, bytes_data);
+	CodingUtil::SE_V(mvd.y, bytes_data);
+
+	auto finish_bit_count = bytes_data->GetBitsCount();
+	return finish_bit_count - start_bit_count;
 }
 
 void InterP8x8LumaFlow8x8Node::Init()

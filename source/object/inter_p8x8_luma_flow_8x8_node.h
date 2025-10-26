@@ -16,9 +16,11 @@ public:
 
 	void Predict() override;
 
-	std::vector<MotionInfo> GetMotionInfos() const override;
+	void FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const override;
 
-	std::vector<MotionVector> GetMVDs() const override;
+	void UpdateMotionInfo() override;
+
+	uint32_t OutputMotionInfos(std::shared_ptr<BytesData> bytes_data) const;
 
 private:
 	void Init();

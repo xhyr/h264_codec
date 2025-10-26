@@ -9,6 +9,7 @@
 #include "cost_util.h"
 #include "mb_util.h"
 #include "full_search_util.h"
+#include "motion_info_context.h"
 
 __codec_begin
 
@@ -39,19 +40,24 @@ BlockData<8, 8> InterP8x8LumaPredictor::GetPredictedData() const
 	return m_predicted_data;
 }
 
-BlockData<8, 8, int32_t> InterP8x8LumaPredictor::GetDiffData() const
-{
-	return m_diff_data;
-}
-
-MotionInfo InterP8x8LumaPredictor::GetMotionInfo() const
-{
-	return m_motion_info;
-}
-
 MotionVector InterP8x8LumaPredictor::GetMVD() const
 {
 	return m_mvd;
+}
+
+void InterP8x8LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const
+{
+	diff_datas.resize(16);
+	auto diff_block_datas = m_diff_data.GetTotalBlock4x4s();
+	uint32_t index = 0;
+	for (uint32_t y_in_block = (m_segment_index / 2) * 2; y_in_block < (m_segment_index / 2) * 2 + 2; ++y_in_block)
+		for (uint32_t x_in_block = (m_segment_index % 2) * 2; x_in_block < (m_segment_index % 2) * 2 + 2; ++x_in_block)
+			diff_datas[y_in_block * 4 + x_in_block] = diff_block_datas[index++];
+}
+
+void InterP8x8LumaPredictor::UpdateMotionInfo()
+{
+	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), m_segment_index % 2 * 2, m_segment_index / 2 * 2, 2, 2, m_motion_info);
 }
 
 void InterP8x8LumaPredictor::Init()

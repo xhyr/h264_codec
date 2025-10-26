@@ -7,6 +7,7 @@
 #include "me_util.h"
 #include "motion_info.h"
 #include "cost_util.h"
+#include "motion_info_context.h"
 
 __codec_begin
 
@@ -55,19 +56,19 @@ BlockData<16, 16> InterP16x16LumaPredictor::GetPredictedData() const
 	return m_predicted_data;
 }
 
-BlockData<16, 16, int32_t> InterP16x16LumaPredictor::GetDiffData() const
-{
-	return m_diff_data;
-}
-
-MotionInfo InterP16x16LumaPredictor::GetMotionInfo() const
-{
-	return m_motion_info;
-}
-
 MotionVector InterP16x16LumaPredictor::GetMVD() const
 {
     return m_mvd;
+}
+
+void InterP16x16LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const
+{
+	diff_datas = m_diff_data.GetTotalBlock4x4s();
+}
+
+void InterP16x16LumaPredictor::UpdateMotionInfo()
+{
+	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), 0, 0, 4, 4, m_motion_info);
 }
 
 void InterP16x16LumaPredictor::Init()
