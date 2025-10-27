@@ -3,11 +3,12 @@
 #include "inter_p8x8_luma_predictor.h"
 #include "bytes_data.h"
 #include "coding_util.h"
+#include "macroblock.h"
 
 __codec_begin
 
 InterP8x8LumaFlow8x8Node::InterP8x8LumaFlow8x8Node(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index) :
-	InterP8x8LumaFlowNodeBase(mb, encoder_context, segment_index)
+	InterP8x8LumaFlowNodeBase(mb, encoder_context, segment_index, MBType::SMB8x8)
 {
 	Init();
 }

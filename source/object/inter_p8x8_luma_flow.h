@@ -19,6 +19,8 @@ public:
 
 	void Backend() override;
 
+	uint32_t OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data) override;
+
 	uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) override;
 
 private:

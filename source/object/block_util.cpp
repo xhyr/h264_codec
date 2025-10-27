@@ -58,6 +58,7 @@ bool BlockUtil::GetBlockNeighborIndex(uint32_t x_in_block, uint32_t y_in_block, 
 				uint32_t new_y_in_block = y_in_block - 1;
 				if (IsPreDecoded(new_x_in_block, new_y_in_block, x_in_block, y_in_block))
 					block_index = GetBlockIndex(new_x_in_block, new_y_in_block, frame_width_in_block);
+				else got = false;
 			}
 			break;
 		}

@@ -14,6 +14,7 @@
 #include "inter_p16x16_luma_flow.h"
 #include "inter_p16x8_luma_flow.h"
 #include "inter_p8x16_luma_flow.h"
+#include "inter_p8x8_luma_flow.h"
 
 __codec_begin
 
@@ -24,6 +25,11 @@ InterLumaFlowBase::InterLumaFlowBase(std::shared_ptr<Macroblock> mb, std::shared
 
 InterLumaFlowBase::~InterLumaFlowBase()
 {
+}
+
+uint32_t InterLumaFlowBase::OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data)
+{
+	return 0;
 }
 
 uint32_t InterLumaFlowBase::OutputCoefficients(std::shared_ptr<BytesData> bytes_data)
@@ -168,6 +174,9 @@ std::shared_ptr<InterLumaFlowBase> InterLumaFlowBase::CreateFlow(MBType mb_type,
 		break;
 	case codec::MBType::P8x16:
 		flow.reset(new InterP8x16LumaFlow(mb, encoder_context));
+		break;
+	case codec::MBType::P8x8:
+		flow.reset(new InterP8x8LumaFlow(mb, encoder_context));
 		break;
 	case codec::MBType::I4:
 		break;

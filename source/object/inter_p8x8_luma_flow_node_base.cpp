@@ -1,16 +1,22 @@
 #include "inter_p8x8_luma_flow_node_base.h"
 
 #include "inter_p8x8_luma_flow_8x8_node.h"
+#include "coding_util.h"
 
 __codec_begin
 
-InterP8x8LumaFlowNodeBase::InterP8x8LumaFlowNodeBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index) :
-	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index)
+InterP8x8LumaFlowNodeBase::InterP8x8LumaFlowNodeBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index, MBType sub_mb_type) :
+	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index), m_sub_mb_type(sub_mb_type)
 {
 }
 
 InterP8x8LumaFlowNodeBase::~InterP8x8LumaFlowNodeBase()
 {
+}
+
+uint32_t InterP8x8LumaFlowNodeBase::OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data)
+{
+	return CodingUtil::UE_V((uint32_t)m_sub_mb_type - 4, bytes_data);
 }
 
 BlockData<8, 8> InterP8x8LumaFlowNodeBase::GetPredictedData() const

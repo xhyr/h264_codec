@@ -22,6 +22,8 @@ public:
 
 	virtual void Backend() = 0;
 
+	virtual uint32_t OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data);
+
 	virtual uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) = 0;
 
 	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data);

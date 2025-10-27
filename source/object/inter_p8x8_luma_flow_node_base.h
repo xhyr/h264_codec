@@ -12,7 +12,7 @@ class BytesData;
 class InterP8x8LumaFlowNodeBase
 {
 public:
-	InterP8x8LumaFlowNodeBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index);
+	InterP8x8LumaFlowNodeBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index, MBType sub_mb_type);
 	virtual ~InterP8x8LumaFlowNodeBase();
 
 	virtual void Predict() = 0;
@@ -23,6 +23,8 @@ public:
 
 	virtual uint32_t OutputMotionInfos(std::shared_ptr<BytesData> bytes_data) const = 0;
 
+	uint32_t OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data);
+
 	BlockData<8, 8> GetPredictedData() const;
 
 	static std::shared_ptr<InterP8x8LumaFlowNodeBase> Create(MBType mb_type, std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index);
@@ -31,6 +33,7 @@ protected:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
 	uint8_t m_segment_index;
+	MBType m_sub_mb_type;
 	BlockData<8, 8> m_predicted_data;
 };
 

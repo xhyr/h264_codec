@@ -23,14 +23,17 @@ void MBInterHeaderBinaryer::OutputMBType(MBType mb_type)
 {
 	switch (mb_type)
 	{
-	case codec::MBType::P16x16:
+	case MBType::P16x16:
 		CodingUtil::UE_V(0, m_bytes_data);
 		break;
-	case codec::MBType::P16x8:
+	case MBType::P16x8:
 		CodingUtil::UE_V(1, m_bytes_data);
 		break;
-	case codec::MBType::P8x16:
+	case MBType::P8x16:
 		CodingUtil::UE_V(2, m_bytes_data);
+		break;
+	case MBType::P8x8:
+		CodingUtil::UE_V(4, m_bytes_data); //zero ref
 		break;
 	}
 }

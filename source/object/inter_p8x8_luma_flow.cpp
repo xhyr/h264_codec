@@ -33,6 +33,14 @@ void InterP8x8LumaFlow::Backend()
 		node->UpdateMotionInfo();
 }
 
+uint32_t InterP8x8LumaFlow::OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data)
+{
+	auto total_bits = 0;
+	for (auto node : m_nodes)
+		total_bits += node->OutputSubMBTypes(bytes_data);
+	return total_bits;
+}
+
 uint32_t InterP8x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
