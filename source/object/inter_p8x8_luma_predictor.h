@@ -39,6 +39,8 @@ private:
 	uint32_t m_y;
 	uint32_t m_x_in_block;
 	uint32_t m_y_in_block;
+	uint32_t m_x_in_block_mb;
+	uint32_t m_y_in_block_mb;
 	uint32_t m_width_in_block;
 	uint32_t m_height_in_block;
 

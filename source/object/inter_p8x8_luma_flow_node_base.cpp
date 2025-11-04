@@ -1,6 +1,7 @@
 #include "inter_p8x8_luma_flow_node_base.h"
 
 #include "inter_p8x8_luma_flow_8x8_node.h"
+#include "inter_p8x8_luma_flow_8x4_node.h"
 #include "coding_util.h"
 
 __codec_begin
@@ -33,6 +34,7 @@ std::shared_ptr<InterP8x8LumaFlowNodeBase> InterP8x8LumaFlowNodeBase::Create(MBT
 		node.reset(new InterP8x8LumaFlow8x8Node(mb, encoder_context, segment_index));
 		break;
 	case codec::MBType::SMB8x4:
+		node.reset(new InterP8x8LumaFlow8x4Node(mb, encoder_context, segment_index));
 		break;
 	case codec::MBType::SMB48x8:
 		break;

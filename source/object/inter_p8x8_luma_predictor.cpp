@@ -50,19 +50,21 @@ void InterP8x8LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>&
 	diff_datas.resize(16);
 	auto diff_block_datas = m_diff_data.GetTotalBlock4x4s();
 	uint32_t index = 0;
-	for (uint32_t y_in_block = (m_segment_index / 2) * 2; y_in_block < (m_segment_index / 2) * 2 + 2; ++y_in_block)
-		for (uint32_t x_in_block = (m_segment_index % 2) * 2; x_in_block < (m_segment_index % 2) * 2 + 2; ++x_in_block)
+	for (uint32_t y_in_block = m_y_in_block_mb; y_in_block < m_y_in_block_mb + m_height_in_block; ++y_in_block)
+		for (uint32_t x_in_block = m_x_in_block_mb; x_in_block < m_x_in_block_mb + m_width_in_block; ++x_in_block)
 			diff_datas[y_in_block * 4 + x_in_block] = diff_block_datas[index++];
 }
 
 void InterP8x8LumaPredictor::UpdateMotionInfo()
 {
-	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), m_segment_index % 2 * 2, m_segment_index / 2 * 2, 2, 2, m_motion_info);
+	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), m_x_in_block_mb, m_y_in_block_mb, m_width_in_block, m_height_in_block, m_motion_info);
 }
 
 void InterP8x8LumaPredictor::Init()
 {
 	std::tie(m_x_in_block, m_y_in_block) = MBUtil::GetPositionInBlock(m_mb, m_segment_index);
+	m_x_in_block_mb = m_x_in_block % 4;
+	m_y_in_block_mb = m_y_in_block % 4;
 	m_x = m_x_in_block << 2;
 	m_y = m_y_in_block << 2;
 	m_width_in_block = 2;
