@@ -58,7 +58,7 @@ void InterP8x16LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>
 
 void InterP8x16LumaPredictor::UpdateMotionInfo()
 {
-	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), m_segment_index * 2, 0, 2, 4, m_motion_info);
+	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, m_motion_info);
 }
 
 void InterP8x16LumaPredictor::Init()

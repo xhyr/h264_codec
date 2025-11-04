@@ -21,11 +21,13 @@ public:
 
 	BlockData<8, 4> GetPredictedData() const;
 
-	BlockData<8, 4, int32_t> GetDiffData() const;
-
-	MotionInfo GetMotionInfo() const;
-
 	MotionVector GetMVD() const;
+
+	void FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const;
+
+	void UpdateMotionInfo();
+	
+	void FillPredictedData(BlockData<8, 8>& predicted_data) const;
 
 private:
 	void Init();
@@ -40,6 +42,8 @@ private:
 	uint32_t m_y;
 	uint32_t m_x_in_block;
 	uint32_t m_y_in_block;
+	uint32_t m_x_in_block_mb;
+	uint32_t m_y_in_block_mb;
 	uint32_t m_width_in_block;
 	uint32_t m_height_in_block;
 

@@ -1,4 +1,4 @@
-#include "inter_p8x8_luma_predictor.h"
+#include "inter_p4x8_luma_predictor.h"
 
 #include "macroblock.h"
 #include "encoder_context.h"
@@ -13,17 +13,17 @@
 
 __codec_begin
 
-InterP8x8LumaPredictor::InterP8x8LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index) :
-	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index)
+InterP4x8LumaPredictor::InterP4x8LumaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index, uint8_t sub_segment_index) :
+	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index), m_sub_segment_index(sub_segment_index)
 {
 	Init();
 }
 
-InterP8x8LumaPredictor::~InterP8x8LumaPredictor()
+InterP4x8LumaPredictor::~InterP4x8LumaPredictor()
 {
 }
 
-void InterP8x8LumaPredictor::Decide()
+void InterP4x8LumaPredictor::Decide()
 {
 	SearchInfo search_info{ m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, 0 };
 	auto best_mv = FullSearchUtil::FindBestMV(search_info, m_encoder_context, m_mvd);
@@ -31,43 +31,49 @@ void InterP8x8LumaPredictor::Decide()
 	m_motion_info.mv = best_mv;
 
 	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
-	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<8, 8>(m_mb, m_segment_index); 
+	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<4, 8>(m_mb, m_segment_index, m_sub_segment_index);
 	m_diff_data = origin_block_data - m_predicted_data;
 }
 
-BlockData<8, 8> InterP8x8LumaPredictor::GetPredictedData() const
+BlockData<4, 8> InterP4x8LumaPredictor::GetPredictedData() const
 {
 	return m_predicted_data;
 }
 
-MotionVector InterP8x8LumaPredictor::GetMVD() const
+MotionVector InterP4x8LumaPredictor::GetMVD() const
 {
 	return m_mvd;
 }
 
-void InterP8x8LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const
+void InterP4x8LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const
 {
 	diff_datas.resize(16);
 	auto diff_block_datas = m_diff_data.GetTotalBlock4x4s();
-	uint32_t index = 0;
-	for (uint32_t y_in_block = m_y_in_block_mb; y_in_block < m_y_in_block_mb + m_height_in_block; ++y_in_block)
-		for (uint32_t x_in_block = m_x_in_block_mb; x_in_block < m_x_in_block_mb + m_width_in_block; ++x_in_block)
-			diff_datas[y_in_block * 4 + x_in_block] = diff_block_datas[index++];
+
+	for(uint8_t i = 0; i < 2; ++i)
+		diff_datas[m_x_in_block_mb + (m_y_in_block_mb + i) * 4] = diff_block_datas[i];
 }
 
-void InterP8x8LumaPredictor::UpdateMotionInfo()
+void InterP4x8LumaPredictor::UpdateMotionInfo()
 {
 	m_encoder_context->motion_info_context->SetMotionInfos(m_mb->GetAddress(), m_x_in_block_mb, m_y_in_block_mb, m_width_in_block, m_height_in_block, m_motion_info);
 }
 
-void InterP8x8LumaPredictor::Init()
+void InterP4x8LumaPredictor::FillPredictedData(BlockData<8, 8>& predicted_data) const
+{
+	for(uint8_t i = 0; i < 2; ++i)
+		predicted_data.SetBlock4x4(m_sub_segment_index, i, m_predicted_data.GetBlock4x4<uint8_t>(0, i));
+}
+
+void InterP4x8LumaPredictor::Init()
 {
 	std::tie(m_x_in_block, m_y_in_block) = MBUtil::GetPositionInBlock(m_mb, m_segment_index);
+	m_x_in_block += m_sub_segment_index;
 	m_x_in_block_mb = m_x_in_block % 4;
 	m_y_in_block_mb = m_y_in_block % 4;
 	m_x = m_x_in_block << 2;
 	m_y = m_y_in_block << 2;
-	m_width_in_block = 2;
+	m_width_in_block = 1;
 	m_height_in_block = 2;
 }
 
