@@ -56,7 +56,7 @@ void InterP8x8LumaFlow::Predict()
 {
 	for (uint8_t i = 0; i < 4; ++i)
 	{
-		m_nodes.emplace_back(InterP8x8LumaFlowNodeBase::Create(MBType::SMB8x4, m_mb, m_encoder_context, i));
+		m_nodes.emplace_back(InterP8x8LumaFlowNodeBase::Create(MBType::SMB4x4, m_mb, m_encoder_context, i));
 		m_nodes[i]->Predict();
 		m_nodes[i]->FillDiffData(m_diff_datas);
 	}
