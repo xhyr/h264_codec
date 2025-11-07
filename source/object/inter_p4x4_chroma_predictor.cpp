@@ -40,16 +40,6 @@ void InterP4x4ChromaPredictor::Decide()
 	m_diff_data[1] = origin_block_data - m_predicted_data[1];
 }
 
-BlockData<4, 4> InterP4x4ChromaPredictor::GetPredictedData(PlaneType plane_type) const
-{
-	return plane_type == PlaneType::Cb ? m_predicted_data[0] : m_predicted_data[1];
-}
-
-BlockData<4, 4, int32_t> InterP4x4ChromaPredictor::GetDiffData(PlaneType plane_type) const
-{
-	return plane_type == PlaneType::Cb ? m_diff_data[0] : m_diff_data[1];
-}
-
 void InterP4x4ChromaPredictor::FillDiffData(PlaneType plane_type, std::vector<BlockData<4, 4, int32_t>>& diff_datas)
 {
 	diff_datas.resize(4);
@@ -59,6 +49,16 @@ void InterP4x4ChromaPredictor::FillDiffData(PlaneType plane_type, std::vector<Bl
 void InterP4x4ChromaPredictor::FillPredictedData(PlaneType plane_type, BlockData<8, 8>& predicted_data)
 {
 	predicted_data.SetBlock4x4(m_segment_index % 2, m_segment_index / 2, GetPredictedData(plane_type));
+}
+
+BlockData<4, 4> InterP4x4ChromaPredictor::GetPredictedData(PlaneType plane_type) const
+{
+	return plane_type == PlaneType::Cb ? m_predicted_data[0] : m_predicted_data[1];
+}
+
+BlockData<4, 4, int32_t> InterP4x4ChromaPredictor::GetDiffData(PlaneType plane_type) const
+{
+	return plane_type == PlaneType::Cb ? m_diff_data[0] : m_diff_data[1];
 }
 
 __codec_end

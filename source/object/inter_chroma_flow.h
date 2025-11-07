@@ -14,7 +14,7 @@ __codec_begin
 class Macroblock;
 struct EncoderContext;
 class BytesData;
-class InterP4x4ChromaPredictor;
+class InterP2x2ChromaPredictor;
 
 class ChromaQuantizer;
 
@@ -48,7 +48,7 @@ private:
 protected:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
-	std::unique_ptr<InterP4x4ChromaPredictor> m_predictors[4];
+	std::unique_ptr<InterP2x2ChromaPredictor> m_predictors[16];
 	std::unique_ptr<ChromaQuantizer> m_quantizer;
 
 	std::unordered_map<PlaneType, BlockData<8, 8>> m_reconstructed_data_map;

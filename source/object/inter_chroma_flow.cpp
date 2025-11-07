@@ -1,6 +1,6 @@
 #include "inter_chroma_flow.h"
 
-#include "inter_p4x4_chroma_predictor.h"
+#include "inter_p2x2_chroma_predictor.h"
 #include "encoder_context.h"
 #include "cavlc_cdc_coder.h"
 #include "cavlc_non_cdc_coder.h"
@@ -20,8 +20,6 @@ __codec_begin
 InterChromaFlow::InterChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
 	m_mb(mb), m_encoder_context(encoder_context)
 {
-	for (uint8_t i = 0; i < 4; ++i)
-		m_predictors[i] = std::make_unique<InterP4x4ChromaPredictor>(mb, encoder_context, i);
 }
 
 InterChromaFlow::~InterChromaFlow()
@@ -30,9 +28,10 @@ InterChromaFlow::~InterChromaFlow()
 
 void InterChromaFlow::Frontend()
 {
+	Predict();
+
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
 	{
-		Predict();
 		TransformAndQuantize(plane_type);
 		InverseQuantizeAndTransform(plane_type);
 		Reconstruct(plane_type);
@@ -79,13 +78,18 @@ int InterChromaFlow::GetDistortion() const
 
 void InterChromaFlow::Predict()
 {
-	for (uint8_t i = 0; i < 4; ++i)
+	for (uint8_t segment_index = 0; segment_index < 4; ++segment_index)
 	{
-		for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
+		for (uint8_t sub_segment_index = 0; sub_segment_index < 4; ++sub_segment_index)
 		{
-			m_predictors[i]->Decide();
-			m_predictors[i]->FillDiffData(plane_type, m_diff_datas_map[plane_type]);
-			m_predictors[i]->FillPredictedData(plane_type, m_predicted_data_map[plane_type]);
+			auto predictor = std::make_unique<InterP2x2ChromaPredictor>(m_mb, m_encoder_context, segment_index, sub_segment_index);
+			predictor->Decide();
+			for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
+			{
+				predictor->FillDiffData(plane_type, m_diff_datas_map[plane_type]);
+				predictor->FillPredictedData(plane_type, m_predicted_data_map[plane_type]);
+			}
+			m_predictors[segment_index * 4 + sub_segment_index] = std::move(predictor);
 		}
 	}
 }

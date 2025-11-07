@@ -51,7 +51,7 @@ void InterP8x4LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>&
 	auto diff_block_datas = m_diff_data.GetTotalBlock4x4s();
 
 	for(uint8_t i = 0; i < 2; ++i)
-		diff_datas[m_x_in_block_mb + m_y_in_block_mb * 4 + i] = diff_block_datas[i];
+		diff_datas[m_x_in_block_mb + i + m_y_in_block_mb * 4] = diff_block_datas[i];
 }
 
 void InterP8x4LumaPredictor::UpdateMotionInfo()

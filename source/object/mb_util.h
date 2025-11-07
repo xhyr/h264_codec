@@ -53,6 +53,12 @@ struct MBUtil
 		return mb->GetOriginalChromaBlockData(plane_type).GetBlock<block_width, block_height>(start_x, start_y);
 	}
 	
+	template<size_t block_width, size_t block_height>
+	static BlockData<block_width, block_height> GetOriginalChromaBlockData(std::shared_ptr<Macroblock> mb, PlaneType plane_type, uint8_t segment_index, uint8_t sub_segment_index)
+	{
+		auto [start_x, start_y] = SegmentUtil::GetSubChromaDataRect(segment_index, sub_segment_index);
+		return mb->GetOriginalChromaBlockData(plane_type).GetBlock<block_width, block_height>(start_x, start_y);
+	}
 };
 
 __codec_end

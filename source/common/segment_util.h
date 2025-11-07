@@ -35,6 +35,14 @@ struct SegmentUtil
 		uint32_t start_y = (segment_index / width_in_segment) * block_height;
 		return { start_x, start_y};
 	}
+
+	static std::tuple<uint32_t, uint32_t> GetSubChromaDataRect(uint8_t segment_index, uint8_t sub_segment_index)
+	{
+		uint32_t start_x = (segment_index % 2) * 4 + sub_segment_index % 2 * 2;
+		uint32_t start_y = (segment_index / 2) * 4 + sub_segment_index / 2 * 2;
+		return { start_x, start_y };
+	}
+
 };
 
 __codec_end
