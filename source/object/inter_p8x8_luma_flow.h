@@ -24,9 +24,9 @@ public:
 	uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) override;
 
 private:
-	void Predict();
+	void Reconstruct(uint8_t segment_index);
 
-	void Reconstruct();
+	int64_t CalculateBlock8x8Distortion(uint32_t block_8x8);
 
 private:
 	std::vector<std::shared_ptr<InterP8x8LumaFlowNodeBase>> m_nodes;

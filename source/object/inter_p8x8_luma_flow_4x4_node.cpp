@@ -61,4 +61,14 @@ void InterP8x8LumaFlow4x4Node::Init()
 		m_predictors[sub_segment_index] = std::make_unique<InterP4x4LumaPredictor>(m_mb, m_encoder_context, m_segment_index, sub_segment_index);
 }
 
+int InterP8x8LumaFlow4x4Node::CalculateRate() const
+{
+	return 0;
+}
+
+int InterP8x8LumaFlow4x4Node::CalculateDistortion() const
+{
+	return 0;
+}
+
 __codec_end

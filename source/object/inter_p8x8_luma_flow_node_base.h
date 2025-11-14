@@ -23,11 +23,18 @@ public:
 
 	virtual uint32_t OutputMotionInfos(std::shared_ptr<BytesData> bytes_data) const = 0;
 
+	int64_t CalculateRDCost() const;
+
 	uint32_t OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data);
 
 	BlockData<8, 8> GetPredictedData() const;
 
 	static std::shared_ptr<InterP8x8LumaFlowNodeBase> Create(MBType mb_type, std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index);
+
+private:
+	virtual int CalculateRate() const = 0;
+
+	virtual int CalculateDistortion() const = 0;
 
 protected:
 	std::shared_ptr<Macroblock> m_mb;

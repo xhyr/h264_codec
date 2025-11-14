@@ -20,13 +20,18 @@ public:
 
 	void UpdateMotionInfo() override;
 
-	uint32_t OutputMotionInfos(std::shared_ptr<BytesData> bytes_data) const;
+	uint32_t OutputMotionInfos(std::shared_ptr<BytesData> bytes_data) const override;
 
 private:
 	void Init();
 
+	int CalculateRate() const override;
+
+	int CalculateDistortion() const override;
+
 private:
 	std::unique_ptr<InterP8x8LumaPredictor> m_predictor;
+	BlockData<8, 8> m_diff_data;
 };
 
 __codec_end

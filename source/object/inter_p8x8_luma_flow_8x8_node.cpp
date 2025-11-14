@@ -52,4 +52,18 @@ void InterP8x8LumaFlow8x8Node::Init()
 	m_predictor = std::make_unique<InterP8x8LumaPredictor>(m_mb, m_encoder_context, m_segment_index);
 }
 
+int InterP8x8LumaFlow8x8Node::CalculateRate() const
+{
+	
+
+	return 0;
+}
+
+int InterP8x8LumaFlow8x8Node::CalculateDistortion() const
+{
+
+
+	return 0;
+}
+
 __codec_end

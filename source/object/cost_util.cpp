@@ -4,6 +4,7 @@
 #include "rdo_constant_values.h"
 #include "yuv_frame.h"
 #include "motion_info.h"
+#include "encoder_context.h"
 
 __codec_begin
 
@@ -63,11 +64,6 @@ int CostUtil::CalculateSATDDistortion(const BlockData<16, 16, int32_t>& block_da
 	return ScaleForAccuracy(satd);
 }
 
-int CostUtil::CalculateSSEDistortion(const BlockData<4, 4, int32_t>& block_data)
-{
-	return ScaleForAccuracy(block_data.GetAbstractSum());
-}
-
 int CostUtil::ScaleForAccuracy(int value)
 {
 	return value << RDOConstantValues::s_lambda_accuracy_bits;
@@ -87,6 +83,11 @@ int CostUtil::CalculateLumaSAD(uint32_t x_in_block, uint32_t y_in_block, uint32_
 	}
 
 	return ScaleForAccuracy(sad);
+}
+
+int CostUtil::CalculateRDCostMotion(int64_t distortion, int64_t rate, std::shared_ptr<EncoderContext> encoder_context)
+{
+	return distortion + rate * encoder_context->lambda_motion_fp;
 }
 
 __codec_end

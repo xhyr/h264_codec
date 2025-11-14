@@ -5,6 +5,7 @@
 #include "inter_p8x8_luma_flow_4x8_node.h"
 #include "inter_p8x8_luma_flow_4x4_node.h"
 #include "coding_util.h"
+#include "encoder_context.h"
 
 __codec_begin
 
@@ -15,6 +16,11 @@ InterP8x8LumaFlowNodeBase::InterP8x8LumaFlowNodeBase(std::shared_ptr<Macroblock>
 
 InterP8x8LumaFlowNodeBase::~InterP8x8LumaFlowNodeBase()
 {
+}
+
+int64_t InterP8x8LumaFlowNodeBase::CalculateRDCost() const
+{
+	return CalculateDistortion() + m_encoder_context->lambda_motion_fp * CalculateRate();
 }
 
 uint32_t InterP8x8LumaFlowNodeBase::OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data)

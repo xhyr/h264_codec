@@ -97,7 +97,7 @@ public:
 	}
 
 	template<size_t block_width, size_t block_height, typename OutType = Ty>
-	BlockData<block_width, block_height> GetBlock(uint32_t start_x, uint32_t start_y)
+	BlockData<block_width, block_height, OutType> GetBlock(uint32_t start_x, uint32_t start_y)
 	{
 		BlockData<block_width, block_height, OutType> result;
 		for (uint32_t y = start_y; y < start_y + block_height; ++y)
@@ -117,14 +117,14 @@ public:
 		return total_blocks;
 	}
 
-	int GetSum() const
+	int64_t GetSum() const
 	{
 		return std::accumulate(m_data.begin(), m_data.end(), 0);
 	}
 
-	int GetAbstractSum() const
+	int64_t GetAbstractSum() const
 	{
-		return std::reduce(m_data.begin(), m_data.end(), 0, [](int sum, Ty value) {return sum + std::abs(value); });
+		return std::reduce(m_data.begin(), m_data.end(), 0, [](int64_t sum, Ty value) {return sum + std::abs(value); });
 	}
 
 	void Reset(Ty value)

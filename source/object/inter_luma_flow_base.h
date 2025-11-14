@@ -43,7 +43,13 @@ protected:
 
 	void InverseQuantizeAndTransform();
 
+	void TransformAndQuantize(uint32_t block_8x8);
+
 	void CheckCoefficientCost(uint32_t block_8x8);
+
+	void InverseQuantizeAndTransform(uint32_t block_8x8);
+
+	uint32_t OutputCoefficients(uint32_t block_8x8, std::shared_ptr<BytesData> bytes_data);
 
 protected:
 	std::shared_ptr<Macroblock> m_mb;
@@ -53,7 +59,7 @@ protected:
 	BlockData<16, 16, int32_t> m_diff_data;
 	std::vector<BlockData<4, 4, int32_t>> m_residual_datas;
 	uint32_t m_coefficient_cost{ 0 };
-	int m_distortion{ 0 };
+	int64_t m_distortion{ 0 };
 	uint8_t m_cbp{ 0 };
 	uint32_t m_detailed_cbp{ 0 };
 
