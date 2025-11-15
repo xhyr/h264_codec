@@ -21,14 +21,18 @@ InterP8x8LumaFlow::~InterP8x8LumaFlow()
 
 void InterP8x8LumaFlow::Frontend()
 {
+	m_nodes.resize(4);
 	for (uint8_t segment_index = 0; segment_index < 4; ++segment_index)
 	{
 		int64_t min_cost = std::numeric_limits<int64_t>::max();
 		MBType best_sub_mb_type = MBType::SMB8x8;
 
-		for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
+		//for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
+		for (auto sub_mb_type : { MBType::SMB8x8})
 		{
 			auto node = InterP8x8LumaFlowNodeBase::Create(sub_mb_type, m_mb, m_encoder_context, segment_index);
+			m_nodes[segment_index] = node;
+
 			node->Predict();
 			node->FillDiffData(m_diff_datas);
 			TransformAndQuantize(segment_index);
@@ -39,13 +43,11 @@ void InterP8x8LumaFlow::Frontend()
 			if (distortion > min_cost)
 				continue;
 
-			int64_t rate = node->OutputSubMBTypes(nullptr);
-			rate += node->OutputMotionInfos(nullptr);
+			auto dummy_bytes_data = std::make_shared<BytesData>();
+			int64_t rate = node->OutputSubMBTypes(dummy_bytes_data);
+			rate += node->OutputMotionInfos(dummy_bytes_data);
 			if (m_cbp & (1 << segment_index))
-			{
-				auto bytes_data = std::make_shared<BytesData>();
-				rate += OutputCoefficients(segment_index, bytes_data);
-			}
+				rate += OutputCoefficients(segment_index, dummy_bytes_data);
 				
 			auto cost = CostUtil::CalculateRDCostMotion(distortion, rate, m_encoder_context);
 			if (cost < min_cost)
@@ -56,14 +58,14 @@ void InterP8x8LumaFlow::Frontend()
 		}
 
 		auto node = InterP8x8LumaFlowNodeBase::Create(best_sub_mb_type, m_mb, m_encoder_context, segment_index);
+		m_nodes[segment_index] = node;
 		node->Predict();
 		node->FillDiffData(m_diff_datas);
-		TransformAndQuantize(segment_index);
-		InverseQuantizeAndTransform(segment_index);
-		Reconstruct(segment_index);
-		m_nodes[segment_index] = node;
 	}
 
+	TransformAndQuantize();
+	InverseQuantizeAndTransform();
+	Reconstruct();
 	CalculateDistortion();
 }
 
@@ -92,6 +94,12 @@ uint32_t InterP8x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_da
 	return finish_bit_count - start_bit_count;
 }
 
+void InterP8x8LumaFlow::Reconstruct()
+{
+	for (uint8_t segment_index = 0; segment_index < 4; ++segment_index)
+		Reconstruct(segment_index);
+}
+
 void InterP8x8LumaFlow::Reconstruct(uint8_t segment_index)
 {
 	auto predicted_data = m_nodes[segment_index]->GetPredictedData();
@@ -112,7 +120,7 @@ int64_t InterP8x8LumaFlow::CalculateBlock8x8Distortion(uint32_t block_8x8)
 {
 	auto original_block_data = MBUtil::GetOriginalLumaBlockData<8, 8>(m_mb, block_8x8);
 	auto reconstruct_block_data = m_reconstructed_data.GetBlock<8, 8, int32_t>(block_8x8 % 2 * 8, block_8x8 / 2 * 8);
-	return CostUtil::CalculateSSEDistortion(reconstruct_block_data - original_block_data);
+	return CostUtil::CalculateSADDistortion(original_block_data, reconstruct_block_data);
 }
 
 __codec_end

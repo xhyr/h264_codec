@@ -76,6 +76,7 @@ void InterLumaFlowBase::CalculateDistortion()
 void InterLumaFlowBase::TransformAndQuantize()
 {
 	m_residual_datas.resize(16);
+	m_coefficient_cost = 0;
 	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)
 		TransformAndQuantize(block_8x8);
 
@@ -94,6 +95,8 @@ void InterLumaFlowBase::InverseQuantizeAndTransform()
 
 void InterLumaFlowBase::TransformAndQuantize(uint32_t block_8x8)
 {
+	m_residual_datas.resize(16);
+
 	for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
 	{
 		uint32_t block_index = BlockUtil::CalculateBlockIndex(block_8x8, block_4x4);
@@ -136,6 +139,8 @@ void InterLumaFlowBase::CheckCoefficientCost(uint32_t block_8x8)
 
 	if (!all_zero)
 		m_cbp |= (1 << block_8x8);
+	else
+		m_cbp &= ~(1 << block_8x8);
 }
 
 void InterLumaFlowBase::InverseQuantizeAndTransform(uint32_t block_8x8)

@@ -32,8 +32,8 @@ struct CostUtil
 
 	static int ScaleForAccuracy(int value);
 
-	template<size_t Width, size_t Height>
-	static int CalculateSADDistortion(const BlockData<Width, Height>& left_block_data, const BlockData<Width, Height>& right_block_data)
+	template<size_t Width, size_t Height, typename Ty1, typename Ty2>
+	static int CalculateSADDistortion(const BlockData<Width, Height, Ty1>& left_block_data, const BlockData<Width, Height, Ty2>& right_block_data)
 	{
 		int distortion = 0;
 		for (size_t y = 0; y < Height; ++y)

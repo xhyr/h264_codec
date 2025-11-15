@@ -87,7 +87,7 @@ int CostUtil::CalculateLumaSAD(uint32_t x_in_block, uint32_t y_in_block, uint32_
 
 int CostUtil::CalculateRDCostMotion(int64_t distortion, int64_t rate, std::shared_ptr<EncoderContext> encoder_context)
 {
-	return distortion + rate * encoder_context->lambda_motion_fp;
+	return distortion + rate * encoder_context->lambda_mode_fp;
 }
 
 __codec_end
