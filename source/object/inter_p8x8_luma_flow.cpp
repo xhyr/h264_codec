@@ -28,7 +28,7 @@ void InterP8x8LumaFlow::Frontend()
 		MBType best_sub_mb_type = MBType::SMB8x8;
 
 		//for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
-		for (auto sub_mb_type : { MBType::SMB8x8})
+		for (auto sub_mb_type : { MBType::SMB4x4 })
 		{
 			auto node = InterP8x8LumaFlowNodeBase::Create(sub_mb_type, m_mb, m_encoder_context, segment_index);
 			m_nodes[segment_index] = node;
