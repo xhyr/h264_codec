@@ -4,6 +4,7 @@
 
 #include "cavlc_util.h"
 #include "math_util.h"
+#include "segment_util.h"
 
 __codec_begin
 
@@ -62,6 +63,23 @@ void CavlcContext::SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_
 	{
 		auto index = GetBlockIndex(CavlcDataType::NormalLuma, mb_addr, i);
 		m_coeff_num_map[CavlcContextType::Luma][index] = coeff_nums[i];
+	}
+}
+
+void CavlcContext::ResetBlockCoeffNums(uint32_t mb_addr, uint8_t x_in_block, uint8_t y_in_block, CavlcDataType data_type)
+{
+
+}
+
+void CavlcContext::ResetLumaBlockCoeffNums(uint32_t mb_addr, uint8_t block_8x8, CavlcDataType data_type)
+{
+	auto [start_x, start_y] = SegmentUtil::GetLumaDataRect<8, 8>(block_8x8);
+	for (uint32_t y_in_block = start_y / 4; y_in_block < start_y / 4 + 2; ++y_in_block)
+	{
+		for (uint32_t x_in_block = start_x / 4; x_in_block < start_x / 4 + 2; ++x_in_block)
+		{
+			SetCoeffNum(data_type, mb_addr, y_in_block * 4 + x_in_block, 0);
+		}
 	}
 }
 

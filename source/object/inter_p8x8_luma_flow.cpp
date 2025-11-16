@@ -6,6 +6,8 @@
 #include "reconstruct_util.h"
 #include "mb_util.h"
 #include "cost_util.h"
+#include "encoder_context.h"
+#include "cavlc_context.h"
 
 __codec_begin
 
@@ -27,7 +29,8 @@ void InterP8x8LumaFlow::Frontend()
 		int64_t min_cost = std::numeric_limits<int64_t>::max();
 		MBType best_sub_mb_type = MBType::SMB8x8;
 
-		for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
+		//for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
+		for (auto sub_mb_type : { MBType::SMB8x4})
 		{
 			auto node = InterP8x8LumaFlowNodeBase::Create(sub_mb_type, m_mb, m_encoder_context, segment_index);
 			m_nodes[segment_index] = node;
@@ -46,7 +49,10 @@ void InterP8x8LumaFlow::Frontend()
 			int64_t rate = node->OutputSubMBTypes(dummy_bytes_data);
 			rate += node->OutputMotionInfos(dummy_bytes_data);
 			if (m_cbp & (1 << segment_index))
+			{
 				rate += OutputCoefficients(segment_index, dummy_bytes_data);
+				m_encoder_context->cavlc_context->ResetLumaBlockCoeffNums(m_mb->GetAddress(), segment_index, CavlcDataType::NormalLuma);
+			}
 				
 			auto cost = CostUtil::CalculateRDCostMotion(distortion, rate, m_encoder_context);
 			if (cost < min_cost)
@@ -60,6 +66,7 @@ void InterP8x8LumaFlow::Frontend()
 		m_nodes[segment_index] = node;
 		node->Predict();
 		node->FillDiffData(m_diff_datas);
+		node->UpdateMotionInfo();
 	}
 
 	TransformAndQuantize();

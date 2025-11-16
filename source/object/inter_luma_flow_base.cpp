@@ -39,7 +39,7 @@ uint32_t InterLumaFlowBase::OutputCoefficients(std::shared_ptr<BytesData> bytes_
 	for (uint32_t block_8x8 = 0; block_8x8 < 4; ++block_8x8)
 	{
 		if ((m_cbp & (1 << block_8x8)) == 0)
-			continue;
+			continue;		
 
 		total_bit_count += OutputCoefficients(block_8x8, bytes_data);
 	}
@@ -196,10 +196,6 @@ std::shared_ptr<InterLumaFlowBase> InterLumaFlowBase::CreateFlow(MBType mb_type,
 		break;
 	case codec::MBType::P8x8:
 		flow.reset(new InterP8x8LumaFlow(mb, encoder_context));
-		break;
-	case codec::MBType::I4:
-		break;
-	case codec::MBType::I16:
 		break;
 	default:
 		break;

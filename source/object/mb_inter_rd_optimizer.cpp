@@ -24,7 +24,7 @@ void MBInterRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
-	auto allowed_mb_types = { MBType::P8x8 };
+	auto allowed_mb_types = { MBType::P8x8 }; 
 	for (auto mb_type : allowed_mb_types)
 	{
 		m_mb_type = mb_type;
@@ -58,6 +58,9 @@ uint32_t MBInterRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 
 void MBInterRDOptimizer::OutputMB(std::shared_ptr<BytesData> bytes_data)
 {
+	if (m_mb->GetAddress() == 37)
+		int sb = 1;
+
 	MBInterHeaderBinaryer header_binaryer(bytes_data);
 	header_binaryer.OutputMBSkipRun(0);
 	header_binaryer.OutputMBType(m_mb_type);
@@ -69,7 +72,7 @@ void MBInterRDOptimizer::OutputMB(std::shared_ptr<BytesData> bytes_data)
 
 	if(m_cbp & 0x0F)
 		m_luma_flow->OutputCoefficients(bytes_data);
-
+		
 	if(m_cbp & 0x30)
 		m_chroma_flow->OutputCoefficients(bytes_data);
 }
