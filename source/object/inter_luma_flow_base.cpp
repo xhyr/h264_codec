@@ -100,7 +100,7 @@ void InterLumaFlowBase::TransformAndQuantize(uint32_t block_8x8)
 	for (uint32_t block_4x4 = 0; block_4x4 < 4; ++block_4x4)
 	{
 		uint32_t block_index = BlockUtil::CalculateBlockIndex(block_8x8, block_4x4);
-		auto& block_data = m_diff_datas[block_index];
+		auto block_data = m_diff_datas[block_index];
 		block_data = TransformUtil::DCT(block_data);
 		block_data = QuantizeUtil::QuantizeNormal(m_encoder_context->qp, block_data, false);
 		m_residual_datas[block_index] = block_data;

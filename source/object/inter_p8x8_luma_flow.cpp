@@ -29,8 +29,7 @@ void InterP8x8LumaFlow::Frontend()
 		int64_t min_cost = std::numeric_limits<int64_t>::max();
 		MBType best_sub_mb_type = MBType::SMB8x8;
 
-		//for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
-		for (auto sub_mb_type : { MBType::SMB8x4})
+		for (auto sub_mb_type : { MBType::SMB8x8, MBType::SMB8x4, MBType::SMB4x8, MBType::SMB4x4 })
 		{
 			auto node = InterP8x8LumaFlowNodeBase::Create(sub_mb_type, m_mb, m_encoder_context, segment_index);
 			m_nodes[segment_index] = node;
@@ -67,6 +66,13 @@ void InterP8x8LumaFlow::Frontend()
 		node->Predict();
 		node->FillDiffData(m_diff_datas);
 		node->UpdateMotionInfo();
+
+		TransformAndQuantize(segment_index);
+		if (m_cbp & (1 << segment_index))
+		{
+			auto dummy_bytes_data = std::make_shared<BytesData>();
+			OutputCoefficients(segment_index, dummy_bytes_data);
+		}
 	}
 
 	TransformAndQuantize();
