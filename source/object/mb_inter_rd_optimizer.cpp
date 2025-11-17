@@ -24,7 +24,7 @@ void MBInterRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
-	auto allowed_mb_types = { MBType::P8x8 }; 
+	auto allowed_mb_types = { MBType::P16x16 }; 
 	for (auto mb_type : allowed_mb_types)
 	{
 		m_mb_type = mb_type;
