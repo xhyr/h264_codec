@@ -32,7 +32,7 @@ public:
 
 	uint8_t GetCBP() const;
 
-	int GetDistortion() const;
+	int GetSSEDistortion() const;
 
 private:
 	void Predict();
@@ -56,7 +56,7 @@ protected:
 	std::unordered_map<PlaneType, std::vector<BlockData<4, 4, int32_t>>> m_diff_datas_map;
 	uint8_t m_cbp{ 0 };
 	CavlcDataSource m_cavlc_data_source;
-	int m_distortion{ 0 };
+	int m_sse_distortion{ 0 };
 
 };
 

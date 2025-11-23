@@ -41,7 +41,7 @@ uint32_t IntraLumaFlowBase::GetDetailedCBP() const
 void IntraLumaFlowBase::CalculateDistortion()
 {
 	auto original_block_data = m_mb->GetOriginalLumaBlockData();
-	m_distortion = CostUtil::CalculateSADDistortion(original_block_data, m_reconstructed_data);
+	m_distortion = CostUtil::CalculateSSEDistortion(original_block_data, m_reconstructed_data);
 }
 
 __codec_end

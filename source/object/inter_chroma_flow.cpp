@@ -71,9 +71,9 @@ uint8_t InterChromaFlow::GetCBP() const
 	return m_cbp;
 }
 
-int InterChromaFlow::GetDistortion() const
+int InterChromaFlow::GetSSEDistortion() const
 {
-	return m_distortion;
+	return m_sse_distortion;
 }
 
 void InterChromaFlow::Predict()
@@ -143,12 +143,12 @@ void InterChromaFlow::Reconstruct(PlaneType plane_type)
 
 void InterChromaFlow::CalculateDistortion()
 {
-	m_distortion = 0;
+	m_sse_distortion = 0;
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
 	{
 		auto original_block_data = m_mb->GetOriginalChromaBlockData(plane_type);
 		const auto& reconstructed_block_data = m_reconstructed_data_map[plane_type];
-		m_distortion += CostUtil::CalculateSADDistortion(original_block_data, reconstructed_block_data);
+		m_sse_distortion += CostUtil::CalculateSSEDistortion(original_block_data, reconstructed_block_data);
 	}
 }
 

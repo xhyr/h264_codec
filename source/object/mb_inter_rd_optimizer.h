@@ -20,7 +20,7 @@ public:
 
 	void Encode();
 
-	uint32_t Binary(std::shared_ptr<BytesData> bytes_data);
+	uint64_t Binary(std::shared_ptr<BytesData> bytes_data);
 
 private:
 	void OutputMB(std::shared_ptr<BytesData> bytes_data);
@@ -30,7 +30,6 @@ private:
 	std::shared_ptr<EncoderContext> m_encoder_context;
 
 	std::shared_ptr<InterLumaFlowBase> m_luma_flow;
-	std::shared_ptr<InterLumaFlowBase> m_best_luma_flow;
 	std::shared_ptr<InterChromaFlow> m_chroma_flow;
 
 	uint32_t m_mb_addr;

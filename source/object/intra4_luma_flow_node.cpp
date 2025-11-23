@@ -176,7 +176,7 @@ void Intra4LumaFlowNode::Reconstruct()
 
 int Intra4LumaFlowNode::CalculateDistortion() const
 {
-	return CostUtil::CalculateSADDistortion(m_reconstructed_block_data, m_original_block_data);
+	return CostUtil::CalculateSSEDistortion(m_reconstructed_block_data, m_original_block_data);
 }
 
 int Intra4LumaFlowNode::CalculateRate() const

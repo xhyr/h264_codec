@@ -24,17 +24,21 @@ public:
 
 	virtual uint32_t OutputSubMBTypes(std::shared_ptr<BytesData> bytes_data);
 
-	virtual uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) = 0;
+	virtual uint32_t OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) const = 0;
 
 	uint32_t OutputCoefficients(std::shared_ptr<BytesData> bytes_data);
 
 	BlockData<16, 16> GetReconstructedData() const;
 
-	int GetDistortion() const;
+	int64_t GetSADDistortion() const;
+
+	int64_t GetSSEDistortion() const;
 
 	uint8_t GetCBP() const;
 
 	uint32_t GetDetailedCBP() const;
+
+	int64_t CalculateRDRate() const;
 
 protected:
 	void CalculateDistortion();
@@ -59,7 +63,9 @@ protected:
 	BlockData<16, 16, int32_t> m_diff_data;
 	std::vector<BlockData<4, 4, int32_t>> m_residual_datas;
 	uint32_t m_coefficient_cost{ 0 };
-	int64_t m_distortion{ 0 };
+	int64_t m_sad_distortion{ 0 };
+	int64_t m_sse_distortion{ 0 };
+	int64_t m_rd_cost{ 0 };
 	uint8_t m_cbp{ 0 };
 	uint32_t m_detailed_cbp{ 0 };
 

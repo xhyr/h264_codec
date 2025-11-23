@@ -66,19 +66,26 @@ void CavlcContext::SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_
 	}
 }
 
-void CavlcContext::ResetBlockCoeffNums(uint32_t mb_addr, uint8_t x_in_block, uint8_t y_in_block, CavlcDataType data_type)
+void CavlcContext::ResetMBCoeffNums(uint32_t mb_addr)
 {
+	for (uint8_t i = 0; i < 16; ++i)
+		SetCoeffNum(CavlcDataType::NormalLuma, mb_addr, i, 0);
 
+	for (uint8_t i = 0; i < 4; ++i)
+	{
+		SetCoeffNum(CavlcDataType::CbAC, mb_addr, i, 0);
+		SetCoeffNum(CavlcDataType::CrAC, mb_addr, i, 0);
+	}
 }
 
-void CavlcContext::ResetLumaBlockCoeffNums(uint32_t mb_addr, uint8_t block_8x8, CavlcDataType data_type)
+void CavlcContext::ResetLumaBlockCoeffNums(uint32_t mb_addr, uint8_t block_8x8)
 {
 	auto [start_x, start_y] = SegmentUtil::GetLumaDataRect<8, 8>(block_8x8);
 	for (uint32_t y_in_block = start_y / 4; y_in_block < start_y / 4 + 2; ++y_in_block)
 	{
 		for (uint32_t x_in_block = start_x / 4; x_in_block < start_x / 4 + 2; ++x_in_block)
 		{
-			SetCoeffNum(data_type, mb_addr, y_in_block * 4 + x_in_block, 0);
+			SetCoeffNum(CavlcDataType::NormalLuma, mb_addr, y_in_block * 4 + x_in_block, 0);
 		}
 	}
 }

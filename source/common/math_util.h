@@ -51,6 +51,12 @@ struct MathUtil
 	}
 
 	template<typename Ty>
+	static Ty Abs(Ty value)
+	{
+		return value < 0 ? -value : value;
+	}
+
+	template<typename Ty>
 	static Ty Median(Ty a, Ty b, Ty c)
 	{
 		if (a > b) // a > b

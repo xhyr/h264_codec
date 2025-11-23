@@ -22,9 +22,9 @@ public:
 
 	void SetMBLumaCoeffNums(uint32_t mb_addr, const std::vector<uint8_t>& coeff_nums);
 
-	void ResetBlockCoeffNums(uint32_t mb_addr, uint8_t x_in_block, uint8_t y_in_block, CavlcDataType data_type);
+	void ResetMBCoeffNums(uint32_t mb_addr);
 
-	void ResetLumaBlockCoeffNums(uint32_t mb_addr, uint8_t block_8x8, CavlcDataType data_type);
+	void ResetLumaBlockCoeffNums(uint32_t mb_addr, uint8_t block_8x8);
 
 	void Reset();
 

@@ -82,9 +82,9 @@ uint32_t IntraChromaFlow::OutputCoefficients(std::shared_ptr<BytesData> bytes_da
 	return finish_bits_count - start_bits_count;
 }
 
-int IntraChromaFlow::GetDistortion()
+int IntraChromaFlow::GetDistortion() const
 {
-	return m_distortion;
+	return m_sse_distortion;
 }
 
 void IntraChromaFlow::Predict()
@@ -142,13 +142,13 @@ void IntraChromaFlow::Reconstruct(PlaneType plane_type)
 
 void IntraChromaFlow::CalculateDistortion()
 {
-	m_distortion = 0;
+	m_sse_distortion = 0;
 	std::vector<PlaneType> plane_types{ PlaneType::Cb, PlaneType::Cr };
 	for (auto plane_type : plane_types)
 	{
 		auto original_block_data = m_mb->GetOriginalChromaBlockData(plane_type);
 		const auto& reconstructed_block_data = m_reconstructed_data_map[plane_type];
-		m_distortion += CostUtil::CalculateSADDistortion(original_block_data, reconstructed_block_data);
+		m_sse_distortion += CostUtil::CalculateSADDistortion(original_block_data, reconstructed_block_data);
 	}
 }
 

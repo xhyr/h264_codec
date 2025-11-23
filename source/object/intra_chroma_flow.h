@@ -35,7 +35,7 @@ public:
 
 	uint32_t OutputCoefficients(std::shared_ptr<BytesData> binary_block);
 
-	int GetDistortion();
+	int GetDistortion() const;
 
 private:
 	void Predict();
@@ -62,7 +62,7 @@ protected:
 	CavlcDataSource m_cavlc_data_source;
 
 	IntraChromaPredictionType m_target_prediction_type{ IntraChromaPredictionType::None };
-	int m_distortion{ 0 };
+	int m_sse_distortion{ 0 };
 };
 
 __codec_end

@@ -50,10 +50,10 @@ void InterP8x8LumaFlow::Frontend()
 			if (m_cbp & (1 << segment_index))
 			{
 				rate += OutputCoefficients(segment_index, dummy_bytes_data);
-				m_encoder_context->cavlc_context->ResetLumaBlockCoeffNums(m_mb->GetAddress(), segment_index, CavlcDataType::NormalLuma);
+				m_encoder_context->cavlc_context->ResetLumaBlockCoeffNums(m_mb->GetAddress(), segment_index);
 			}
 				
-			auto cost = CostUtil::CalculateRDCostMotion(distortion, rate, m_encoder_context);
+			auto cost = CostUtil::CalculateRDCostMode(distortion, rate, m_encoder_context);
 			if (cost < min_cost)
 			{
 				min_cost = cost;
@@ -95,7 +95,7 @@ uint32_t InterP8x8LumaFlow::OutputSubMBTypes(std::shared_ptr<BytesData> bytes_da
 	return total_bits;
 }
 
-uint32_t InterP8x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)
+uint32_t InterP8x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) const
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 
@@ -132,7 +132,7 @@ int64_t InterP8x8LumaFlow::CalculateBlock8x8Distortion(uint32_t block_8x8)
 {
 	auto original_block_data = MBUtil::GetOriginalLumaBlockData<8, 8>(m_mb, block_8x8);
 	auto reconstruct_block_data = m_reconstructed_data.GetBlock<8, 8, int32_t>(block_8x8 % 2 * 8, block_8x8 / 2 * 8);
-	return CostUtil::CalculateSADDistortion(original_block_data, reconstruct_block_data);
+	return CostUtil::CalculateSSEDistortion(original_block_data, reconstruct_block_data);
 }
 
 __codec_end

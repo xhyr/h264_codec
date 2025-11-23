@@ -34,7 +34,7 @@ void InterP16x8LumaFlow::Backend()
 		predictor->UpdateMotionInfo();
 }
 
-uint32_t InterP16x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data)
+uint32_t InterP16x8LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) const
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
 

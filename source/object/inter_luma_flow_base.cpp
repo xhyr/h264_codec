@@ -52,9 +52,14 @@ BlockData<16, 16> InterLumaFlowBase::GetReconstructedData() const
 	return m_reconstructed_data;
 }
 
-int InterLumaFlowBase::GetDistortion() const
+int64_t InterLumaFlowBase::GetSADDistortion() const
 {
-	return m_distortion;
+	return m_sad_distortion;
+}
+
+int64_t InterLumaFlowBase::GetSSEDistortion() const
+{
+	return m_sse_distortion;
 }
 
 uint8_t InterLumaFlowBase::GetCBP() const
@@ -67,10 +72,18 @@ uint32_t InterLumaFlowBase::GetDetailedCBP() const
     return m_detailed_cbp;
 }
 
+int64_t InterLumaFlowBase::CalculateRDRate() const
+{
+	auto bytes_data = std::make_shared<BytesData>();
+	OutputMotionInfo(bytes_data);
+	return bytes_data->GetBitsCount();
+}
+
 void InterLumaFlowBase::CalculateDistortion()
 {
 	auto original_block_data = m_mb->GetOriginalLumaBlockData();
-	m_distortion = CostUtil::CalculateSADDistortion(original_block_data, m_reconstructed_data);
+	m_sad_distortion = CostUtil::CalculateSADDistortion(original_block_data, m_reconstructed_data);
+	m_sse_distortion = CostUtil::CalculateSSEDistortion(original_block_data, m_reconstructed_data);
 }
 
 void InterLumaFlowBase::TransformAndQuantize()
