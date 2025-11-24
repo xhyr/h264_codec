@@ -82,12 +82,8 @@ void CavlcContext::ResetLumaBlockCoeffNums(uint32_t mb_addr, uint8_t block_8x8)
 {
 	auto [start_x, start_y] = SegmentUtil::GetLumaDataRect<8, 8>(block_8x8);
 	for (uint32_t y_in_block = start_y / 4; y_in_block < start_y / 4 + 2; ++y_in_block)
-	{
 		for (uint32_t x_in_block = start_x / 4; x_in_block < start_x / 4 + 2; ++x_in_block)
-		{
 			SetCoeffNum(CavlcDataType::NormalLuma, mb_addr, y_in_block * 4 + x_in_block, 0);
-		}
-	}
 }
 
 void CavlcContext::Reset()
@@ -185,7 +181,5 @@ CavlcContextType CavlcContext::MapDataType(CavlcDataType data_type) const
 	else if (data_type == CavlcDataType::CrAC)
 		return CavlcContextType::Cr;
 }
-
-
 
 __codec_end

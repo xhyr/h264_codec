@@ -18,24 +18,25 @@ LoggerImpl::LoggerImpl() :m_level(LoggerLevel::Debug)
 
 LoggerImpl::~LoggerImpl()
 {
+	m_to_stop = true;
+	m_conditional.notify_one();
+	m_thread.join();
+
 	BackUp();
 }
 
 void LoggerImpl::Log(LoggerLevel level, const std::string& message)
 {
-	std::lock_guard<std::mutex> lk(m_mutex);
-	if (level > m_level)
-		return;
-
 	std::string out_message = GetTimeDescription();
 	out_message += " : ";
 	out_message += message;
 	out_message += "\n";
-	m_stream << out_message;
-	m_stream.flush();
 
-	if(level <= LoggerLevel::Info)
-		printf("%s", out_message.c_str());
+	std::lock_guard<std::mutex> lk(m_mutex);
+	if (level > m_level)
+		return;
+	m_log_cache.emplace_back(level, out_message);
+	m_conditional.notify_one();
 }
 
 void LoggerImpl::SetLevel(LoggerLevel level)
@@ -63,6 +64,28 @@ int64_t LoggerImpl::GetElapsedSeconds() const
 	return elapsed_time / m_frequency;
 }
 
+void LoggerImpl::Loop()
+{
+	while (!m_to_stop)
+	{
+		LoggerLevel level;
+		std::string message;
+
+		{
+			std::unique_lock<std::mutex> lk(m_mutex);
+			m_conditional.wait(lk, [this]() {return m_to_stop || !m_log_cache.empty(); });
+			std::tie(level, message) = m_log_cache.front();
+			m_log_cache.pop_front();
+		}
+
+		m_stream << message;
+		m_stream.flush();
+
+		if (level <= LoggerLevel::Info)
+			printf("%s", message.c_str());
+	}
+}
+
 void LoggerImpl::Init()
 {
 	m_stream.open("log.log");
@@ -70,6 +93,8 @@ void LoggerImpl::Init()
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	m_frequency = frequency.QuadPart;
+
+	m_thread = std::thread([this]() {Loop(); });
 }
 
 void LoggerImpl::BackUp()

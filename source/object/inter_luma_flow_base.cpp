@@ -52,11 +52,6 @@ BlockData<16, 16> InterLumaFlowBase::GetReconstructedData() const
 	return m_reconstructed_data;
 }
 
-int64_t InterLumaFlowBase::GetSADDistortion() const
-{
-	return m_sad_distortion;
-}
-
 int64_t InterLumaFlowBase::GetSSEDistortion() const
 {
 	return m_sse_distortion;
@@ -82,7 +77,6 @@ int64_t InterLumaFlowBase::CalculateRDRate() const
 void InterLumaFlowBase::CalculateDistortion()
 {
 	auto original_block_data = m_mb->GetOriginalLumaBlockData();
-	m_sad_distortion = CostUtil::CalculateSADDistortion(original_block_data, m_reconstructed_data);
 	m_sse_distortion = CostUtil::CalculateSSEDistortion(original_block_data, m_reconstructed_data);
 }
 

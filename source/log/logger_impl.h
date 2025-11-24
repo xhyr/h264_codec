@@ -1,8 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <atomic>
+#include <condition_variable>
+#include <deque>
 #include <fstream>
 #include <mutex>
+#include <thread>
+#include <utility>
 #include <vector>
 #include <Windows.h>
 
@@ -26,6 +31,8 @@ public:
 
 	int64_t GetElapsedSeconds() const;
 
+	void Loop();
+
 private:
 	void Init();
 
@@ -40,6 +47,11 @@ private:
 
 	int64_t m_frequency;
 	LARGE_INTEGER m_anchor_time;
+	
+	std::deque<std::pair<LoggerLevel, std::string>> m_log_cache;
+	std::condition_variable m_conditional;
+	std::thread m_thread;
+	std::atomic<bool> m_to_stop{ false };
 };
 
 __codec_end

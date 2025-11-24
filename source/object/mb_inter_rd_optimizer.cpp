@@ -30,10 +30,12 @@ void MBInterRDOptimizer::Encode()
 	MBType best_mb_type = MBType::P16x16;
 	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();
 	auto allowed_mb_types = {MBType::P16x16, MBType::P16x8, MBType::P8x16, MBType::P8x8}; 
+	MBType last_mb_type = MBType::P16x16;
 	for (auto mb_type : allowed_mb_types)
 	{
 		m_mb_type = mb_type;
 		m_mb->SetType(m_mb_type);
+		last_mb_type = mb_type;
 
 		m_luma_flow = InterLumaFlowBase::CreateFlow(mb_type, m_mb, m_encoder_context);
 		m_luma_flow->Frontend();
@@ -60,19 +62,22 @@ void MBInterRDOptimizer::Encode()
 		}
 	}
 
-	m_mb_type = best_mb_type;
-	m_mb->SetType(m_mb_type);
-	m_luma_flow = InterLumaFlowBase::CreateFlow(m_mb_type, m_mb, m_encoder_context);
-	m_luma_flow->Frontend();
-	m_luma_flow->Backend();
-	m_luma_cbp = m_luma_flow->GetCBP();
+	if (last_mb_type != best_mb_type)
+	{
+		m_mb_type = best_mb_type;
+		m_mb->SetType(m_mb_type);
+		m_luma_flow = InterLumaFlowBase::CreateFlow(m_mb_type, m_mb, m_encoder_context);
+		m_luma_flow->Frontend();
+		m_luma_flow->Backend();
+		m_luma_cbp = m_luma_flow->GetCBP();
+
+		m_chroma_flow = std::make_shared<InterChromaFlow>(m_mb, m_encoder_context);
+		m_chroma_flow->Frontend();
+		m_chroma_cbp = m_chroma_flow->GetCBP();
+		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+	}
+
 	m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
-
-	m_chroma_flow = std::make_shared<InterChromaFlow>(m_mb, m_encoder_context);
-	m_chroma_flow->Frontend();
-	m_chroma_cbp = m_chroma_flow->GetCBP();
-	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
-
 	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
 	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);

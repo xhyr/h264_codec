@@ -30,8 +30,6 @@ public:
 
 	BlockData<16, 16> GetReconstructedData() const;
 
-	int64_t GetSADDistortion() const;
-
 	int64_t GetSSEDistortion() const;
 
 	uint8_t GetCBP() const;
@@ -63,7 +61,6 @@ protected:
 	BlockData<16, 16, int32_t> m_diff_data;
 	std::vector<BlockData<4, 4, int32_t>> m_residual_datas;
 	uint32_t m_coefficient_cost{ 0 };
-	int64_t m_sad_distortion{ 0 };
 	int64_t m_sse_distortion{ 0 };
 	int64_t m_rd_cost{ 0 };
 	uint8_t m_cbp{ 0 };

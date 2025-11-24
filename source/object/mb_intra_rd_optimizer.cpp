@@ -110,6 +110,7 @@ void MBIntraRDOptimizer::RunLumaFlow(MBType mb_type)
 	default:
 		break;
 	}
+
 	m_cbp = m_chroma_cbp << 4 | m_luma_cbp;
 }
 

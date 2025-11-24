@@ -26,9 +26,6 @@ void Slice::Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> 
 	m_qp = encoder_context->config->qp;
 	m_encoder_context = encoder_context;
 	m_header.Construct(m_tick, m_tick == 0 && slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData(), m_qp);
-
-	/*if (m_tick != 0)
-		m_header.disable_deblocking_filter_idc = 1;*/
 }
 
 bool Slice::Encode()
