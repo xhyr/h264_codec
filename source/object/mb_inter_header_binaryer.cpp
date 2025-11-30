@@ -16,7 +16,7 @@ MBInterHeaderBinaryer::~MBInterHeaderBinaryer()
 
 void MBInterHeaderBinaryer::OutputMBSkipRun(uint32_t skip_run)
 {
-	CodingUtil::UE_V(0, m_bytes_data);
+	CodingUtil::UE_V(skip_run, m_bytes_data);
 }
 
 void MBInterHeaderBinaryer::OutputMBType(MBType mb_type)

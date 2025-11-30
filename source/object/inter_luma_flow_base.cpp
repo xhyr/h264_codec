@@ -11,6 +11,7 @@
 #include "cavlc_pre_coder_luma_4x4.h"
 #include "cavlc_constant_values.h"
 #include "bytes_data.h"
+#include "inter_pskip_luma_flow.h"
 #include "inter_p16x16_luma_flow.h"
 #include "inter_p16x8_luma_flow.h"
 #include "inter_p8x16_luma_flow.h"
@@ -191,6 +192,7 @@ std::shared_ptr<InterLumaFlowBase> InterLumaFlowBase::CreateFlow(MBType mb_type,
 	switch (mb_type)
 	{
 	case codec::MBType::PSkip:
+		flow.reset(new InterPSkipLumaFlow(mb, encoder_context));
 		break;
 	case codec::MBType::P16x16:
 		flow.reset(new InterP16x16LumaFlow(mb, encoder_context));

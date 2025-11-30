@@ -41,6 +41,8 @@ struct EncoderContext
 	std::pair<int, int> mv_horizontal_limit;
 
 	std::shared_ptr<EncoderConfig> config;
+
+	uint32_t mb_run{ 0 };
 };
 
 __codec_end

@@ -20,10 +20,10 @@ public:
 
 	void Encode();
 
-	uint64_t Binary(std::shared_ptr<BytesData> bytes_data);
+	uint64_t Binary(std::shared_ptr<BytesData> bytes_data, bool rdo_pass = false);
 
 private:
-	void OutputMB(std::shared_ptr<BytesData> bytes_data);
+	void OutputMB(std::shared_ptr<BytesData> bytes_data, bool rdo_pass);
 
 private:
 	std::shared_ptr<Macroblock> m_mb;

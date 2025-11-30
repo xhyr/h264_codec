@@ -21,7 +21,7 @@ class ChromaQuantizer;
 class InterChromaFlow
 {
 public:
-	InterChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
+	InterChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, bool skip);
 	virtual ~InterChromaFlow();
 
 	void Frontend();
@@ -48,6 +48,7 @@ private:
 protected:
 	std::shared_ptr<Macroblock> m_mb;
 	std::shared_ptr<EncoderContext> m_encoder_context;
+	bool m_skip;
 	std::unique_ptr<InterP2x2ChromaPredictor> m_predictors[16];
 	std::unique_ptr<ChromaQuantizer> m_quantizer;
 

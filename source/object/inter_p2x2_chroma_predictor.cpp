@@ -11,8 +11,8 @@
 
 __codec_begin
 
-InterP2x2ChromaPredictor::InterP2x2ChromaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index, uint8_t sub_segment_index) :
-	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index), m_sub_segment_index(sub_segment_index)
+InterP2x2ChromaPredictor::InterP2x2ChromaPredictor(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, uint8_t segment_index, uint8_t sub_segment_index, bool skip) :
+	m_mb(mb), m_encoder_context(encoder_context), m_segment_index(segment_index), m_sub_segment_index(sub_segment_index), m_skip(skip)
 {
 }
 
@@ -32,18 +32,25 @@ void InterP2x2ChromaPredictor::Decide()
 	uint32_t new_y = MathUtil::Clamp<int>((pos.second << 2) + mv.y, 0, (m_encoder_context->height / 2 - 1) * 8);
 
 	m_predicted_data[0].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->last_frame->u_data, new_x, new_y, 2, 2, m_encoder_context->width / 2, m_encoder_context->height / 2));
-	auto origin_block_data = MBUtil::GetOriginalChromaBlockData<2, 2>(m_mb, PlaneType::Cb, m_segment_index, m_sub_segment_index); 
-	m_diff_data[0] = origin_block_data - m_predicted_data[0];
-
 	m_predicted_data[1].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->last_frame->v_data, new_x, new_y, 2, 2, m_encoder_context->width / 2, m_encoder_context->height / 2));
-	origin_block_data = MBUtil::GetOriginalChromaBlockData<2, 2>(m_mb, PlaneType::Cr, m_segment_index, m_sub_segment_index);
-	m_diff_data[1] = origin_block_data - m_predicted_data[1];
+	if (!m_skip)
+	{
+		auto origin_block_data = MBUtil::GetOriginalChromaBlockData<2, 2>(m_mb, PlaneType::Cb, m_segment_index, m_sub_segment_index);
+		m_diff_data[0] = origin_block_data - m_predicted_data[0];
+		origin_block_data = MBUtil::GetOriginalChromaBlockData<2, 2>(m_mb, PlaneType::Cr, m_segment_index, m_sub_segment_index);
+		m_diff_data[1] = origin_block_data - m_predicted_data[1];
+	}
 }
 
 void InterP2x2ChromaPredictor::FillDiffData(PlaneType plane_type, std::vector<BlockData<4, 4, int32_t>>& diff_datas)
 {
 	diff_datas.resize(4);
-	DataUtil::SetData(diff_datas[m_segment_index], GetDiffData(plane_type), m_sub_segment_index);
+	if (m_skip)
+	{
+		for (auto& diff_data : diff_datas)
+			diff_data.Reset(0);
+	}
+	else DataUtil::SetData(diff_datas[m_segment_index], GetDiffData(plane_type), m_sub_segment_index);
 }
 
 void InterP2x2ChromaPredictor::FillPredictedData(PlaneType plane_type, BlockData<8, 8>& predicted_data)

@@ -17,8 +17,8 @@
 
 __codec_begin
 
-InterChromaFlow::InterChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
-	m_mb(mb), m_encoder_context(encoder_context)
+InterChromaFlow::InterChromaFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context, bool skip) :
+	m_mb(mb), m_encoder_context(encoder_context), m_skip(skip)
 {
 }
 
@@ -32,8 +32,12 @@ void InterChromaFlow::Frontend()
 
 	for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
 	{
-		TransformAndQuantize(plane_type);
-		InverseQuantizeAndTransform(plane_type);
+		if (!m_skip)
+		{
+			TransformAndQuantize(plane_type);
+			InverseQuantizeAndTransform(plane_type);
+		}
+	
 		Reconstruct(plane_type);
 	}
 	CalculateDistortion();
@@ -82,7 +86,7 @@ void InterChromaFlow::Predict()
 	{
 		for (uint8_t sub_segment_index = 0; sub_segment_index < 4; ++sub_segment_index)
 		{
-			auto predictor = std::make_unique<InterP2x2ChromaPredictor>(m_mb, m_encoder_context, segment_index, sub_segment_index);
+			auto predictor = std::make_unique<InterP2x2ChromaPredictor>(m_mb, m_encoder_context, segment_index, sub_segment_index, m_skip);
 			predictor->Decide();
 			for (auto plane_type : { PlaneType::Cb, PlaneType::Cr })
 			{
@@ -138,7 +142,10 @@ void InterChromaFlow::InverseQuantizeAndTransform(PlaneType plane_type)
 
 void InterChromaFlow::Reconstruct(PlaneType plane_type)
 {
-	m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_datas_map[plane_type], m_predicted_data_map[plane_type]);
+	if (!m_skip)
+		m_reconstructed_data_map[plane_type] = ReconstructUtil::Reconstruct(m_diff_datas_map[plane_type], m_predicted_data_map[plane_type]);
+	else
+		m_reconstructed_data_map[plane_type] = m_predicted_data_map[plane_type];
 }
 
 void InterChromaFlow::CalculateDistortion()

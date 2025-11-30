@@ -23,6 +23,8 @@ public:
 
 	std::tuple<MotionInfo, MotionInfo, MotionInfo> GetNeighborMotionInfo(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block) const;
 
+	void RestMotionInfos(uint32_t mb_addr);
+
 private:
 	void Init();
 

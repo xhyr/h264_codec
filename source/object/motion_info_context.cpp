@@ -79,6 +79,12 @@ std::tuple<MotionInfo, MotionInfo, MotionInfo> MotionInfoContext::GetNeighborMot
 	return std::make_tuple(motion_info_a, motion_info_b, motion_info_c);
 }
 
+void MotionInfoContext::RestMotionInfos(uint32_t mb_addr)
+{
+	MotionInfo motion_info;
+	SetMotionInfos(mb_addr, 0, 0, 4, 4, motion_info);
+}
+
 void MotionInfoContext::Init()
 {
 	
