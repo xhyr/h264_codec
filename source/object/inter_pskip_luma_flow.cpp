@@ -41,7 +41,6 @@ void InterPSkipLumaFlow::Predict()
 {
 	m_predictor = std::make_unique<InterPSkipLumaPredictor>(m_mb, m_encoder_context);
 	m_predictor->Decide();
-	m_predictor->FillDiffData(m_diff_datas);
 }
 
 void InterPSkipLumaFlow::Reconstruct()

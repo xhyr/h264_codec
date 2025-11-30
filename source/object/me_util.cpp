@@ -99,6 +99,18 @@ MotionVector MEUtil::GetPredictorMV(uint32_t x_in_block, uint32_t y_in_block, ui
 	return mv;
 }
 
+MotionVector MEUtil::GetPredictorMVPSkip(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, int ref_id, std::shared_ptr<MotionInfoContext> motion_info_context)
+{
+	auto [mi_a, mi_b, mi_c] = motion_info_context->GetNeighborMotionInfo(x_in_block, y_in_block, width_in_block);
+
+	bool zero_motion_left = (mi_a.ref_id == -1) ? true : (mi_a.ref_id == 0 && mi_a.mv.x == 0 && mi_a.mv.y == 0) ? true : false;
+	bool zero_motion_above = (mi_b.ref_id == -1) ? true : (mi_b.ref_id == 0 && mi_b.mv.x == 0 && mi_b.mv.y == 0) ? true : false;
+	if (zero_motion_left || zero_motion_above)
+		return { 0, 0 };
+
+	return GetPredictorMV(x_in_block, y_in_block, width_in_block, height_in_block, ref_id, motion_info_context);
+}
+
 std::vector<MotionVector> MEUtil::GenerateMotionVectors(uint32_t search_range)
 {
 	std::vector<MotionVector> mvs;

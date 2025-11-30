@@ -15,6 +15,8 @@ struct EncoderContext;
 struct MEUtil
 {
 	static MotionVector GetPredictorMV(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, int ref_id, std::shared_ptr<MotionInfoContext> motion_info_context);
+	
+	static MotionVector GetPredictorMVPSkip(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, int ref_id, std::shared_ptr<MotionInfoContext> motion_info_context);
 
 	static std::vector<MotionVector> GenerateMotionVectors(uint32_t search_range);
 

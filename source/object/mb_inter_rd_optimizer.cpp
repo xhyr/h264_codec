@@ -10,6 +10,7 @@
 #include "cost_util.h"
 #include "encoder_context.h"
 #include "cavlc_context.h"
+#include "coding_util.h"
 
 __codec_begin
 
@@ -27,13 +28,13 @@ void MBInterRDOptimizer::Encode()
 	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
-	if (m_mb_addr == 37)
+	if (m_mb_addr == 64)
 		int sb = 1;
 
 	MBType best_mb_type = MBType::PSkip;
 	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();
 	//auto allowed_mb_types = {MBType::P16x16, MBType::P16x8, MBType::P8x16, MBType::P8x8}; 
-	auto allowed_mb_types = {MBType::PSkip, MBType::P16x16}; 
+	auto allowed_mb_types = {MBType::PSkip, MBType::P16x16, MBType::P16x8, MBType::P8x16, MBType::P8x8}; 
 	for (auto mb_type : allowed_mb_types)
 	{
 		m_mb_type = mb_type;
@@ -84,6 +85,13 @@ void MBInterRDOptimizer::Encode()
 
 uint64_t MBInterRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data, bool rdo_pass)
 {
+	if (m_mb_type == MBType::PSkip && rdo_pass)
+	{
+		auto rate = CodingUtil::GetUEBitCount(m_encoder_context->mb_run + 1);
+		rate -= CodingUtil::GetUEBitCount(m_encoder_context->mb_run);
+		return rate;
+	}
+
 	auto start_bit_count = bytes_data->GetBitsCount();
 	OutputMB(bytes_data, rdo_pass);
 	uint64_t finish_bit_count = bytes_data->GetBitsCount();
@@ -94,19 +102,16 @@ void MBInterRDOptimizer::OutputMB(std::shared_ptr<BytesData> bytes_data, bool rd
 {
 	if (m_mb_type == MBType::PSkip)
 	{
-		if (!rdo_pass)
+		++m_encoder_context->mb_run;
+
+		if (m_mb_addr == m_encoder_context->mb_num - 1)
 		{
-			++m_encoder_context->mb_run;
-
-			if (m_mb_addr == m_encoder_context->mb_num - 1)
-			{
-				MBInterHeaderBinaryer header_binaryer(bytes_data);
-				header_binaryer.OutputMBSkipRun(m_encoder_context->mb_run);
-				m_encoder_context->mb_run = 0;
-			}
-
-			m_encoder_context->cavlc_context->ResetMBCoeffNums(m_mb_addr);
+			MBInterHeaderBinaryer header_binaryer(bytes_data);
+			header_binaryer.OutputMBSkipRun(m_encoder_context->mb_run);
+			m_encoder_context->mb_run = 0;
 		}
+
+		m_encoder_context->cavlc_context->ResetMBCoeffNums(m_mb_addr);
 
 		return;
 	}
