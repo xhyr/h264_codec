@@ -16,7 +16,7 @@ struct RDOUtil
 
 	static int GetLambdaMotionFixedPoint(int qp);
 
-	static int CalculateRDCost(int distortion, int rate, int lambda);
+	static int64_t CalculateRDCost(int64_t distortion, int64_t rate, int lambda);
 
 };
 

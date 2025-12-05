@@ -18,7 +18,7 @@ public:
 	MBInterRDOptimizer(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
 	~MBInterRDOptimizer();
 
-	void Encode();
+	bool Encode(int64_t& min_rd_cost);
 
 	uint64_t Binary(std::shared_ptr<BytesData> bytes_data, bool rdo_pass = false);
 
@@ -37,7 +37,6 @@ private:
 	int m_luma_cbp{ 0 };
 	int m_cbp{ 0 };
 	MBType m_mb_type;
-	int m_rd_cost{ 0 };
 };
 
 __codec_end

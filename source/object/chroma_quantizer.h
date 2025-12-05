@@ -9,7 +9,7 @@ __codec_begin
 class ChromaQuantizer
 {
 public:
-	ChromaQuantizer(int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks, bool is_intra = true);
+	ChromaQuantizer(bool is_slice_intra, int qp, const BlockData<2, 2, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks, bool is_intra = true);
 	~ChromaQuantizer();
 
 	void Quantize();

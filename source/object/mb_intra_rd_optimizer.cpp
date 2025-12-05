@@ -26,10 +26,11 @@ MBIntraRDOptimizer::~MBIntraRDOptimizer()
 {
 }
 
-void MBIntraRDOptimizer::Encode()
+bool MBIntraRDOptimizer::Encode(int64_t& min_rd_cost)
 {
-	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
+
+	bool found{ false };
 
 	m_chroma_flow = std::make_shared<IntraChromaFlow>(m_mb, m_encoder_context);
 	m_chroma_flow->Frontend();
@@ -40,10 +41,10 @@ void MBIntraRDOptimizer::Encode()
 	{
 		auto old_mb_luma_coeff_nums = m_encoder_context->cavlc_context->GetMBLumaCoeffNums(m_mb_addr);
 
-		int rd_cost = CalculateRDCost(mb_type);
-		if (rd_cost < m_rd_cost)
+		int rd_cost = CalculateRDCost(mb_type, min_rd_cost);
+		if (rd_cost < min_rd_cost)
 		{
-			m_rd_cost = rd_cost;
+			min_rd_cost = rd_cost;
 			m_mb->SetType(mb_type);
 			if (mb_type == MBType::I4)
 			{
@@ -52,19 +53,26 @@ void MBIntraRDOptimizer::Encode()
 			}
 
 			m_best_luma_flow = m_luma_flow;
+
+			found = true;
 		}
 
 		m_encoder_context->cavlc_context->SetMBLumaCoeffNums(m_mb_addr, old_mb_luma_coeff_nums);
 	}
 
-	m_luma_flow = m_best_luma_flow;
-	m_luma_cbp = m_luma_flow->GetCBP();
-	m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
-	m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
+	if (found)
+	{
+		m_luma_flow = m_best_luma_flow;
+		m_luma_cbp = m_luma_flow->GetCBP();
+		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+		m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
 
-	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
-	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
-	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
+		m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
+		m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
+		m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
+	}
+
+	return found;
 }
 
 uint32_t MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
@@ -73,19 +81,20 @@ uint32_t MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 	auto mb_type = m_mb->GetType();
 	OutputMB(mb_type, bytes_data);
 	uint32_t finish_bit_count = bytes_data->GetBitsCount();
-	return finish_bit_count - start_bit_count;}
+	return finish_bit_count - start_bit_count;
+}
 
-int MBIntraRDOptimizer::CalculateRDCost(MBType mb_type)
+int MBIntraRDOptimizer::CalculateRDCost(MBType mb_type, int64_t min_rd_cost)
 {
 	int distortion = m_chroma_flow->GetDistortion();
 	RunLumaFlow(mb_type);
 	distortion += m_luma_flow->GetDistortion();
 
-	if (distortion > m_rd_cost)
-		return std::numeric_limits<int>::max();
+	if (distortion > min_rd_cost)
+		return std::numeric_limits<int64_t>::max();
 
-	int rate = CalculateRate(mb_type);
-	int rd_cost = RDOUtil::CalculateRDCost(distortion, rate, m_encoder_context->lambda_mode_fp);
+	int64_t rate = CalculateRate(mb_type);
+	int64_t rd_cost = RDOUtil::CalculateRDCost(distortion, rate, m_encoder_context->lambda_mode_fp);
 	return rd_cost;
 }
 

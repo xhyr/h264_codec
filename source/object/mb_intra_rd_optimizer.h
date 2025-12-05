@@ -20,12 +20,12 @@ public:
 	MBIntraRDOptimizer(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context);
 	~MBIntraRDOptimizer();
 
-	void Encode();
+	bool Encode(int64_t& min_rd_cost);
 
 	uint32_t Binary(std::shared_ptr<BytesData> bytes_data);
 
 private:
-	int CalculateRDCost(MBType mb_type);
+	int CalculateRDCost(MBType mb_type, int64_t min_rd_cost);
 
 	void RunLumaFlow(MBType mb_type);
 
@@ -46,7 +46,6 @@ private:
 	int m_luma_cbp{ 0 };
 	int m_cbp{ 0 };
 	MBType m_mb_type;
-	int m_rd_cost{ 0 };
 };
 
 __codec_end

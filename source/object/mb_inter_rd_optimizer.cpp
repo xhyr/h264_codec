@@ -23,12 +23,12 @@ MBInterRDOptimizer::~MBInterRDOptimizer()
 {
 }
 
-void MBInterRDOptimizer::Encode()
+bool MBInterRDOptimizer::Encode(int64_t& min_rd_cost)
 {
-	m_rd_cost = std::numeric_limits<int>::max();
 	m_mb_addr = m_mb->GetAddress();
 
-	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();
+	bool found{ false };
+
 	auto allowed_mb_types = {MBType::PSkip, MBType::P16x16, MBType::P16x8, MBType::P8x16, MBType::P8x8}; 
 	MBType best_mb_type = *allowed_mb_types.begin();
 	for (auto mb_type : allowed_mb_types)
@@ -55,28 +55,34 @@ void MBInterRDOptimizer::Encode()
 		{
 			min_rd_cost = rd_cost;
 			best_mb_type = mb_type;
+			found = true;
 		}
 	}
 
-	if (m_mb_type != best_mb_type)
+	if (found)
 	{
-		m_mb_type = best_mb_type;
-		m_mb->SetType(best_mb_type);
-		m_luma_flow = InterLumaFlowBase::CreateFlow(best_mb_type, m_mb, m_encoder_context);
-		m_luma_flow->Frontend();
-		m_luma_flow->Backend();
-		m_luma_cbp = m_luma_flow->GetCBP();
+		if (m_mb_type != best_mb_type)
+		{
+			m_mb_type = best_mb_type;
+			m_mb->SetType(best_mb_type);
+			m_luma_flow = InterLumaFlowBase::CreateFlow(best_mb_type, m_mb, m_encoder_context);
+			m_luma_flow->Frontend();
+			m_luma_flow->Backend();
+			m_luma_cbp = m_luma_flow->GetCBP();
 
-		m_chroma_flow = std::make_shared<InterChromaFlow>(m_mb, m_encoder_context, m_mb_type == MBType::PSkip);
-		m_chroma_flow->Frontend();
-		m_chroma_cbp = m_chroma_flow->GetCBP();
-		m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+			m_chroma_flow = std::make_shared<InterChromaFlow>(m_mb, m_encoder_context, m_mb_type == MBType::PSkip);
+			m_chroma_flow->Frontend();
+			m_chroma_cbp = m_chroma_flow->GetCBP();
+			m_cbp = (m_chroma_cbp << 4) | m_luma_cbp;
+		}
+
+		m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
+		m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
+		m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
+		m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
 	}
 
-	m_mb->SetLumaDetailedCBP(m_luma_flow->GetDetailedCBP());
-	m_mb->SetReconstructedLumaBlockData(m_luma_flow->GetReconstructedData());
-	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cb), PlaneType::Cb);
-	m_mb->SetReconstructedChromaBlockData(m_chroma_flow->GetReconstructedData(PlaneType::Cr), PlaneType::Cr);
+	return found;
 }
 
 uint64_t MBInterRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data, bool rdo_pass)
@@ -108,7 +114,6 @@ void MBInterRDOptimizer::OutputMB(std::shared_ptr<BytesData> bytes_data, bool rd
 		}
 
 		m_encoder_context->cavlc_context->ResetMBCoeffNums(m_mb_addr);
-
 		return;
 	}
 

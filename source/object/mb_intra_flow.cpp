@@ -15,7 +15,8 @@ MBIntraFlow::~MBIntraFlow()
 
 void MBIntraFlow::DoEncode()
 {
-	m_rd_optimizer->Encode();
+	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();
+	m_rd_optimizer->Encode(min_rd_cost);
 }
 
 void MBIntraFlow::Binary(std::shared_ptr<BytesData> bytes_data)

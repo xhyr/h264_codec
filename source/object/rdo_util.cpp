@@ -28,7 +28,7 @@ int RDOUtil::GetLambdaMotionFixedPoint(int qp)
 	return  static_cast<int>((1 << RDOConstantValues::s_lambda_accuracy_bits) * lambda + 0.5);
 }
 
-int RDOUtil::CalculateRDCost(int distortion, int rate, int lambda)
+int64_t RDOUtil::CalculateRDCost(int64_t distortion, int64_t rate, int lambda)
 {
 	return distortion + (rate > 0 ? lambda * rate : lambda * 1 / 2);
 }

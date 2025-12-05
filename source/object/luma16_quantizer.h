@@ -9,7 +9,7 @@ __codec_begin
 class Luma16Quantizer
 {
 public:
-	Luma16Quantizer(int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
+	Luma16Quantizer(bool is_slice_intra, int qp, const BlockData<4, 4, int32_t>& dc_block, const std::vector<BlockData<4, 4, int32_t>>& ac_blocks);
 	~Luma16Quantizer();
 
 	void Quantize();
