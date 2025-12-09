@@ -8,7 +8,7 @@ __codec_begin
 
 struct QuantizeUtil
 {
-	static BlockData<4, 4, int32_t> QuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block);
+	static BlockData<4, 4, int32_t> QuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block, bool is_intra = true);
 
 	static BlockData<2, 2, int32_t> QuantizeDC(int qp, const BlockData<2, 2, int32_t>& dc_block, bool is_intra = true);
 

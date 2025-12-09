@@ -7,9 +7,9 @@
 
 __codec_begin
 
-BlockData<4, 4, int32_t> QuantizeUtil::QuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block)
+BlockData<4, 4, int32_t> QuantizeUtil::QuantizeDC(int qp, const BlockData<4, 4, int32_t>& dc_block, bool is_intra)
 {
-	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp);
+	auto [qp_rem, qp_offset, qp_bits] = GetQuantizeParameters(qp, is_intra);
 
 	auto dc_factor = QuantizeConstants::s_quant_matrix[qp_rem][0][0];
 	auto dc_data = dc_block.GetData();

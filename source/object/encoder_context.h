@@ -42,7 +42,7 @@ struct EncoderContext
 
 	std::shared_ptr<EncoderConfig> config;
 
-	bool is_intra;
+	bool is_slice_intra;
 
 	uint32_t mb_run{ 0 };
 };

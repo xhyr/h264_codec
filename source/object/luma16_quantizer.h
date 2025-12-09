@@ -23,6 +23,7 @@ public:
 	uint32_t GetDetailedCBP() const;
 
 private:
+	bool m_is_slice_intra;
 	int m_qp;
 	BlockData<4, 4, int32_t> m_dc_block;
 	std::vector<BlockData<4, 4, int32_t>> m_ac_blocks;

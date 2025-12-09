@@ -19,7 +19,7 @@ MBInterFlow::~MBInterFlow()
 
 void MBInterFlow::DoEncode()
 {
-	if (m_mb_addr == 2)
+	if (m_mb_addr == 0)
 		int sb = 1;
 
 	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();

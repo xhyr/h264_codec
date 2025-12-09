@@ -41,7 +41,7 @@ bool MBIntraRDOptimizer::Encode(int64_t& min_rd_cost)
 	{
 		auto old_mb_luma_coeff_nums = m_encoder_context->cavlc_context->GetMBLumaCoeffNums(m_mb_addr);
 
-		int rd_cost = CalculateRDCost(mb_type, min_rd_cost);
+		int64_t rd_cost = CalculateRDCost(mb_type, min_rd_cost);
 		if (rd_cost < min_rd_cost)
 		{
 			min_rd_cost = rd_cost;
@@ -84,7 +84,7 @@ uint32_t MBIntraRDOptimizer::Binary(std::shared_ptr<BytesData> bytes_data)
 	return finish_bit_count - start_bit_count;
 }
 
-int MBIntraRDOptimizer::CalculateRDCost(MBType mb_type, int64_t min_rd_cost)
+int64_t MBIntraRDOptimizer::CalculateRDCost(MBType mb_type, int64_t min_rd_cost)
 {
 	int distortion = m_chroma_flow->GetDistortion();
 	RunLumaFlow(mb_type);
@@ -123,7 +123,7 @@ void MBIntraRDOptimizer::RunLumaFlow(MBType mb_type)
 	m_cbp = m_chroma_cbp << 4 | m_luma_cbp;
 }
 
-int MBIntraRDOptimizer::CalculateRate(MBType mb_type)
+int64_t MBIntraRDOptimizer::CalculateRate(MBType mb_type)
 {
 	auto bytes_data = std::make_shared<BytesData>();
 	return OutputMB(mb_type, bytes_data);

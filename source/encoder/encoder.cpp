@@ -65,7 +65,7 @@ bool Encoder::Encode()
 			m_context->slice_addr = encoded_frame_count;
 
 			auto slice_type = DecideSliceType(encoded_frame_count);
-			m_context->is_intra = slice_type == SliceType::I;
+			m_context->is_slice_intra = slice_type == SliceType::I;
 			auto slice = std::make_shared<Slice>();
 			slice->Construct(encoded_frame_count, slice_type, parameter_set_container.GetActiveSPS(), parameter_set_container.GetActivePPS(), m_context);
 			slice->Encode();

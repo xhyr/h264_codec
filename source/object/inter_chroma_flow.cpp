@@ -103,7 +103,7 @@ void InterChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	ChromaTransformer transformer(m_diff_datas_map[plane_type]);
 	transformer.Transform();
 
-	m_quantizer = std::make_unique<ChromaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks(), false);
+	m_quantizer = std::make_unique<ChromaQuantizer>(false, m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks(), false);
 	m_quantizer->Quantize();
 
 	CavlcPreCoderChroma8x8 pre_coder;

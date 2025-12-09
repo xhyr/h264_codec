@@ -98,7 +98,7 @@ void IntraChromaFlow::TransformAndQuantize(PlaneType plane_type)
 	ChromaTransformer transformer(diff_data);
 	transformer.Transform();
 
-	m_quantizer = std::make_unique<ChromaQuantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	m_quantizer = std::make_unique<ChromaQuantizer>(m_encoder_context->is_slice_intra, m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
 	CavlcPreCoderChroma8x8 pre_coder;
@@ -148,7 +148,7 @@ void IntraChromaFlow::CalculateDistortion()
 	{
 		auto original_block_data = m_mb->GetOriginalChromaBlockData(plane_type);
 		const auto& reconstructed_block_data = m_reconstructed_data_map[plane_type];
-		m_sse_distortion += CostUtil::CalculateSADDistortion(original_block_data, reconstructed_block_data);
+		m_sse_distortion += CostUtil::CalculateSSEDistortion(original_block_data, reconstructed_block_data);
 	}
 }
 

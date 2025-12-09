@@ -66,7 +66,7 @@ void Intra16LumaFlow::TransformAndQuantize()
 	Luma16Transformer transformer(m_predictor->GetDiffData());
 	transformer.Transform();
 
-	m_quantizer = std::make_unique<Luma16Quantizer>(m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
+	m_quantizer = std::make_unique<Luma16Quantizer>(m_encoder_context->is_slice_intra, m_encoder_context->qp, transformer.GetDCBlock(), transformer.GetBlocks());
 	m_quantizer->Quantize();
 
 	m_cbp = m_quantizer->IsACAllZero() ? 0 : 15;

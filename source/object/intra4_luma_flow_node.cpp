@@ -144,7 +144,7 @@ void Intra4LumaFlowNode::Transform()
 
 void Intra4LumaFlowNode::Quantize()
 {
-	m_diff_data = QuantizeUtil::QuantizeNormal(m_encoder_context->qp, m_diff_data);
+	m_diff_data = QuantizeUtil::QuantizeNormal(m_encoder_context->qp, m_diff_data, m_encoder_context->is_slice_intra);
 	m_residual_data = m_diff_data;
 	m_is_all_zero = m_diff_data.AllEqual(0);
 }

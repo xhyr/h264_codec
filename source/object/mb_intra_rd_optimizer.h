@@ -25,11 +25,11 @@ public:
 	uint32_t Binary(std::shared_ptr<BytesData> bytes_data);
 
 private:
-	int CalculateRDCost(MBType mb_type, int64_t min_rd_cost);
+	int64_t CalculateRDCost(MBType mb_type, int64_t min_rd_cost);
 
 	void RunLumaFlow(MBType mb_type);
 
-	int CalculateRate(MBType mb_type);
+	int64_t CalculateRate(MBType mb_type);
 
 	int OutputMB(MBType mb_type, std::shared_ptr<BytesData> bytes_data);
 
