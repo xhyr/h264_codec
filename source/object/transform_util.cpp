@@ -1,9 +1,14 @@
 #include "transform_util.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>& block_data, int shift_bits)
 {
+	ZoneScoped;
+
 	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 4; ++y)
@@ -49,6 +54,8 @@ BlockData<4, 4, int32_t> TransformUtil::Hadamard(const BlockData<4, 4, int32_t>&
 
 BlockData<2, 2, int32_t> TransformUtil::Hadamard(const BlockData<2, 2, int32_t>& block_data)
 {
+	ZoneScoped;
+
 	BlockData<2, 2, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 2; ++y)
@@ -86,6 +93,8 @@ BlockData<2, 2, int32_t> TransformUtil::InverseHadamard(const BlockData<2, 2, in
 
 BlockData<4, 4, int32_t> TransformUtil::DCT(const BlockData<4, 4, int32_t>& block_data)
 {
+	ZoneScoped;
+
 	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 4; ++y)
@@ -131,6 +140,8 @@ BlockData<4, 4, int32_t> TransformUtil::DCT(const BlockData<4, 4, int32_t>& bloc
 
 BlockData<4, 4, int32_t> TransformUtil::InverseDCT(const BlockData<4, 4, int32_t>& block_data)
 {
+	ZoneScoped;
+
 	BlockData<4, 4, int32_t> intermediate_block;
 	//right matrix mutiple, horizontal
 	for (uint32_t y = 0; y < 4; ++y)

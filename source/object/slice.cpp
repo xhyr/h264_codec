@@ -12,6 +12,9 @@
 #include "yuv_frame.h"
 #include "data_util.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 SliceType Slice::GetType() const
@@ -42,6 +45,7 @@ bool Slice::Encode()
 		auto old_bit_count = m_bytes_data->GetBitsCount();
 
 		mb->Encode(m_bytes_data);
+
 		auto used_bit_count = m_bytes_data->GetBitsCount() - old_bit_count;
 
 		total_used_bit_count += used_bit_count;

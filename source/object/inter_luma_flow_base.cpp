@@ -17,6 +17,10 @@
 #include "inter_p8x16_luma_flow.h"
 #include "inter_p8x8_luma_flow.h"
 
+#define TRACY_ON_DEMAND
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 InterLumaFlowBase::InterLumaFlowBase(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context) :
@@ -77,6 +81,8 @@ int64_t InterLumaFlowBase::CalculateRDRate() const
 
 void InterLumaFlowBase::CalculateDistortion()
 {
+	//ZoneScoped;
+
 	auto original_block_data = m_mb->GetOriginalLumaBlockData();
 	m_sse_distortion = CostUtil::CalculateSSEDistortion(original_block_data, m_reconstructed_data);
 }

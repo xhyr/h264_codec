@@ -6,6 +6,9 @@
 #include "math_util.h"
 #include "../encoder/encoder.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 struct YUVFrame;
@@ -45,6 +48,8 @@ struct CostUtil
 	template<size_t Width, size_t Height, typename Ty1, typename Ty2>
 	static int CalculateSSEDistortion(const BlockData<Width, Height, Ty1>& left_block_data, const BlockData<Width, Height, Ty2>& right_block_data)
 	{
+		ZoneScoped;
+
 		int distortion = 0;
 		for (size_t y = 0; y < Height; ++y)
 			for (size_t x = 0; x < Width; ++x)

@@ -6,6 +6,9 @@
 #include "motion_info.h"
 #include "encoder_context.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 int CostUtil::CalculateSATD(const BlockData<4, 4, int32_t>& block_data)
@@ -71,15 +74,38 @@ int CostUtil::ScaleForAccuracy(int value)
 
 int CostUtil::CalculateLumaSAD(uint32_t x_in_block, uint32_t y_in_block, uint32_t width_in_block, uint32_t height_in_block, std::shared_ptr<YUVFrame> current_frame, std::shared_ptr<YUVFrame> ref_frame, const MotionVector& mv)
 {
+	ZoneScoped;
+
+	int start_y = y_in_block * 4;
+	int finish_y = y_in_block * 4 + height_in_block * 4;
+	int start_x = x_in_block * 4;
+	int finish_x = x_in_block * 4 + width_in_block * 4;
+
+	const uint8_t* current_data_ptr = current_frame->GetLumaValueAddress(start_x, start_y);
+	const uint8_t* ref_data_ptr = ref_frame->GetLumaValueAddress(start_x + mv.x, start_y + mv.y);
+
+	const int width = current_frame->width;
+	const int height = current_frame->height;
+
 	int sad = 0;
-	for (int y = y_in_block * 4; y < y_in_block * 4 + height_in_block * 4; ++y)
+
+	for (int y = start_y; y < finish_y; ++y)
 	{
-		for (int x = x_in_block * 4; x < x_in_block * 4 + width_in_block * 4; ++x)
+		auto old_current_data_ptr = current_data_ptr;
+		auto old_ref_data_ptr = ref_data_ptr;
+
+		for (int x = start_x; x < finish_x; ++x)
 		{
-			int current_value = current_frame->GetLumaValue(x, y);
-			int ref_value = ref_frame->GetLumaValue(x + mv.x, y + mv.y);
-			sad += std::abs(current_value - ref_value);
+			sad += std::abs(*current_data_ptr - *ref_data_ptr);
+			if (x >= 0 && x < width - 1) ++current_data_ptr;
+			if (x + mv.x >= 0 && x + mv.x < width - 1) ++ref_data_ptr;
 		}
+
+		current_data_ptr = old_current_data_ptr;
+		if (y >= 0 && y < height - 1) current_data_ptr += width;
+
+		ref_data_ptr = old_ref_data_ptr;
+		if (y + mv.y >= 0 && y + mv.y < height - 1) ref_data_ptr += width;
 	}
 
 	return ScaleForAccuracy(sad);

@@ -5,10 +5,15 @@
 #include "motion_info.h"
 #include "cost_util.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 MotionVector FullSearchUtil::FindBestMV(const SearchInfo& search_info, std::shared_ptr<EncoderContext> encoder_context, MotionVector& mvd)
 {
+	ZoneScoped;
+
 	auto pred_mv = MEUtil::GetPredictorMV(search_info.x_in_block, search_info.y_in_block, search_info.width_in_block, search_info.height_in_block, 0, encoder_context->motion_info_context);
 
 	int min_cost = std::numeric_limits<int>::max();

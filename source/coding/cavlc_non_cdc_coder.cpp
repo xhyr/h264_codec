@@ -7,6 +7,9 @@
 #include "cavlc_util.h"
 #include "cavlc_context.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 CavlcNonCdcCoder::CavlcNonCdcCoder(uint32_t mb_addr, std::shared_ptr<CavlcContext> cavlc_context, std::shared_ptr<BytesData> bytes_data) : 
@@ -22,12 +25,16 @@ CavlcNonCdcCoder::~CavlcNonCdcCoder()
 
 void CavlcNonCdcCoder::CodeLumaDC(const LevelAndRuns& input)
 {
+	ZoneScoped;
+
 	m_block_index = 0;
 	DoCode(input, CavlcDataType::LumaDC);
 }
 
 void CavlcNonCdcCoder::CodeLumaACs(const std::vector<LevelAndRuns>& inputs)
 {
+	ZoneScoped;
+
 	for (uint32_t index = 0; index < inputs.size(); ++index)
 	{
 		m_block_index = CavlcConstantValues::s_scan_block_orders[index];

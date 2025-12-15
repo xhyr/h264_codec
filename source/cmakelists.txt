@@ -15,7 +15,28 @@ add_subdirectory(coding)
 add_subdirectory(common)
 add_subdirectory(log)
 
-add_executable(${PROJECT_NAME} main.cpp)
+macro(source_group_by_dir source_files)
+    if(MSVC)
+        set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR})
+        foreach(sgbd_file ${${source_files}})
+            string(REGEX REPLACE ${sgbd_cur_dir}/\(.*\) \\1 sgbd_fpath ${sgbd_file})
+            string(REGEX REPLACE "\(.*\)/.*" \\1 sgbd_group_name ${sgbd_fpath})
+            string(COMPARE EQUAL ${sgbd_fpath} ${sgbd_group_name} sgbd_nogroup)
+            string(REPLACE "/" "\\" sgbd_group_name ${sgbd_group_name})
+            if(sgbd_nogroup)
+                set(sgbd_group_name "\\")
+            endif(sgbd_nogroup)
+            source_group(${sgbd_group_name} FILES ${sgbd_file})
+        endforeach(sgbd_file)
+    endif(MSVC)
+endmacro(source_group_by_dir)
+
+file(GLOB project_headers *.h)
+file(GLOB project_cpps *.cpp)
+set(all_files ${project_headers} ${project_cpps})
+source_group_by_dir(all_files)
+
+add_executable(${PROJECT_NAME} ${all_files})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/encoder)
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/encoder)
@@ -47,6 +68,37 @@ target_link_libraries(${PROJECT_NAME} log.lib)
 
 add_dependencies(${PROJECT_NAME} encoder decoder object stream coding common log)
 
-
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../resource")
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/library/tracy/include)
+file(GLOB tracy_lib_files_debug "${CMAKE_CURRENT_SOURCE_DIR}/library/tracy/lib/debug/*.lib")
+file(GLOB tracy_lib_files_release "${CMAKE_CURRENT_SOURCE_DIR}/library/tracy/lib/release/*.lib")
+target_link_libraries(${PROJECT_NAME} 
+	$<$<CONFIG:Debug>:${tracy_lib_files_debug}>
+    $<$<CONFIG:Release>:${tracy_lib_files_release}>
+)
+
+file(GLOB tracy_dll_files_debug "${CMAKE_CURRENT_SOURCE_DIR}/library/tracy/bin/debug/*.dll")
+file(GLOB tracy_dll_files_release "${CMAKE_CURRENT_SOURCE_DIR}/library/tracy/bin/release/*.dll")
+
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/Debug")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Debug")
+endif()
+
+add_custom_command(TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	${tracy_dll_files_debug}
+	${CMAKE_BINARY_DIR}/Debug
+)
+
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/Release")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/Release")
+endif()
+
+add_custom_command(TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	${tracy_dll_files_release}
+	${CMAKE_BINARY_DIR}/Release
+)

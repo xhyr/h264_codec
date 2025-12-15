@@ -14,6 +14,9 @@
 #include "cavlc_context.h"
 #include "conformance_util.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 Encoder::Encoder(std::shared_ptr<EncoderConfig> config) : m_config(config)

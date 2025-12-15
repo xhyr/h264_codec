@@ -49,4 +49,12 @@ uint8_t YUVFrame::GetLumaValue(int x, int y) const
 	return y_data.get()[x + y * width];
 }
 
+const uint8_t* YUVFrame::GetLumaValueAddress(int x, int y) const
+{
+	x = MathUtil::Clamp<int>(x, 0, width - 1);
+	y = MathUtil::Clamp<int>(y, 0, height - 1);
+
+    return &y_data.get()[x + y * width];
+}
+
 __codec_end

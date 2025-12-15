@@ -4,6 +4,9 @@
 #include "mb_inter_rd_optimizer.h"
 #include "macroblock.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 MBInterFlow::MBInterFlow(std::shared_ptr<Macroblock> mb, std::shared_ptr<EncoderContext> encoder_context):
@@ -19,6 +22,8 @@ MBInterFlow::~MBInterFlow()
 
 void MBInterFlow::DoEncode()
 {
+	ZoneScoped;
+
 	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();
 	m_inter_rd_optimizer->Encode(min_rd_cost);
 	m_is_intra = m_intra_rd_optimizer->Encode(min_rd_cost);

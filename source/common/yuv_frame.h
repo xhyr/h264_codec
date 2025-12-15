@@ -24,6 +24,8 @@ struct YUVFrame
 
 	uint8_t GetLumaValue(int x, int y) const;
 
+	const uint8_t* GetLumaValueAddress(int x, int y) const;
+
 	uint32_t width, height;
 	std::shared_ptr<uint8_t[]> y_data, u_data, v_data;
 };

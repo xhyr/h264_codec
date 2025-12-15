@@ -9,11 +9,15 @@
 #include <Windows.h>
 #include <thread>
 
+#include "tracy_manager.h"
+
 using namespace codec;
 
 int main(int argc, char* argv[])
 {
 	auto start_time = std::chrono::steady_clock::now();
+
+	TracyManager tracy_manager;
 
 	auto encoder_config = EncoderConfigReader::Read("config.txt");
 	Encoder encoder(encoder_config);

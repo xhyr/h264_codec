@@ -12,6 +12,9 @@
 #include "motion_info.h"
 #include "motion_info_context.h"
 
+#define TRACY_ENABLE
+#include <tracy/Tracy.hpp>
+
 __codec_begin
 
 Macroblock::Macroblock(uint32_t mb_addr, std::weak_ptr<Slice> slice, std::shared_ptr<EncoderContext> encoder_context):
@@ -26,6 +29,8 @@ Macroblock::~Macroblock()
 
 bool Macroblock::Encode(std::shared_ptr<BytesData> bytes_data)
 {
+	ZoneScoped;
+
 	m_bytes_data = bytes_data;
 
 	PreEncode();
@@ -143,6 +148,8 @@ void Macroblock::ObtainOriginalData()
 
 void Macroblock::PreEncode()
 {
+	ZoneScoped;
+
 	m_neighbors = std::make_unique<MBNeighbors>(shared_from_this(), m_addr, m_encoder_context);
 
 	CreateMBFlow();
@@ -151,16 +158,22 @@ void Macroblock::PreEncode()
 
 void Macroblock::DoEncode()
 {
+	ZoneScoped;
+
 	m_mb_flow->DoEncode();
 }
 
 void Macroblock::Binary()
 {
+	ZoneScoped;
+
 	m_mb_flow->Binary(m_bytes_data);
 }
 
 void Macroblock::PostEncode()
 {
+	ZoneScoped;
+
 	m_mb_flow->PostEncode();
 }
 

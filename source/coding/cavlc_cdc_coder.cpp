@@ -6,7 +6,6 @@
 #include "coding_util.h"
 #include "cavlc_util.h"
 #include "cavlc_context.h"
-#include "cavlc_cdc_coder.h"
 
 __codec_begin
 
