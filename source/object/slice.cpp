@@ -11,6 +11,7 @@
 #include "loop_filter.h"
 #include "yuv_frame.h"
 #include "data_util.h"
+#include "dpb.h"
 
 #define TRACY_ENABLE
 #include <tracy/Tracy.hpp>
@@ -134,7 +135,7 @@ void Slice::CollectAllFrameData()
 
 void Slice::AddToDPB()
 {
-	m_encoder_context->last_frame = m_frame_data;
+	m_encoder_context->dpb->InsertFrame(m_frame_data);
 }
 
 __codec_end

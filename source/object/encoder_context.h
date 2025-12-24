@@ -14,6 +14,7 @@ class CavlcContext;
 struct EncoderConfig;
 class MotionInfoContext;
 struct MotionVector;
+class Dpb;
 
 struct EncoderContext
 {
@@ -34,7 +35,7 @@ struct EncoderContext
 	int lambda_motion_fp;
 	std::shared_ptr<CavlcContext> cavlc_context;
 	std::shared_ptr<MotionInfoContext> motion_info_context;
-	std::shared_ptr<YUVFrame> last_frame;
+	std::shared_ptr<Dpb> dpb;
 	std::vector<MotionVector> search_motion_vectors;
 
 	std::pair<int, int> mv_vertical_limit;

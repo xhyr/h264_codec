@@ -6,6 +6,8 @@
 #include "math_util.h"
 #include "coding_util.h"
 #include "encoder_context.h"
+#include "me_constant_values.h"
+#include "bytes_data.h"
 
 __codec_begin
 
@@ -153,6 +155,29 @@ bool MEUtil::IsMVDifferent(const MotionVector& left, const MotionVector& right, 
 {
 	return abs(left.x - right.x) >= threshold || abs(left.y - right.y) >= threshold;
 }
+
+int MEUtil::GetRefBitCount(int ref_id, int ref_num)
+{
+	if (ref_num == 1)
+		return 0;
+
+	return MEConstantValues::ref_bit_counts[ref_id];
+}
+
+uint32_t MEUtil::CodingRefID(int ref_id, int ref_num, std::shared_ptr<BytesData> bytes_data)
+{
+	if (ref_num == 1)
+		return 0;
+
+	if (ref_num == 2)
+	{
+		bytes_data->PushBit(1 - ref_id);
+		return 1;
+	}
+
+	return 0;
+}
+
 
 __codec_end
 

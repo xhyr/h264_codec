@@ -11,6 +11,7 @@ __codec_begin
 struct MotionVector;
 class MotionInfoContext;
 struct EncoderContext;
+class BytesData;
 
 struct MEUtil
 {
@@ -25,6 +26,11 @@ struct MEUtil
 	static MotionVector ClipMVRange(const MotionVector& mv, std::shared_ptr<EncoderContext> encoder_context);
 
 	static bool IsMVDifferent(const MotionVector& left, const MotionVector& right, int threshold);
+
+	static int GetRefBitCount(int ref_id, int ref_num);
+
+	static uint32_t CodingRefID(int ref_id, int ref_num, std::shared_ptr<BytesData> bytes_data);
+
 
 };
 

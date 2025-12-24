@@ -8,6 +8,7 @@
 #include "math_util.h"
 #include "interpolate_util.h"
 #include "mb_util.h"
+#include "dpb.h"
 
 __codec_begin
 
@@ -31,11 +32,11 @@ void InterP4x4ChromaPredictor::Decide()
 	uint32_t new_x = MathUtil::Clamp<int>((pos.first << 2) + mv.x, 0, (m_encoder_context->width / 2 - 1) * 8);
 	uint32_t new_y = MathUtil::Clamp<int>((pos.second << 2) + mv.y, 0, (m_encoder_context->height / 2 - 1) * 8);
 
-	m_predicted_data[0].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->last_frame->u_data, new_x, new_y, 4, 4, m_encoder_context->width / 2, m_encoder_context->height / 2));
+	m_predicted_data[0].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->dpb->GetFrame(0)->u_data, new_x, new_y, 4, 4, m_encoder_context->width / 2, m_encoder_context->height / 2));
 	auto origin_block_data = MBUtil::GetOriginalChromaBlockData<4, 4>(m_mb, PlaneType::Cb, m_segment_index); 
 	m_diff_data[0] = origin_block_data - m_predicted_data[0];
 
-	m_predicted_data[1].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->last_frame->v_data, new_x, new_y, 4, 4, m_encoder_context->width / 2, m_encoder_context->height / 2));
+	m_predicted_data[1].SetData(InterpolateUtil::InterpolateChromaBlock(m_encoder_context->dpb->GetFrame(0)->v_data, new_x, new_y, 4, 4, m_encoder_context->width / 2, m_encoder_context->height / 2));
 	origin_block_data = MBUtil::GetOriginalChromaBlockData<4, 4>(m_mb, PlaneType::Cr, m_segment_index);
 	m_diff_data[1] = origin_block_data - m_predicted_data[1];
 }

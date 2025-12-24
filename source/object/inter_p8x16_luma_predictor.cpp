@@ -10,6 +10,7 @@
 #include "mb_util.h"
 #include "full_search_util.h"
 #include "motion_info_context.h"
+#include "dpb.h"
 
 __codec_begin
 
@@ -30,7 +31,7 @@ void InterP8x16LumaPredictor::Decide()
 	m_motion_info.ref_id = 0;
 	m_motion_info.mv = best_mv;
 
-	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
+	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->dpb->GetFrame(0)->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
 	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<8, 16>(m_mb, m_segment_index);
 	m_diff_data = origin_block_data - m_predicted_data;
 }

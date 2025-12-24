@@ -40,6 +40,8 @@ struct MEConstantValues
 
 	constexpr static int mv_different_threshold{ 4 };
 
+	constexpr static int ref_bit_counts[15] = {1, 3, 3, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7};
+
 };
 
 __codec_end

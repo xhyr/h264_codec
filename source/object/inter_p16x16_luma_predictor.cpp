@@ -8,6 +8,7 @@
 #include "motion_info.h"
 #include "cost_util.h"
 #include "motion_info_context.h"
+#include "dpb.h"
 
 __codec_begin
 
@@ -32,7 +33,8 @@ void InterP16x16LumaPredictor::Decide()
 		auto cand_mv = pred_mv + mv;
 		auto cost = MEUtil::CalculateMVCost(pred_mv, cand_mv, m_encoder_context->lambda_motion_fp);
 		auto full_pixel_mv = MotionVector{ cand_mv.x / 4, cand_mv.y / 4 };
-		cost += CostUtil::CalculateLumaSAD(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, m_encoder_context->yuv_frame, m_encoder_context->last_frame, full_pixel_mv);
+		auto last_frame = m_encoder_context->dpb->GetFrame(0);
+		cost += CostUtil::CalculateLumaSAD(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, m_encoder_context->yuv_frame, last_frame, full_pixel_mv);
 
 		if (cost < min_cost)
 		{
@@ -46,7 +48,7 @@ void InterP16x16LumaPredictor::Decide()
 	m_motion_info.mv = best_mv;
 	m_mvd = best_mv - pred_mv;
 
-	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->last_frame->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
+	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->dpb->GetFrame(0)->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
 	auto origin_block_data = m_mb->GetOriginalLumaBlockData();
 	m_diff_data = origin_block_data - m_predicted_data;
 }

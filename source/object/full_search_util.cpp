@@ -4,6 +4,7 @@
 #include "me_util.h"
 #include "motion_info.h"
 #include "cost_util.h"
+#include "dpb.h"
 
 #define TRACY_ENABLE
 #include <tracy/Tracy.hpp>
@@ -23,7 +24,8 @@ MotionVector FullSearchUtil::FindBestMV(const SearchInfo& search_info, std::shar
 		auto cand_mv = pred_mv + mv;
 		auto cost = MEUtil::CalculateMVCost(pred_mv, cand_mv, encoder_context->lambda_motion_fp);
 		auto full_pixel_mv = MotionVector{ cand_mv.x / 4, cand_mv.y / 4 };
-		cost += CostUtil::CalculateLumaSAD(search_info.x_in_block, search_info.y_in_block, search_info.width_in_block, search_info.height_in_block, encoder_context->yuv_frame, encoder_context->last_frame, full_pixel_mv);
+		auto last_frame = encoder_context->dpb->GetFrame(0);
+		cost += CostUtil::CalculateLumaSAD(search_info.x_in_block, search_info.y_in_block, search_info.width_in_block, search_info.height_in_block, encoder_context->yuv_frame, last_frame, full_pixel_mv);
 
 		if (cost < min_cost)
 		{
