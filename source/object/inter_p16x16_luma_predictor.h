@@ -23,6 +23,8 @@ public:
 
 	MotionVector GetMVD() const;
 
+	uint32_t GetRefID() const;
+
 	void FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const;
 
 	void UpdateMotionInfo();

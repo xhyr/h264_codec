@@ -6,6 +6,8 @@
 #include "encoder_context.h"
 #include "motion_info_context.h"
 #include "reconstruct_util.h"
+#include "me_util.h"
+#include "dpb.h"
 
 __codec_begin
 
@@ -36,6 +38,8 @@ void InterP16x16LumaFlow::Backend()
 uint32_t InterP16x16LumaFlow::OutputMotionInfo(std::shared_ptr<BytesData> bytes_data) const 
 {
 	auto start_bit_count = bytes_data->GetBitsCount();
+
+	MEUtil::CodingRefID(m_predictor->GetRefID(), m_encoder_context->dpb->GetRefFrameNum(), bytes_data);
 	
 	auto mvd = m_predictor->GetMVD();
 

@@ -24,31 +24,41 @@ InterP16x16LumaPredictor::~InterP16x16LumaPredictor()
 
 void InterP16x16LumaPredictor::Decide()
 {
-	auto pred_mv = MEUtil::GetPredictorMV(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, 0, m_encoder_context->motion_info_context);
+	if (m_mb->GetAddress() == 18)
+		int sb = 1;
 
-	int min_cost = std::numeric_limits<int>::max();
-	MotionVector best_mv;
-	for (auto mv : m_encoder_context->search_motion_vectors)
+
+	int64_t min_cost = std::numeric_limits<int64_t>::max();
+	MotionInfo best_motion_info;
+	MotionVector best_pred_mv;
+	auto ref_num = m_encoder_context->dpb->GetRefFrameNum();
+	for (uint32_t ref_id = 0; ref_id < ref_num; ++ref_id)
 	{
-		auto cand_mv = pred_mv + mv;
-		auto cost = MEUtil::CalculateMVCost(pred_mv, cand_mv, m_encoder_context->lambda_motion_fp);
-		auto full_pixel_mv = MotionVector{ cand_mv.x / 4, cand_mv.y / 4 };
-		auto last_frame = m_encoder_context->dpb->GetFrame(0);
-		cost += CostUtil::CalculateLumaSAD(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, m_encoder_context->yuv_frame, last_frame, full_pixel_mv);
-
-		if (cost < min_cost)
+		auto pred_mv = MEUtil::GetPredictorMV(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, ref_id, m_encoder_context->motion_info_context);
+		int64_t ref_cost = MEUtil::GetRefBitCount(ref_id, ref_num) * m_encoder_context->lambda_motion_fp;
+		for (auto mv : m_encoder_context->search_motion_vectors)
 		{
-			min_cost = cost;
-			best_mv = cand_mv;
+			auto cand_mv = pred_mv + mv;
+			auto cost = MEUtil::CalculateMVCost(pred_mv, cand_mv, m_encoder_context->lambda_motion_fp) + ref_cost;
+			auto full_pixel_mv = MotionVector{ cand_mv.x / 4, cand_mv.y / 4 };
+			auto ref_frame = m_encoder_context->dpb->GetFrame(ref_id);
+			cost += CostUtil::CalculateLumaSAD(m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, m_encoder_context->yuv_frame, ref_frame, full_pixel_mv);
+
+			if (cost < min_cost)
+			{
+				min_cost = cost;
+				best_motion_info.mv = cand_mv;
+				best_motion_info.ref_id = ref_id;
+				best_pred_mv = pred_mv;
+			}
 		}
 	}
+	
+	best_motion_info.mv = MEUtil::ClipMVRange(best_motion_info.mv, m_encoder_context);
+	m_motion_info = best_motion_info;
+	m_mvd = best_motion_info.mv - best_pred_mv;
 
-	best_mv = MEUtil::ClipMVRange(best_mv, m_encoder_context);
-	m_motion_info.ref_id = 0;
-	m_motion_info.mv = best_mv;
-	m_mvd = best_mv - pred_mv;
-
-	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->dpb->GetFrame(0)->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
+	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->dpb->GetFrame(m_motion_info.ref_id)->y_data, m_x + m_motion_info.mv.x / 4, m_y + m_motion_info.mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
 	auto origin_block_data = m_mb->GetOriginalLumaBlockData();
 	m_diff_data = origin_block_data - m_predicted_data;
 }
@@ -61,6 +71,11 @@ BlockData<16, 16> InterP16x16LumaPredictor::GetPredictedData() const
 MotionVector InterP16x16LumaPredictor::GetMVD() const
 {
     return m_mvd;
+}
+
+uint32_t InterP16x16LumaPredictor::GetRefID() const
+{
+	return m_motion_info.ref_id;
 }
 
 void InterP16x16LumaPredictor::FillDiffData(std::vector<BlockData<4, 4, int32_t>>& diff_datas) const

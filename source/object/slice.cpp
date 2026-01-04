@@ -29,12 +29,16 @@ void Slice::Construct(uint32_t tick, SliceType slice_type, std::shared_ptr<SPS> 
 	m_type = slice_type;
 	m_qp = encoder_context->config->qp;
 	m_encoder_context = encoder_context;
-	m_header.Construct(m_tick, m_tick == 0 && slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData(), m_qp);
+	m_header.Construct(m_tick, m_tick == 0 && slice_type == SliceType::I, static_cast<uint32_t>(slice_type), sps->GetData(), m_qp, m_encoder_context->dpb->GetRefFrameNum());
 }
 
 bool Slice::Encode()
 {
 	m_frame_data = std::make_shared<YUVFrame>(m_encoder_context->width, m_encoder_context->height);
+
+	if (m_tick == 2)
+		int sb = 1;
+
 	m_bytes_data = m_header.Convert2BytesData();
 
 	auto header_bit_count = m_bytes_data->GetBitsCount();
@@ -51,7 +55,7 @@ bool Slice::Encode()
 
 		total_used_bit_count += used_bit_count;
 
-		if(m_tick == 1)
+		if(m_tick == 2)
 			LOGINFO("mb_addr = %d, used_bits = %d, total_used_byte_count = %d.", mb_addr, used_bit_count, total_used_bit_count / 8);
 
 		m_macroblocks.push_back(mb);

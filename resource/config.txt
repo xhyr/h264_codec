@@ -9,7 +9,7 @@ height = 144
 
 start_frame = 0
 
-frames_to_encode = 2
+frames_to_encode = 3
 
 profile_idc = 66
 

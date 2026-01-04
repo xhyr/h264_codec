@@ -6,7 +6,7 @@
 
 __codec_begin
 
-void SliceHeader::Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data, uint8_t qp)
+void SliceHeader::Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data, uint8_t qp, uint32_t _active_list0_ref_num)
 {
 	frame_num = tick;
 	uint32_t top_poc = tick * 2;
@@ -21,6 +21,8 @@ void SliceHeader::Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_t
 	slice_qp_delta = static_cast<int32_t>(qp) - 26;
 	
 	slice_type = _slice_type;
+
+	active_list0_ref_num = _active_list0_ref_num;
 }
 
 std::shared_ptr<BytesData> SliceHeader::Convert2BytesData() const
@@ -37,7 +39,7 @@ std::shared_ptr<BytesData> SliceHeader::Convert2BytesData() const
 	if (slice_type == 5)
 	{
 		CodingUtil::U_1(1, bytes_data);
-		CodingUtil::UE_V(0, bytes_data);
+		CodingUtil::UE_V(active_list0_ref_num - 1, bytes_data);
 
 		CodingUtil::U_1(0, bytes_data);
 	}

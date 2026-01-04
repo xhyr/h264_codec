@@ -44,9 +44,12 @@ struct SliceHeader
 	int32_t alpha_c0_offset_div2{ 0 };
 	int32_t beta_offset_div2{ 0 };
 
-	void Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data, uint8_t qp);
+	void Construct(uint32_t tick, bool _idr_pic_flag, uint32_t _slice_type, std::shared_ptr<SPSData> sps_data, uint8_t qp, uint32_t _active_list0_ref_num);
 
 	std::shared_ptr<BytesData> Convert2BytesData() const;
+
+	//helper data
+	uint32_t active_list0_ref_num{ 0 };
 };
 
 __codec_end

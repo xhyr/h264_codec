@@ -29,7 +29,8 @@ bool MBInterRDOptimizer::Encode(int64_t& min_rd_cost)
 
 	bool found{ false };
 
-	auto allowed_mb_types = {MBType::PSkip, MBType::P16x16, MBType::P16x8, MBType::P8x16, MBType::P8x8}; 
+	//auto allowed_mb_types = {MBType::PSkip, MBType::P16x16, MBType::P16x8, MBType::P8x16, MBType::P8x8}; 
+	auto allowed_mb_types = { MBType::P16x16 };
 	MBType best_mb_type = *allowed_mb_types.begin();
 	for (auto mb_type : allowed_mb_types)
 	{

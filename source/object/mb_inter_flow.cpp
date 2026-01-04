@@ -26,7 +26,7 @@ void MBInterFlow::DoEncode()
 
 	int64_t min_rd_cost = std::numeric_limits<int64_t>::max();
 	m_inter_rd_optimizer->Encode(min_rd_cost);
-	m_is_intra = m_intra_rd_optimizer->Encode(min_rd_cost);
+	//m_is_intra = m_intra_rd_optimizer->Encode(min_rd_cost);
 }
 
 void MBInterFlow::Binary(std::shared_ptr<BytesData> bytes_data)
