@@ -26,13 +26,11 @@ InterP16x8LumaPredictor::~InterP16x8LumaPredictor()
 
 void InterP16x8LumaPredictor::Decide()
 {
-	SearchInfo search_info{ m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block, 0 };
-	auto best_mv = FullSearchUtil::FindBestMV(search_info, m_encoder_context, m_mvd);
-	m_motion_info.ref_id = 0;
-	m_motion_info.mv = best_mv;
+	SearchInfo search_info{ m_x_in_block, m_y_in_block, m_width_in_block, m_height_in_block };
+	m_motion_info = FullSearchUtil::FindBestMotionInfo(search_info, m_encoder_context, m_mvd);
 
-	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->dpb->GetFrame(0)->y_data, m_x + best_mv.x / 4, m_y + best_mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
-	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<16, 8>(m_mb, m_segment_index);  
+	m_predicted_data.SetData(DataUtil::ObtainDataInBlock(m_encoder_context->dpb->GetFrame(m_motion_info.ref_id)->y_data, m_x + m_motion_info.mv.x / 4, m_y + m_motion_info.mv.y / 4, m_width_in_block * 4, m_height_in_block * 4, m_encoder_context->width, m_encoder_context->height));
+	auto origin_block_data = MBUtil::GetOriginalLumaBlockData<16, 8>(m_mb, m_segment_index);
 	m_diff_data = origin_block_data - m_predicted_data;
 }
 

@@ -9,10 +9,11 @@ __codec_begin
 struct MotionVector;
 struct SearchInfo;
 struct EncoderContext;
+struct MotionInfo;
 
 struct FullSearchUtil
 {
-	static MotionVector FindBestMV(const SearchInfo& search_info, std::shared_ptr<EncoderContext> encoder_context, MotionVector& mvd);
+	static MotionInfo FindBestMotionInfo(const SearchInfo& search_info, std::shared_ptr<EncoderContext> encoder_context, MotionVector& mvd);
 
 };
 
